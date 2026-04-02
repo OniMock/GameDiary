@@ -16,6 +16,7 @@ static const char *get_db_tmp_path() {
 }
 
 void storage_init(void) {
+  sceIoMkdir(sctrlKernelMsIsEf() ? "ef0:/PSP" : "ms0:/PSP", 0777);
   sceIoMkdir(sctrlKernelMsIsEf() ? "ef0:/PSP/COMMON" : "ms0:/PSP/COMMON", 0777);
   sceIoMkdir(get_db_dir(), 0777);
 }
