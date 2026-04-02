@@ -1,4 +1,7 @@
+#include "tracker.h"
 #include "common.h"
+#include "detector.h"
+#include "storage.h"
 
 static SceUID tracker_thid = -1;
 static SceUID cb_thid = -1;

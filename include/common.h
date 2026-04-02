@@ -52,18 +52,4 @@ extern char g_game_id[16];
 extern char g_game_name[64];
 extern u8 g_category;
 
-// External API functions
-void tracker_thread_start(void);
-void tracker_thread_stop(void);
-
-void detector_init(void);
-void detector_init_late(void);
-
-void storage_init(void);
-void storage_update_session(const char *game_id, const char *game_name,
-                            u8 category, u32 session_time, int is_new_session);
-
-// Helper to get UNIX timestamp
-u32 get_current_timestamp(void);
-
 #endif // _COMMON_H_

@@ -1,3 +1,4 @@
+#include "detector.h"
 #include "common.h"
 
 char g_game_id[16];

@@ -1,4 +1,6 @@
+#include "storage.h"
 #include "common.h"
+#include "tracker.h"
 
 // Paths based on media
 static const char *get_db_dir() {
