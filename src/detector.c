@@ -3,7 +3,6 @@
 #include "common.h"
 #include <pspsdk/kubridge.h>
 
-
 char g_game_id[16];
 char g_game_name[64];
 char g_apitype_str[8];
@@ -91,10 +90,15 @@ void detector_init(void) {
         }
       }
 
-      // DEBUG: Se falhou em achar o titulo do PS1, salvar o EBOOT_PATH como
-      // nome!
+      // Fallback logic
       if (!got_title) {
-        snprintf(g_game_name, 63, "PT: %s", eboot_path);
+        if (got_id) {
+          // If we have ID but no TITLE, use ID as name
+          snprintf(g_game_name, 63, "PS1: %s", g_game_id);
+        } else {
+          // Last resort: use the eboot path (truncated to avoid warning)
+          snprintf(g_game_name, 63, "PT: %.58s", eboot_path);
+        }
         g_game_name[63] = '\0';
       }
     } else {
