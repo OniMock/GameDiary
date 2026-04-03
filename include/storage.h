@@ -1,14 +1,17 @@
 #ifndef _STORAGE_H_
 #define _STORAGE_H_
 
-#include "common.h"
+#include "models.h"
 
-// Initialize database directory
+// Initialize database directory and check integrity
 void storage_init(void);
 
-// Atomically save or append the session playtime to the database
-void storage_update_session(const char *game_id, const char *game_name,
-                            const char *apitype_str, u8 category,
-                            u32 session_time, int is_new_session);
+// Lookup game UID by game_id. Create if not found.
+// Returns 0 on success, < 0 on error.
+int storage_get_or_create_game(const GameMetadata *meta, u32 *uid);
+
+// Append a new session record to sessions.dat
+// Returns 0 on success, < 0 on error.
+int storage_append_session(u32 game_uid, u32 duration, u32 timestamp);
 
 #endif

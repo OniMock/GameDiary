@@ -1,121 +1,301 @@
 #include "storage.h"
-#include "common.h"
 #include "db_schema.h"
-#include "tracker.h"
+#include "common.h"
+#include <string.h>
 
-// Paths based on media
+#define CACHE_SIZE 256
+#define CHUNK_SIZE 128
+
+static GameEntry g_cache[CACHE_SIZE];
+static u32 g_cache_count = 0;
+static GameRegistryHeader g_header;
+static int g_initialized = 0;
+
+// Shared I/O buffer to avoid stack overflow in small kernel threads
+static GameEntry g_io_chunk[CHUNK_SIZE];
+
+static const char *get_device_path() {
+  return sctrlKernelMsIsEf() ? "ef0:" : "ms0:";
+}
+
 static const char *get_db_dir() {
-  return sctrlKernelMsIsEf() ? DB_DIR_EF0 : DB_DIR;
+  return sctrlKernelMsIsEf() ? DB_DIR_EF : DB_DIR_MS;
 }
 
-static const char *get_db_path() {
-  return sctrlKernelMsIsEf() ? DB_PATH_EF0 : DB_PATH;
+static void get_full_path(char *out, const char *filename) {
+  snprintf(out, 128, "%s/%s", get_db_dir(), filename);
 }
 
-static const char *get_db_tmp_path() {
-  return sctrlKernelMsIsEf() ? DB_TMP_PATH_EF0 : DB_TMP_PATH;
+static void ensure_dir(const char *path) {
+  char tmp[128];
+  char *p = NULL;
+  size_t len;
+  snprintf(tmp, sizeof(tmp), "%s", path);
+  len = strlen(tmp);
+  if (tmp[len - 1] == '/') tmp[len - 1] = 0;
+  for (p = tmp + 1; *p; p++) {
+    if (*p == '/') {
+      *p = 0;
+      sceIoMkdir(tmp, 0777);
+      *p = '/';
+    }
+  }
+  sceIoMkdir(tmp, 0777);
+}
+
+static u32 calculate_checksum(const GameRegistryHeader *h) {
+    u32 hash = 2166136261U; // FNV offset basis
+    const unsigned char *data = (const unsigned char *)h;
+
+    for (size_t i = 0; i < sizeof(GameRegistryHeader); i++) {
+        // Skip checksum field itself
+        if (i >= 16 && i < 20) continue; // checksum field is at offset 16 (4th u32)
+
+        hash ^= data[i];
+        hash *= 16777619U; // FNV prime
+    }
+    return hash;
+}
+
+static int validate_header(const GameRegistryHeader *h) {
+    if (h->magic != GAMEDIARY_MAGIC) return -1;
+    if (h->version != DB_VERSION) return -2;
+    if (h->ready_flag != GAMEDIARY_MAGIC) return -3;
+    if (h->checksum != calculate_checksum(h)) return -4;
+    return 0;
+}
+
+static int load_reliable_header(GameRegistryHeader *header, const char *path) {
+    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+    if (fd < 0) return -1;
+
+    // 1. Try Primary Header
+    int res = sceIoRead(fd, header, sizeof(GameRegistryHeader));
+    if (res == sizeof(GameRegistryHeader) && validate_header(header) == 0) {
+        sceIoClose(fd);
+        return 0;
+    }
+
+    // 2. Try Backup Header at the end
+    SceOff size = sceIoLseek(fd, 0, PSP_SEEK_END);
+    if (size > (SceOff)sizeof(GameRegistryHeader)) {
+        sceIoLseek(fd, size - sizeof(GameRegistryHeader), PSP_SEEK_SET);
+        res = sceIoRead(fd, header, sizeof(GameRegistryHeader));
+        if (res == sizeof(GameRegistryHeader) && validate_header(header) == 0) {
+            sceIoClose(fd);
+            return 0;
+        }
+    }
+
+    sceIoClose(fd);
+    return -2;
+}
+
+static int save_registry_atomic(const GameRegistryHeader *h_template, const GameEntry *new_entry) {
+    char path[128], tmp_path[128];
+    get_full_path(path, GAMES_DAT);
+    get_full_path(tmp_path, GAMES_TMP);
+
+    SceUID out_fd = sceIoOpen(tmp_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    if (out_fd < 0) return -1;
+
+    GameRegistryHeader h = *h_template;
+    h.ready_flag = 0; // Not ready yet
+    h.checksum = 0;
+
+    // 1. Write initial header
+    sceIoWrite(out_fd, &h, sizeof(GameRegistryHeader));
+
+    // 2. Copy existing entries
+    SceUID in_fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+    if (in_fd >= 0) {
+        sceIoLseek(in_fd, sizeof(GameRegistryHeader), PSP_SEEK_SET);
+        u32 to_copy = h_template->num_entries; // Original count
+        u32 copied = 0;
+        while (copied < to_copy) {
+            u32 n = (to_copy - copied > CHUNK_SIZE) ? CHUNK_SIZE : (to_copy - copied);
+            int r = sceIoRead(in_fd, g_io_chunk, n * sizeof(GameEntry));
+            if (r <= 0) break;
+            sceIoWrite(out_fd, g_io_chunk, r);
+            copied += (r / sizeof(GameEntry));
+        }
+        sceIoClose(in_fd);
+    }
+
+    // 3. Write new entry
+    if (new_entry) {
+        sceIoWrite(out_fd, new_entry, sizeof(GameEntry));
+        h.num_entries++;
+    }
+
+    // 4. Update Header and Backup
+    h.ready_flag = GAMEDIARY_MAGIC;
+    h.checksum = calculate_checksum(&h);
+
+    sceIoLseek(out_fd, 0, PSP_SEEK_SET);
+    sceIoWrite(out_fd, &h, sizeof(GameRegistryHeader)); // Update primary
+
+    sceIoLseek(out_fd, 0, PSP_SEEK_END);
+    sceIoWrite(out_fd, &h, sizeof(GameRegistryHeader)); // Write backup at end
+
+    // 5. Sync and Rename
+    // Flush filesystem metadata AFTER closing handle to ensure FAT updates are caught
+    sceIoClose(out_fd);
+    sceIoSync(get_device_path(), 0);
+
+    sceIoRemove(path);
+    int res = sceIoRename(tmp_path, path);
+    sceIoSync(get_device_path(), 0); // Sync after rename to persist FAT entry
+
+    return (res >= 0) ? 0 : -2;
 }
 
 void storage_init(void) {
-  sceIoMkdir(sctrlKernelMsIsEf() ? "ef0:/PSP" : "ms0:/PSP", 0777);
-  sceIoMkdir(sctrlKernelMsIsEf() ? "ef0:/PSP/COMMON" : "ms0:/PSP/COMMON", 0777);
-  sceIoMkdir(get_db_dir(), 0777);
+  if (g_initialized) return;
+
+  const char *base = sctrlKernelMsIsEf() ? "ef0:/PSP/COMMON/GameDiary" : "ms0:/PSP/COMMON/GameDiary";
+  ensure_dir(base);
+  ensure_dir(get_db_dir());
+
+  char path[128], tmp_path[128];
+  get_full_path(path, GAMES_DAT);
+  get_full_path(tmp_path, GAMES_TMP);
+
+  // Recovery: check if games.tmp is valid and should be promoted
+  GameRegistryHeader tmp_header;
+  if (load_reliable_header(&tmp_header, tmp_path) == 0) {
+      sceIoRemove(path);
+      sceIoRename(tmp_path, path);
+      sceIoSync(get_device_path(), 0);
+  } else {
+      sceIoRemove(tmp_path);
+  }
+
+  if (load_reliable_header(&g_header, path) < 0) {
+    g_header.magic = GAMEDIARY_MAGIC;
+    g_header.version = DB_VERSION;
+    g_header.num_entries = 0;
+    g_header.next_uid = 1;
+    g_header.ready_flag = GAMEDIARY_MAGIC;
+    g_header.checksum = calculate_checksum(&g_header);
+    memset(g_header.reserved, 0, sizeof(g_header.reserved));
+
+    SceUID fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    if (fd >= 0) {
+      sceIoWrite(fd, &g_header, sizeof(GameRegistryHeader));
+      sceIoClose(fd);
+      sceIoSync(get_device_path(), 0);
+    }
+  }
+
+  // Session log integrity check
+  char s_path[128];
+  get_full_path(s_path, SESSIONS_DAT);
+  SceUID s_fd = sceIoOpen(s_path, PSP_O_RDONLY, 0777);
+  if (s_fd >= 0) {
+    SceOff size = sceIoLseek(s_fd, 0, PSP_SEEK_END);
+    sceIoClose(s_fd);
+    if (size % sizeof(SessionEntry) != 0) {
+      SceOff valid_size = (size / sizeof(SessionEntry)) * sizeof(SessionEntry);
+      char s_tmp[128];
+      get_full_path(s_tmp, "sessions.tmp");
+      SceUID in_fd = sceIoOpen(s_path, PSP_O_RDONLY, 0777);
+      SceUID out_fd = sceIoOpen(s_tmp, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+      if (in_fd >= 0 && out_fd >= 0) {
+          static char recovery_buf[512]; // Static to avoid stack usage
+          SceOff copied = 0;
+          while (copied < valid_size) {
+              u32 to_read = (valid_size - copied > sizeof(recovery_buf)) ? sizeof(recovery_buf) : (u32)(valid_size - copied);
+              int r = sceIoRead(in_fd, recovery_buf, to_read);
+              if (r <= 0) break;
+              sceIoWrite(out_fd, recovery_buf, r);
+              copied += r;
+          }
+      }
+      if (in_fd >= 0) sceIoClose(in_fd);
+      if (out_fd >= 0) sceIoClose(out_fd);
+      sceIoRemove(s_path);
+      sceIoRename(s_tmp, s_path);
+      sceIoSync(get_device_path(), 0);
+    }
+  }
+
+  g_cache_count = 0;
+  g_initialized = 1;
 }
 
-// Write the database via a temporary file safely
-static int write_safe_db(GameDiaryHeader *header, GameDiaryEntry *entries) {
-  const char *path = get_db_path();
-  const char *tmp_path = get_db_tmp_path();
-
-  SceUID fd =
-      sceIoOpen(tmp_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-  if (fd < 0)
-    return -1;
-
-  sceIoWrite(fd, header, sizeof(GameDiaryHeader));
-  sceIoWrite(fd, entries, sizeof(GameDiaryEntry) * header->num_entries);
-  sceIoClose(fd);
-
-  sceIoRemove(path);
-  sceIoRename(tmp_path, path);
-  return 0;
+static void add_to_cache(const GameEntry *entry) {
+    u32 count = (g_cache_count < CACHE_SIZE) ? g_cache_count : (CACHE_SIZE - 1);
+    memmove(&g_cache[1], &g_cache[0], count * sizeof(GameEntry));
+    memcpy(&g_cache[0], entry, sizeof(GameEntry));
+    if (g_cache_count < CACHE_SIZE) g_cache_count++;
 }
 
-void storage_update_session(const char *game_id, const char *game_name,
-                            const char *apitype_str, u8 category,
-                            u32 session_time, int is_new_session) {
-  const char *path = get_db_path();
-  GameDiaryHeader header;
+int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
+  if (!g_initialized) storage_init();
 
-  // Default Header
-  header.magic = GAMEDIARY_MAGIC;
-  header.version = DB_VERSION;
-  header.num_entries = 0;
-  header.reserved = 0;
+  for (u32 i = 0; i < g_cache_count; i++) {
+    if (strcmp(g_cache[i].game_id, meta->game_id) == 0) {
+      *uid = g_cache[i].uid;
+      if (i > 0) {
+          GameEntry tmp = g_cache[i];
+          memmove(&g_cache[1], &g_cache[0], i * sizeof(GameEntry));
+          g_cache[0] = tmp;
+      }
+      return 0;
+    }
+  }
 
-  // Read existing database to memory (it is small enough, max 500 games * ~90
-  // bytes = 45KB) We allocate dynamically in kernel but safely, or we use a
-  // static buffer? Let's use a static buffer to ensure absolutely zero memory
-  // fragmentation. 500 entries = 46 KB static buffer.
-  static GameDiaryEntry g_entries[500];
-
+  char path[128];
+  get_full_path(path, GAMES_DAT);
   SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
   if (fd >= 0) {
-    if (sceIoRead(fd, &header, sizeof(GameDiaryHeader)) ==
-        sizeof(GameDiaryHeader)) {
-      if (header.magic == GAMEDIARY_MAGIC && header.version == DB_VERSION) {
-        if (header.num_entries > 500)
-          header.num_entries = 500;
-        sceIoRead(fd, g_entries, sizeof(GameDiaryEntry) * header.num_entries);
-      } else {
-        header.num_entries = 0; // Invalid DB, overwrite
+    sceIoLseek(fd, sizeof(GameRegistryHeader), PSP_SEEK_SET);
+    int read_bytes;
+    while ((read_bytes = sceIoRead(fd, g_io_chunk, sizeof(g_io_chunk))) > 0) {
+      u32 entries_in_chunk = read_bytes / sizeof(GameEntry);
+      for (u32 i = 0; i < entries_in_chunk; i++) {
+        if (strcmp(g_io_chunk[i].game_id, meta->game_id) == 0) {
+          *uid = g_io_chunk[i].uid;
+          add_to_cache(&g_io_chunk[i]);
+          sceIoClose(fd);
+          return 0;
+        }
       }
     }
     sceIoClose(fd);
   }
 
-  u32 now = get_current_timestamp();
-  int found_idx = -1;
+  GameEntry new_game;
+  memset(&new_game, 0, sizeof(GameEntry));
+  new_game.uid = g_header.next_uid++;
+  strncpy(new_game.game_id, meta->game_id, 15);
+  strncpy(new_game.game_name, meta->game_name, 63);
+  strncpy(new_game.apitype_str, meta->apitype_str, 7);
+  new_game.category = meta->category;
 
-  for (u32 i = 0; i < header.num_entries; i++) {
-    if (strcmp(g_entries[i].game_id, game_id) == 0) {
-      found_idx = i;
-      break;
-    }
+  if (save_registry_atomic(&g_header, &new_game) == 0) {
+      g_header.num_entries++;
+      *uid = new_game.uid;
+      add_to_cache(&new_game); // Success! Add to cache now.
+      return 0;
   }
 
-  if (found_idx != -1) {
-    // Update existing
-    g_entries[found_idx].total_time += session_time;
-    g_entries[found_idx].last_played = now;
-    if (is_new_session) {
-      g_entries[found_idx].session_count++;
-    }
-    // Always copy name just in case it updated or fixed
-    strncpy(g_entries[found_idx].game_name, game_name, 63);
-    strncpy(g_entries[found_idx].apitype_str, apitype_str, 7);
-    g_entries[found_idx].apitype_str[7] = '\0';
-    g_entries[found_idx].category = category;
-  } else {
-    // Add new
-    if (header.num_entries < 500) {
-      found_idx = header.num_entries++;
-      strncpy(g_entries[found_idx].game_id, game_id, 15);
-      g_entries[found_idx].game_id[15] = '\0';
-      strncpy(g_entries[found_idx].game_name, game_name, 63);
-      g_entries[found_idx].game_name[63] = '\0';
-      strncpy(g_entries[found_idx].apitype_str, apitype_str, 7);
-      g_entries[found_idx].apitype_str[7] = '\0';
-      g_entries[found_idx].total_time = session_time;
-      g_entries[found_idx].first_played = now;
-      g_entries[found_idx].last_played = now;
-      g_entries[found_idx].session_count = 1;
-      g_entries[found_idx].category = category;
+  return -1;
+}
 
-      for (int i = 0; i < 3; i++)
-        g_entries[found_idx].reserved[i] = 0;
-    }
-  }
-
-  write_safe_db(&header, g_entries);
+int storage_append_session(u32 game_uid, u32 duration, u32 timestamp) {
+  if (!g_initialized) storage_init();
+  char path[128];
+  get_full_path(path, SESSIONS_DAT);
+  SceUID fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+  if (fd < 0) return -1;
+  SessionEntry entry;
+  entry.game_uid = game_uid;
+  entry.duration = duration;
+  entry.timestamp = timestamp;
+  int res = sceIoWrite(fd, &entry, sizeof(SessionEntry));
+  sceIoClose(fd);
+  sceIoSync(get_device_path(), 0);
+  return (res == sizeof(SessionEntry)) ? 0 : -2;
 }
