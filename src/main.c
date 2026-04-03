@@ -1,8 +1,9 @@
+#include "apitype.h"
 #include "common.h"
 #include "detector.h"
 #include "storage.h"
 #include "tracker.h"
-#include "apitype.h"
+
 
 PSP_MODULE_INFO("GameDiary", 0x1000, 1, 0);
 

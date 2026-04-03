@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "models.h"
 #include "pspsdk/systemctrl.h"
 
 // Magic "GAMD"
@@ -31,12 +32,12 @@
 #define CAT_UNKNOWN 4
 
 typedef struct {
-  char game_id[16];   // e.g. "ULUS-10041"
-  char game_name[64]; // e.g. "Grand Theft Auto: Liberty City Stories"
+  char game_id[16];    // e.g. "ULUS-10041"
+  char game_name[64];  // e.g. "Grand Theft Auto: Liberty City Stories"
   char apitype_str[8]; // e.g. "0x120"
-  u32 total_time;     // in seconds
-  u32 first_played;   // UNIX timestamp
-  u32 last_played;    // UNIX timestamp
+  u32 total_time;      // in seconds
+  u32 first_played;    // UNIX timestamp
+  u32 last_played;     // UNIX timestamp
   u32 session_count;
   u8 category; // 0: PSP, 1: PS1, 2: Homebrew
   u8 reserved[3];
@@ -48,10 +49,5 @@ typedef struct {
   u32 num_entries;
   u32 reserved;
 } GameDiaryHeader;
-
-extern char g_game_id[16];
-extern char g_game_name[64];
-extern char g_apitype_str[8];
-extern u8 g_category;
 
 #endif // _COMMON_H_

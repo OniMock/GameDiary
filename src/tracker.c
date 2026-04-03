@@ -27,8 +27,10 @@ static int power_callback(int unknown, int power_info, void *arg) {
   if (power_info & PSP_POWER_CB_POWER_SWITCH ||
       power_info & PSP_POWER_CB_SUSPENDING) {
     if (pending_seconds > 0) {
-      storage_update_session(g_game_id, g_game_name, g_apitype_str,
-                             g_category, pending_seconds, 0);
+      const GameMetadata *metadata = detector_get_metadata();
+      storage_update_session(metadata->game_id, metadata->game_name,
+                             metadata->apitype_str, metadata->category,
+                             pending_seconds, 0);
       pending_seconds = 0;
     }
     is_suspended = 1;
@@ -68,7 +70,9 @@ static int tracker_thread_main(SceSize args, void *argp) {
   }
 
   // Initialize session (marks as a new launch)
-  storage_update_session(g_game_id, g_game_name, g_apitype_str, g_category, 0, 1);
+  const GameMetadata *metadata = detector_get_metadata();
+  storage_update_session(metadata->game_id, metadata->game_name,
+                         metadata->apitype_str, metadata->category, 0, 1);
 
   while (running) {
     sceKernelDelayThread(1000 * 1000); // 1 sec
@@ -77,8 +81,10 @@ static int tracker_thread_main(SceSize args, void *argp) {
       pending_seconds++;
 
       if (pending_seconds >= 60) {
-        storage_update_session(g_game_id, g_game_name, g_apitype_str,
-                               g_category, pending_seconds, 0);
+        const GameMetadata *metadata = detector_get_metadata();
+        storage_update_session(metadata->game_id, metadata->game_name,
+                               metadata->apitype_str, metadata->category,
+                               pending_seconds, 0);
         pending_seconds = 0;
       }
     }
@@ -99,8 +105,10 @@ void tracker_thread_start(void) {
 void tracker_thread_stop(void) {
   running = 0;
   if (pending_seconds > 0) {
-    storage_update_session(g_game_id, g_game_name, g_apitype_str,
-                           g_category, pending_seconds, 0);
+    const GameMetadata *metadata = detector_get_metadata();
+    storage_update_session(metadata->game_id, metadata->game_name,
+                           metadata->apitype_str, metadata->category,
+                           pending_seconds, 0);
     pending_seconds = 0;
   }
 }
