@@ -48,8 +48,8 @@ static u32 calculate_checksum(const GameRegistryHeader *h) {
     const unsigned char *data = (const unsigned char *)h;
 
     for (size_t i = 0; i < sizeof(GameRegistryHeader); i++) {
-        // Skip checksum field itself
-        if (i >= 16 && i < 20) continue; // checksum field is at offset 16 (4th u32)
+        // Skip checksum field itself (offset 20: 5th u32)
+        if (i >= 20 && i < 24) continue;
 
         hash ^= data[i];
         hash *= 16777619U; // FNV prime
