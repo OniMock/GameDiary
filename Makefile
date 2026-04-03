@@ -18,8 +18,8 @@ USE_KERNEL_LIBS = 1
 USE_KERNEL_LIBC = 1
 PSP_FW_VERSION = 661
 
-LIBS = -lpsppower -lpsprtc -lpspctrl_driver -lpspdisplay_driver -lpspsystemctrl_kernel -lgcc
-LDFLAGS =
+LIBS = -lpsppower -lpsprtc -lpspctrl_driver -lpspdisplay_driver -lpspsystemctrl_kernel -lpspkubridge -lgcc
+LDFLAGS = -Llib
 
 PSPSDK = $(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

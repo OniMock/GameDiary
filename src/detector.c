@@ -1,6 +1,8 @@
 #include "detector.h"
-#include "common.h"
 #include "apitype.h"
+#include "common.h"
+#include <pspsdk/kubridge.h>
+
 
 char g_game_id[16];
 char g_game_name[64];
@@ -17,6 +19,9 @@ static u32 hash_string(const char *str) {
   return hash;
 }
 
+static int parse_pbp_sfo_string(const char *path, const char *target_key,
+                                char *out, int out_max);
+
 void detector_init(void) {
   u16 param_type = 0;
   u32 param_len = 0;
@@ -25,7 +30,8 @@ void detector_init(void) {
   // 1. Detect Category via apitype
   int apitype = sceKernelInitApitype();
   g_category = apitype_detect_category(apitype);
-  snprintf(g_apitype_str, sizeof(g_apitype_str), "0x%03X", (unsigned int)apitype);
+  snprintf(g_apitype_str, sizeof(g_apitype_str), "0x%03X",
+           (unsigned int)apitype);
 
   // Default setup
   strncpy(g_game_id, "UNKNOWN-00000", 15);
@@ -55,25 +61,45 @@ void detector_init(void) {
   if (g_category == CAT_HOMEBREW) {
     if (strcmp(g_game_id, "UNKNOWN-00000") == 0) {
       // Generate a pseudo-ID based on TITLE
-      snprintf(g_game_id, 16, "HBX-%08X", (unsigned int)hash_string(g_game_name));
+      snprintf(g_game_id, 16, "HBX-%08X",
+               (unsigned int)hash_string(g_game_name));
     }
   } else if (g_category == CAT_PS1) {
-    // For PS1 (POPS), sctrlGetInitPARAM often returns incorrect information
-    // like generic Sony strings spoofed by the emulator.
-    // So we use sctrlGetSfoPARAM with NULL to read directly from the current EBOOT.PBP
-    if (sctrlGetSfoPARAM(NULL, "DISC_ID", &param_type, &param_len, param_buf) >= 0) {
-      if (param_len > 0 && param_len < 16) {
-        strncpy(g_game_id, param_buf, param_len);
-        g_game_id[param_len] = '\0';
+    char eboot_path[256];
+    memset(eboot_path, 0, sizeof(eboot_path));
+
+    if (kuKernelInitFileName(eboot_path) >= 0 && eboot_path[0] != '\0') {
+      char tmp_buf[64];
+      int got_id = 0, got_title = 0;
+
+      if (parse_pbp_sfo_string(eboot_path, "DISC_ID", tmp_buf,
+                               sizeof(tmp_buf))) {
+        int copy_len = strlen(tmp_buf);
+        if (copy_len > 0 && copy_len < 16) {
+          strncpy(g_game_id, tmp_buf, copy_len);
+          g_game_id[copy_len] = '\0';
+          got_id = 1;
+        }
       }
-    }
-    
-    // Some EBOOTs use TITLE, shouldn't hurt to try getting it too.
-    if (sctrlGetSfoPARAM(NULL, "TITLE", &param_type, &param_len, param_buf) >= 0) {
-      if (param_len > 0 && param_len < 64) {
-        strncpy(g_game_name, param_buf, param_len);
-        g_game_name[param_len] = '\0';
+
+      if (parse_pbp_sfo_string(eboot_path, "TITLE", tmp_buf, sizeof(tmp_buf))) {
+        int copy_len = strlen(tmp_buf);
+        if (copy_len > 0 && copy_len < 64) {
+          strncpy(g_game_name, tmp_buf, copy_len);
+          g_game_name[copy_len] = '\0';
+          got_title = 1;
+        }
       }
+
+      // DEBUG: Se falhou em achar o titulo do PS1, salvar o EBOOT_PATH como
+      // nome!
+      if (!got_title) {
+        snprintf(g_game_name, 63, "PT: %s", eboot_path);
+        g_game_name[63] = '\0';
+      }
+    } else {
+      strncpy(g_game_name, "KUBRIDGE FAILED", 63);
+      g_game_name[63] = '\0';
     }
   }
 }
@@ -127,6 +153,88 @@ static int parse_sfo_string(const char *path, const char *target_key, char *out,
       u32 size = (d_max < limit) ? d_max : limit;
       int to_read = (int)size;
       int bytes = sceIoRead(fd, out, to_read);
+      if (bytes > 0) {
+        out[bytes] = '\0';
+        found = 1;
+      }
+      break;
+    }
+  }
+
+  sceIoClose(fd);
+  return found;
+}
+
+// Helper to manually parse SFO from a PBP file
+static int parse_pbp_sfo_string(const char *path, const char *target_key,
+                                char *out, int out_max) {
+  SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0);
+  if (fd < 0) {
+    snprintf(out, out_max, "IO ERR %x", fd);
+    return 0;
+  }
+
+  u8 pbp_head[12];
+  if (sceIoRead(fd, pbp_head, 12) != 12) {
+    sceIoClose(fd);
+    return 0;
+  }
+
+  // Check '\0PBP'
+  if (pbp_head[0] != 0x00 || pbp_head[1] != 'P' || pbp_head[2] != 'B' ||
+      pbp_head[3] != 'P') {
+    sceIoClose(fd);
+    snprintf(out, out_max, "NOT PBP");
+    return 0;
+  }
+
+  u32 sfo_offset = *(u32 *)&pbp_head[8];
+
+  if (sceIoLseek(fd, sfo_offset, PSP_SEEK_SET) < 0) {
+    sceIoClose(fd);
+    return 0;
+  }
+
+  u8 header[20];
+  if (sceIoRead(fd, header, 20) != 20) {
+    sceIoClose(fd);
+    return 0;
+  }
+
+  // Check magic '\0PSF'
+  if (header[0] != 0x00 || header[1] != 'P' || header[2] != 'S' ||
+      header[3] != 'F') {
+    sceIoClose(fd);
+    snprintf(out, out_max, "NOT SFO");
+    return 0;
+  }
+
+  u32 key_ofs = *(u32 *)&header[8];
+  u32 data_ofs = *(u32 *)&header[12];
+  u32 count = *(u32 *)&header[16];
+
+  int found = 0;
+  for (u32 i = 0; i < count && i < 256; i++) {
+    sceIoLseek(fd, sfo_offset + 20 + i * 16, PSP_SEEK_SET);
+    u8 entry[16];
+    if (sceIoRead(fd, entry, 16) != 16)
+      break;
+
+    u16 k_ofs = *(u16 *)&entry[0];
+    u32 d_ofs = *(u32 *)&entry[12];
+    u32 d_max = *(u32 *)&entry[8];
+
+    char key_str[32];
+    sceIoLseek(fd, sfo_offset + key_ofs + k_ofs, PSP_SEEK_SET);
+    if (sceIoRead(fd, key_str, sizeof(key_str) - 1) <= 0)
+      continue;
+    key_str[sizeof(key_str) - 1] = '\0';
+
+    if (strcmp(key_str, target_key) == 0) {
+      sceIoLseek(fd, sfo_offset + data_ofs + d_ofs, PSP_SEEK_SET);
+      u32 limit = (u32)(out_max - 1);
+      u32 size = (d_max < limit) ? d_max : limit;
+      int bytes = sceIoRead(fd, out, (int)size);
       if (bytes > 0) {
         out[bytes] = '\0';
         found = 1;
