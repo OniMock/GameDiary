@@ -3,6 +3,12 @@
 
 #include <pspkernel.h>
 
+#define CAT_PSP 0
+#define CAT_PS1 1
+#define CAT_HOMEBREW 2
+#define CAT_VSH 3
+#define CAT_UNKNOWN 4
+
 typedef struct {
   char game_id[16];
   char game_name[64];

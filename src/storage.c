@@ -1,5 +1,6 @@
 #include "storage.h"
 #include "common.h"
+#include "db_schema.h"
 #include "tracker.h"
 
 // Paths based on media
