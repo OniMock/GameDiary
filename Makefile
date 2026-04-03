@@ -1,6 +1,6 @@
 TARGET = GameDiary
 
-OBJS = src/main.o src/detector.o src/storage.o src/tracker.o
+OBJS = src/main.o src/apitype.o src/detector.o src/storage.o src/tracker.o
 
 INCDIR = include
 CFLAGS = -O2 -Os -G0 -Wall -Wextra -D_PSP_FW_VERSION=661 \

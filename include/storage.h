@@ -8,6 +8,7 @@ void storage_init(void);
 
 // Atomically save or append the session playtime to the database
 void storage_update_session(const char *game_id, const char *game_name,
-                            u8 category, u32 session_time, int is_new_session);
+                            const char *apitype_str, u8 category,
+                            u32 session_time, int is_new_session);
 
 #endif

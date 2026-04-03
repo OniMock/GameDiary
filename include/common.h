@@ -13,7 +13,7 @@
 
 // Magic "GAMD"
 #define GAMEDIARY_MAGIC 0x444D4147
-#define DB_VERSION 1
+#define DB_VERSION 2
 
 #define DB_PATH "ms0:/PSP/COMMON/GameDiary/diary.dat"
 #define DB_TMP_PATH "ms0:/PSP/COMMON/GameDiary/diary.tmp"
@@ -24,15 +24,16 @@
 #define DB_TMP_PATH_EF0 "ef0:/PSP/COMMON/GameDiary/diary.tmp"
 #define DB_DIR_EF0 "ef0:/PSP/COMMON/GameDiary"
 
-// Categories
 #define CAT_PSP 0
 #define CAT_PS1 1
 #define CAT_HOMEBREW 2
-#define CAT_UNKNOWN 3
+#define CAT_VSH 3
+#define CAT_UNKNOWN 4
 
 typedef struct {
   char game_id[16];   // e.g. "ULUS-10041"
   char game_name[64]; // e.g. "Grand Theft Auto: Liberty City Stories"
+  char apitype_str[8]; // e.g. "0x120"
   u32 total_time;     // in seconds
   u32 first_played;   // UNIX timestamp
   u32 last_played;    // UNIX timestamp
@@ -50,6 +51,7 @@ typedef struct {
 
 extern char g_game_id[16];
 extern char g_game_name[64];
+extern char g_apitype_str[8];
 extern u8 g_category;
 
 #endif // _COMMON_H_

@@ -41,7 +41,8 @@ static int write_safe_db(GameDiaryHeader *header, GameDiaryEntry *entries) {
 }
 
 void storage_update_session(const char *game_id, const char *game_name,
-                            u8 category, u32 session_time, int is_new_session) {
+                            const char *apitype_str, u8 category,
+                            u32 session_time, int is_new_session) {
   const char *path = get_db_path();
   GameDiaryHeader header;
 
@@ -91,6 +92,8 @@ void storage_update_session(const char *game_id, const char *game_name,
     }
     // Always copy name just in case it updated or fixed
     strncpy(g_entries[found_idx].game_name, game_name, 63);
+    strncpy(g_entries[found_idx].apitype_str, apitype_str, 7);
+    g_entries[found_idx].apitype_str[7] = '\0';
     g_entries[found_idx].category = category;
   } else {
     // Add new
@@ -100,6 +103,8 @@ void storage_update_session(const char *game_id, const char *game_name,
       g_entries[found_idx].game_id[15] = '\0';
       strncpy(g_entries[found_idx].game_name, game_name, 63);
       g_entries[found_idx].game_name[63] = '\0';
+      strncpy(g_entries[found_idx].apitype_str, apitype_str, 7);
+      g_entries[found_idx].apitype_str[7] = '\0';
       g_entries[found_idx].total_time = session_time;
       g_entries[found_idx].first_played = now;
       g_entries[found_idx].last_played = now;
