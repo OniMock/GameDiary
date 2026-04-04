@@ -8,7 +8,9 @@ static SceUID cb_thid = -1;
 static int running = 0;
 
 static volatile u32 pending_seconds = 0;
-static volatile int is_suspended = 0;
+static volatile u32 session_total_seconds = 0;
+static SceOff current_session_offset = -1;
+static volatile int is_suspended = 1; // Start suspended until detector confirms
 static u32 current_game_uid = 0;
 
 u32 get_current_timestamp(void);
@@ -30,8 +32,9 @@ static int power_callback(int unknown, int power_info, void *arg) {
   if (power_info & PSP_POWER_CB_POWER_SWITCH ||
       power_info & PSP_POWER_CB_SUSPENDING) {
     if (pending_seconds > 0 && current_game_uid > 0) {
-      storage_append_session(current_game_uid, pending_seconds,
-                             get_current_timestamp());
+      session_total_seconds += pending_seconds;
+      storage_log_session(current_game_uid, session_total_seconds,
+                             get_current_timestamp(), &current_session_offset);
       pending_seconds = 0;
     }
     is_suspended = 1;
@@ -76,6 +79,10 @@ static int tracker_thread_main(SceSize args, void *argp) {
     current_game_uid = 0;
   }
 
+  session_total_seconds = 0;
+  current_session_offset = -1;
+  is_suspended = 0; // Everything ready
+
   while (running) {
     sceKernelDelayThread(1000 * 1000); // 1 sec
 
@@ -84,8 +91,9 @@ static int tracker_thread_main(SceSize args, void *argp) {
 
       if (pending_seconds >= 60) {
         if (current_game_uid > 0) {
-          storage_append_session(current_game_uid, pending_seconds,
-                                 get_current_timestamp());
+          session_total_seconds += pending_seconds;
+          storage_log_session(current_game_uid, session_total_seconds,
+                                 get_current_timestamp(), &current_session_offset);
         }
         pending_seconds = 0;
       }
@@ -107,8 +115,9 @@ void tracker_thread_start(void) {
 void tracker_thread_stop(void) {
   running = 0;
   if (pending_seconds > 0 && current_game_uid > 0) {
-    storage_append_session(current_game_uid, pending_seconds,
-                           get_current_timestamp());
+    session_total_seconds += pending_seconds;
+    storage_log_session(current_game_uid, session_total_seconds,
+                           get_current_timestamp(), &current_session_offset);
     pending_seconds = 0;
   }
 }

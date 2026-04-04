@@ -2,6 +2,7 @@
 #include "db_schema.h"
 #include "common.h"
 #include <string.h>
+#include <stddef.h>
 
 #define CACHE_SIZE 256
 #define CHUNK_SIZE 128
@@ -43,25 +44,38 @@ static void ensure_dir(const char *path) {
   sceIoMkdir(tmp, 0777);
 }
 
-static u32 calculate_checksum(const GameRegistryHeader *h) {
+static u32 calculate_generic_checksum(const void *data, size_t len, size_t skip_offset) {
     u32 hash = 2166136261U; // FNV offset basis
-    const unsigned char *data = (const unsigned char *)h;
+    const unsigned char *p = (const unsigned char *)data;
 
-    for (size_t i = 0; i < sizeof(GameRegistryHeader); i++) {
-        // Skip checksum field itself (offset 20: 5th u32)
-        if (i >= 20 && i < 24) continue;
+    // Safety: ensure we don't hash past the intended header size
+    for (size_t i = 0; i < len; i++) {
+        // Skip the 4-byte checksum field dynamically
+        if (i >= skip_offset && i < skip_offset + sizeof(u32)) continue;
 
-        hash ^= data[i];
+        hash ^= p[i];
         hash *= 16777619U; // FNV prime
     }
     return hash;
 }
 
+// Forward-compatibility: Map each version to its expected header size
+static size_t get_header_size_by_version(u32 version) {
+    if (version <= 3) return 32; // Version up to 3: 32 bytes
+    // Future expansion example: if (version == 4) return 64;
+    return sizeof(GameRegistryHeader); // Fallback to current size
+}
+
 static int validate_header(const GameRegistryHeader *h) {
     if (h->magic != GAMEDIARY_MAGIC) return -1;
-    if (h->version != DB_VERSION) return -2;
+    if (h->version > DB_VERSION) return -2; // Cannot read "future" versions
     if (h->ready_flag != GAMEDIARY_MAGIC) return -3;
-    if (h->checksum != calculate_checksum(h)) return -4;
+
+    // Use the size that was relevant for THIS header's version
+    size_t hash_len = get_header_size_by_version(h->version);
+    u32 expected_hash = calculate_generic_checksum(h, hash_len, offsetof(GameRegistryHeader, checksum));
+
+    if (h->checksum != expected_hash) return -4;
     return 0;
 }
 
@@ -129,8 +143,9 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
     }
 
     // 4. Update Header and Backup
+    h.version = DB_VERSION;
     h.ready_flag = GAMEDIARY_MAGIC;
-    h.checksum = calculate_checksum(&h);
+    h.checksum = calculate_generic_checksum(&h, get_header_size_by_version(h.version), offsetof(GameRegistryHeader, checksum));
 
     sceIoLseek(out_fd, 0, PSP_SEEK_SET);
     sceIoWrite(out_fd, &h, sizeof(GameRegistryHeader)); // Update primary
@@ -138,14 +153,14 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
     sceIoLseek(out_fd, 0, PSP_SEEK_END);
     sceIoWrite(out_fd, &h, sizeof(GameRegistryHeader)); // Write backup at end
 
-    // 5. Sync and Rename
-    // Flush filesystem metadata AFTER closing handle to ensure FAT updates are caught
+    // 5. Cleanup and Rename
     sceIoClose(out_fd);
-    sceIoSync(get_device_path(), 0);
 
     sceIoRemove(path);
     int res = sceIoRename(tmp_path, path);
-    sceIoSync(get_device_path(), 0); // Sync after rename to persist FAT entry
+    if (res >= 0) {
+        sceIoSync(get_device_path(), 0); // Only one critical sync after rename
+    }
 
     return (res >= 0) ? 0 : -2;
 }
@@ -177,14 +192,14 @@ void storage_init(void) {
     g_header.num_entries = 0;
     g_header.next_uid = 1;
     g_header.ready_flag = GAMEDIARY_MAGIC;
-    g_header.checksum = calculate_checksum(&g_header);
+    // Use the version-aware size for initial creation as well
+    g_header.checksum = calculate_generic_checksum(&g_header, get_header_size_by_version(g_header.version), offsetof(GameRegistryHeader, checksum));
     memset(g_header.reserved, 0, sizeof(g_header.reserved));
 
     SceUID fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (fd >= 0) {
       sceIoWrite(fd, &g_header, sizeof(GameRegistryHeader));
       sceIoClose(fd);
-      sceIoSync(get_device_path(), 0);
     }
   }
 
@@ -269,9 +284,12 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
   GameEntry new_game;
   memset(&new_game, 0, sizeof(GameEntry));
   new_game.uid = g_header.next_uid++;
-  strncpy(new_game.game_id, meta->game_id, 15);
-  strncpy(new_game.game_name, meta->game_name, 63);
-  strncpy(new_game.apitype_str, meta->apitype_str, 7);
+
+  // Safe string copying with manual null termination assurance
+  snprintf(new_game.game_id, sizeof(new_game.game_id), "%s", meta->game_id);
+  snprintf(new_game.game_name, sizeof(new_game.game_name), "%s", meta->game_name);
+  snprintf(new_game.apitype_str, sizeof(new_game.apitype_str), "%s", meta->apitype_str);
+
   new_game.category = meta->category;
 
   if (save_registry_atomic(&g_header, &new_game) == 0) {
@@ -284,18 +302,32 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
   return -1;
 }
 
-int storage_append_session(u32 game_uid, u32 duration, u32 timestamp) {
+int storage_log_session(u32 game_uid, u32 duration, u32 timestamp, SceOff *offset) {
   if (!g_initialized) storage_init();
   char path[128];
   get_full_path(path, SESSIONS_DAT);
-  SceUID fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
-  if (fd < 0) return -1;
+
+  SceUID fd;
   SessionEntry entry;
   entry.game_uid = game_uid;
   entry.duration = duration;
   entry.timestamp = timestamp;
+
+  if (*offset == -1) {
+    // New session: Append
+    fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+    if (fd < 0) return -1;
+
+    // Get the current offset before writing (since it's append, it's just size)
+    *offset = sceIoLseek(fd, 0, PSP_SEEK_END);
+  } else {
+    // Existing session: Overwrite
+    fd = sceIoOpen(path, PSP_O_WRONLY, 0777);
+    if (fd < 0) return -2;
+    sceIoLseek(fd, *offset, PSP_SEEK_SET);
+  }
+
   int res = sceIoWrite(fd, &entry, sizeof(SessionEntry));
   sceIoClose(fd);
-  sceIoSync(get_device_path(), 0);
-  return (res == sizeof(SessionEntry)) ? 0 : -2;
+  return (res == sizeof(SessionEntry)) ? 0 : -3;
 }
