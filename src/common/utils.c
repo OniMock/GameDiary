@@ -1,6 +1,5 @@
-#include "utils.h"
+#include "common/utils.h"
 #include <pspkernel.h>
-#include <pspsdk/kubridge.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -14,12 +13,12 @@ u32 hash_string(const char *str) {
 }
 
 // Safely read a 32-bit little-endian value from a potentially unaligned buffer
-static u32 get_u32_le(const u8 *p) {
+u32 utils_get_u32_le(const u8 *p) {
   return p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24);
 }
 
 // Helper to copy a file
-static int copy_file(const char *src, const char *dst) {
+int utils_copy_file(const char *src, const char *dst) {
   SceUID f_in = sceIoOpen(src, PSP_O_RDONLY, 0777);
   if (f_in < 0)
     return -1;
@@ -39,7 +38,7 @@ static int copy_file(const char *src, const char *dst) {
 }
 
 // Helper to extract ICON0.PNG from PBP
-static int extract_pbp_icon(const char *pbp_path, const char *dst) {
+int utils_extract_pbp_icon(const char *pbp_path, const char *dst) {
   SceUID f_in = sceIoOpen(pbp_path, PSP_O_RDONLY, 0777);
   if (f_in < 0) {
     return -1;
@@ -56,7 +55,7 @@ static int extract_pbp_icon(const char *pbp_path, const char *dst) {
     return -3;
   }
 
-  u32 icon0_ofs = get_u32_le(&header[12]);
+  u32 icon0_ofs = utils_get_u32_le(&header[12]);
   if (icon0_ofs == 0) {
     sceIoClose(f_in);
     return -4;
@@ -64,7 +63,7 @@ static int extract_pbp_icon(const char *pbp_path, const char *dst) {
 
   u32 next_ofs = 0;
   for (int i = 16; i <= 36; i += 4) {
-    u32 off = get_u32_le(&header[i]);
+    u32 off = utils_get_u32_le(&header[i]);
     if (off > icon0_ofs) {
       next_ofs = off;
       break;
@@ -103,34 +102,4 @@ static int extract_pbp_icon(const char *pbp_path, const char *dst) {
   sceIoClose(f_in);
   sceIoClose(f_out);
   return 0;
-}
-
-void utils_capture_icon(const char *game_id, u8 category, const char *dest_dir, const char *executable_path) {
-  char dest_path[128];
-  snprintf(dest_path, sizeof(dest_path), "%s/%s.png", dest_dir, game_id);
-
-  if (category == CAT_PSP) {
-    if (copy_file("disc0:/PSP_GAME/ICON0.PNG", dest_path) == 0) {
-      return;
-    }
-  }
-
-  if (executable_path && executable_path[0] != '\0') {
-    int ext_res = extract_pbp_icon(executable_path, dest_path);
-    if (ext_res == 0) return;
-
-    char sidecar_path[256];
-    strncpy(sidecar_path, executable_path, sizeof(sidecar_path));
-    sidecar_path[sizeof(sidecar_path) - 1] = '\0';
-    char *last_slash = strrchr(sidecar_path, '/');
-    if (last_slash) {
-      strcpy(last_slash + 1, "ICON0.PNG");
-      int sc1 = copy_file(sidecar_path, dest_path);
-      if (sc1 == 0) return;
-
-      strcpy(last_slash + 1, "icon0.png");
-      int sc2 = copy_file(sidecar_path, dest_path);
-      if (sc2 == 0) return;
-    }
-  }
 }

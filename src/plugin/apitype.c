@@ -1,4 +1,4 @@
-#include "apitype.h"
+#include "plugin/apitype.h"
 
 int apitype_detect_category(int apitype) {
   // VSH (XMB)

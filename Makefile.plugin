@@ -1,0 +1,43 @@
+TARGET = GameDiary
+
+# -----------------------------------------------------------------------
+# Plugin (PRX) objects — kernel-mode
+# -----------------------------------------------------------------------
+PLUGIN_OBJS = \
+  src/plugin/main.o \
+  src/plugin/apitype.o \
+  src/plugin/detector.o \
+  src/plugin/metadata_repository.o \
+  src/plugin/tracker.o \
+  src/plugin/icon_capture.o
+
+# -----------------------------------------------------------------------
+# Common objects — shared between plugin and app
+# -----------------------------------------------------------------------
+COMMON_OBJS = \
+  src/common/storage.o \
+  src/common/sfo_parser.o \
+  src/common/utils.o
+
+OBJS = $(PLUGIN_OBJS) $(COMMON_OBJS)
+
+INCDIR = include
+CFLAGS = -O2 -Os -G0 -Wall -Wextra -D_PSP_FW_VERSION=661 -DGDIARY_PLUGIN \
+         -Iinclude \
+         -Ilib \
+         -I/usr/local/pspdev/psp/include \
+         -I/usr/local/pspdev/psp/sdk/include
+CXXFLAGS = $(CFLAGS)
+ASFLAGS = $(CFLAGS)
+
+BUILD_PRX = 1
+PRX_EXPORTS = exports.exp
+
+USE_KERNEL_LIBS = 1
+PSP_FW_VERSION = 661
+
+LIBS = -lpsppower -lpsprtc -lpspctrl_driver -lpspdisplay_driver -lpspsystemctrl_kernel -lpspkubridge -lgcc
+LDFLAGS = -Llib/ark4
+
+PSPSDK = $(shell psp-config --pspsdk-path)
+include $(PSPSDK)/lib/build.mak

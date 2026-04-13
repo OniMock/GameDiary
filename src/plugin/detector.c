@@ -1,5 +1,5 @@
-#include "detector.h"
-#include "metadata_repository.h"
+#include "plugin/detector.h"
+#include "plugin/metadata_repository.h"
 #include <string.h>
 
 static GameMetadata g_current_game;

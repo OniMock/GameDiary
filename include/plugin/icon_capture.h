@@ -1,13 +1,7 @@
-#ifndef _UTILS_H_
-#define _UTILS_H_
+#ifndef _PLUGIN_ICON_CAPTURE_H_
+#define _PLUGIN_ICON_CAPTURE_H_
 
 #include <psptypes.h>
-#include "models.h"
-
-/**
- * @brief Simple hash function for strings (djb2).
- */
-u32 hash_string(const char *str);
 
 /**
  * @brief Attempts to capture the game icon (ICON0.PNG) and save it to dest_path.
@@ -18,5 +12,4 @@ u32 hash_string(const char *str);
  */
 void utils_capture_icon(const char *game_id, u8 category, const char *dest_dir, const char *executable_path);
 
-#endif // _UTILS_H_
-
+#endif // _PLUGIN_ICON_CAPTURE_H_

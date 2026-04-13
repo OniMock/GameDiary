@@ -1,4 +1,4 @@
-#include "sfo_parser.h"
+#include "common/sfo_parser.h"
 #include <pspkernel.h>
 #include <stdio.h>
 #include <string.h>

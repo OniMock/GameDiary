@@ -1,9 +1,9 @@
-#include "apitype.h"
-#include "common.h"
-#include "detector.h"
-#include "storage.h"
-#include "tracker.h"
-
+#include "plugin/apitype.h"
+#include "common/common.h"
+#include "plugin/detector.h"
+#include "common/storage.h"
+#include "plugin/tracker.h"
+#include <pspsdk/systemctrl.h>
 
 PSP_MODULE_INFO("GameDiary", 0x1000, 1, 0);
 
@@ -20,8 +20,12 @@ int module_start(SceSize args, void *argp) {
     return 1; // VSH, ignore
   }
 
-  // Initialize storage directory
-  storage_init();
+  /* Resolve base path here — the only place sctrlKernelMsIsEf() is needed.
+   * Passing it down keeps common/storage.c kernel-API-free. */
+  const char *base_dir = sctrlKernelMsIsEf()
+                           ? "ef0:/PSP/COMMON/GameDiary"
+                           : "ms0:/PSP/COMMON/GameDiary";
+  storage_init(base_dir);
 
   // Grab game info right at boot before the buffer clears
   detector_init();

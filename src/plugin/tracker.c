@@ -1,7 +1,9 @@
-#include "tracker.h"
-#include "common.h"
-#include "detector.h"
-#include "storage.h"
+#include "plugin/tracker.h"
+#include "common/common.h"
+#include "plugin/detector.h"
+#include "common/storage.h"
+#include <psppower.h>
+#include <pspsdk/systemctrl.h>
 
 static SceUID tracker_thid = -1;
 static SceUID cb_thid = -1;

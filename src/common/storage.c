@@ -1,31 +1,34 @@
-#include "storage.h"
-#include "db_schema.h"
-#include "common.h"
-#include "utils.h"
+#include "common/storage.h"
+#include "common/db_schema.h"
+#include "common/utils.h"
+#ifdef GDIARY_PLUGIN
+#include "plugin/icon_capture.h"
+#endif
+
+#include <pspkernel.h>
+#include <stdio.h>
 #include <string.h>
 #include <stddef.h>
 
 #define CACHE_SIZE 256
 #define CHUNK_SIZE 128
 
-static GameEntry g_cache[CACHE_SIZE];
-static u32 g_cache_count = 0;
-static GameRegistryHeader g_header;
-static int g_initialized = 0;
+static GameEntry           g_cache[CACHE_SIZE];
+static u32                 g_cache_count = 0;
+static GameRegistryHeader  g_header;
+static int                 g_initialized = 0;
 
-// Shared I/O buffer to avoid stack overflow in small kernel threads
+/* Shared I/O buffer — static to avoid stack overflow in small kernel threads */
 static GameEntry g_io_chunk[CHUNK_SIZE];
 
-static const char *get_device_path() {
-  return sctrlKernelMsIsEf() ? "ef0:" : "ms0:";
-}
-
-static const char *get_db_dir() {
-  return sctrlKernelMsIsEf() ? DB_DIR_EF : DB_DIR_MS;
-}
+/* Base directory and db directory cached at storage_init() time.
+ * Avoids repeated calls to path-resolution logic at runtime. */
+static char g_base_dir[128] = {0};
+static char g_db_dir[160]   = {0};
+static char g_device[8]     = {0};  /* e.g. "ms0:" or "ef0:" */
 
 static void get_full_path(char *out, const char *filename) {
-  snprintf(out, 128, "%s/%s", get_db_dir(), filename);
+  snprintf(out, 256, "%s/%s", g_db_dir, filename);
 }
 
 static void ensure_dir(const char *path) {
@@ -107,7 +110,7 @@ static int load_reliable_header(GameRegistryHeader *header, const char *path) {
 }
 
 static int save_registry_atomic(const GameRegistryHeader *h_template, const GameEntry *new_entry) {
-    char path[128], tmp_path[128];
+    char path[256], tmp_path[256];
     get_full_path(path, GAMES_DAT);
     get_full_path(tmp_path, GAMES_TMP);
 
@@ -160,34 +163,48 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
     sceIoRemove(path);
     int res = sceIoRename(tmp_path, path);
     if (res >= 0) {
-        sceIoSync(get_device_path(), 0); // Only one critical sync after rename
+        sceIoSync(g_device, 0); /* One critical sync after the atomic rename */
     }
 
     return (res >= 0) ? 0 : -2;
 }
 
-void storage_init(void) {
+void storage_init(const char *base_dir) {
   if (g_initialized) return;
 
-  const char *base = sctrlKernelMsIsEf() ? "ef0:/PSP/COMMON/GameDiary" : "ms0:/PSP/COMMON/GameDiary";
-  ensure_dir(base);
-  ensure_dir(get_db_dir());
+  /* Store the base dir and derive the db sub-directory and device prefix.
+   * The caller (plugin/main.c) is responsible for resolving which device
+   * to use (sctrlKernelMsIsEf), keeping this layer kernel-agnostic. */
+  snprintf(g_base_dir, sizeof(g_base_dir), "%s", base_dir);
+  snprintf(g_db_dir,   sizeof(g_db_dir),   "%s/db", base_dir);
 
-  // Ensure source directory exists for icons
-  char source_dir[128];
-  snprintf(source_dir, sizeof(source_dir), "%s/source", base);
+  /* Extract device prefix (e.g. "ms0:" or "ef0:") from the base path. */
+  const char *colon = strchr(base_dir, ':');
+  if (colon && (colon - base_dir + 1) < (int)sizeof(g_device)) {
+    int len = (int)(colon - base_dir + 1);
+    snprintf(g_device, sizeof(g_device), "%.*s", len, base_dir);
+  } else {
+    snprintf(g_device, sizeof(g_device), "ms0:");
+  }
+
+  ensure_dir(g_base_dir);
+  ensure_dir(g_db_dir);
+
+  /* Ensure source directory exists for capturing game icons. */
+  char source_dir[160];
+  snprintf(source_dir, sizeof(source_dir), "%s/source", g_base_dir);
   ensure_dir(source_dir);
 
-  char path[128], tmp_path[128];
+  char path[256], tmp_path[256];
   get_full_path(path, GAMES_DAT);
   get_full_path(tmp_path, GAMES_TMP);
 
-  // Recovery: check if games.tmp is valid and should be promoted
+  /* Recovery: check if games.tmp is valid and should be promoted. */
   GameRegistryHeader tmp_header;
   if (load_reliable_header(&tmp_header, tmp_path) == 0) {
       sceIoRemove(path);
       sceIoRename(tmp_path, path);
-      sceIoSync(get_device_path(), 0);
+      sceIoSync(g_device, 0);
   } else {
       sceIoRemove(tmp_path);
   }
@@ -210,7 +227,7 @@ void storage_init(void) {
   }
 
   // Session log integrity check
-  char s_path[128];
+  char s_path[256];
   get_full_path(s_path, SESSIONS_DAT);
   SceUID s_fd = sceIoOpen(s_path, PSP_O_RDONLY, 0777);
   if (s_fd >= 0) {
@@ -218,7 +235,7 @@ void storage_init(void) {
     sceIoClose(s_fd);
     if (size % sizeof(SessionEntry) != 0) {
       SceOff valid_size = (size / sizeof(SessionEntry)) * sizeof(SessionEntry);
-      char s_tmp[128];
+      char s_tmp[256];
       get_full_path(s_tmp, "sessions.tmp");
       SceUID in_fd = sceIoOpen(s_path, PSP_O_RDONLY, 0777);
       SceUID out_fd = sceIoOpen(s_tmp, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
@@ -237,7 +254,7 @@ void storage_init(void) {
       if (out_fd >= 0) sceIoClose(out_fd);
       sceIoRemove(s_path);
       sceIoRename(s_tmp, s_path);
-      sceIoSync(get_device_path(), 0);
+      sceIoSync(g_device, 0);
     }
   }
 
@@ -253,7 +270,9 @@ static void add_to_cache(const GameEntry *entry) {
 }
 
 int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
-  if (!g_initialized) storage_init();
+  /* Caller must have called storage_init() before this point.
+   * If not initialized, we can't recover gracefully without a base_dir. */
+  if (!g_initialized) return -1;
 
   for (u32 i = 0; i < g_cache_count; i++) {
     if (strcmp(g_cache[i].game_id, meta->game_id) == 0) {
@@ -267,7 +286,7 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
     }
   }
 
-  char path[128];
+  char path[256];
   get_full_path(path, GAMES_DAT);
   SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
   if (fd >= 0) {
@@ -303,11 +322,12 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
       *uid = new_game.uid;
       add_to_cache(&new_game); // Success! Add to cache now.
 
-      // Capture game icon for the new registration
-      const char *base = sctrlKernelMsIsEf() ? "ef0:/PSP/COMMON/GameDiary" : "ms0:/PSP/COMMON/GameDiary";
-      char source_dir[128];
-      snprintf(source_dir, sizeof(source_dir), "%s/source", base);
+#ifdef GDIARY_PLUGIN
+      /* Capture icon using the stored base dir (no sctrl needed here). */
+      char source_dir[160];
+      snprintf(source_dir, sizeof(source_dir), "%s/source", g_base_dir);
       utils_capture_icon(new_game.game_id, new_game.category, source_dir, meta->file_path);
+#endif
 
       return 0;
   }
@@ -316,8 +336,8 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
 }
 
 int storage_log_session(u32 game_uid, u32 duration, u32 timestamp, SceOff *offset) {
-  if (!g_initialized) storage_init();
-  char path[128];
+  if (!g_initialized) return -1;  /* Must call storage_init() first */
+  char path[256];
   get_full_path(path, SESSIONS_DAT);
 
   SceUID fd;
