@@ -26,6 +26,11 @@ int metadata_fetch(GameMetadata *metadata) {
            (unsigned int)apitype);
 
   set_default_metadata(metadata);
+  
+  memset(metadata->file_path, 0, sizeof(metadata->file_path));
+  if (kuKernelInitFileName(metadata->file_path) < 0) {
+      metadata->file_path[0] = '\0';
+  }
 
   // 1. Fetch PARAMs from System (PSP/ISO/Homebrew)
   if (metadata->category == CAT_PSP || metadata->category == CAT_HOMEBREW) {

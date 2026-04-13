@@ -1,6 +1,7 @@
 #include "storage.h"
 #include "db_schema.h"
 #include "common.h"
+#include "utils.h"
 #include <string.h>
 #include <stddef.h>
 
@@ -172,6 +173,11 @@ void storage_init(void) {
   ensure_dir(base);
   ensure_dir(get_db_dir());
 
+  // Ensure source directory exists for icons
+  char source_dir[128];
+  snprintf(source_dir, sizeof(source_dir), "%s/source", base);
+  ensure_dir(source_dir);
+
   char path[128], tmp_path[128];
   get_full_path(path, GAMES_DAT);
   get_full_path(tmp_path, GAMES_TMP);
@@ -296,6 +302,13 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
       g_header.num_entries++;
       *uid = new_game.uid;
       add_to_cache(&new_game); // Success! Add to cache now.
+
+      // Capture game icon for the new registration
+      const char *base = sctrlKernelMsIsEf() ? "ef0:/PSP/COMMON/GameDiary" : "ms0:/PSP/COMMON/GameDiary";
+      char source_dir[128];
+      snprintf(source_dir, sizeof(source_dir), "%s/source", base);
+      utils_capture_icon(new_game.game_id, new_game.category, source_dir, meta->file_path);
+
       return 0;
   }
 

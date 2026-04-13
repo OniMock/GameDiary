@@ -14,6 +14,7 @@ typedef struct {
   char game_name[64];
   char apitype_str[8];
   u8 category;
+  char file_path[256];
 } GameMetadata;
 
 #endif // _MODELS_H_
