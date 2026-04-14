@@ -18,8 +18,8 @@ typedef struct {
 
 static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
     [LANG_EN] = { "English",   g_lang_en_entries },
-    [LANG_PT] = { "Portugu\xeas", g_lang_pt_entries },
-    [LANG_ES] = { "Espa\xf1ol",  g_lang_es_entries }
+    [LANG_PT] = { "Português", g_lang_pt_entries },
+    [LANG_ES] = { "Español",  g_lang_es_entries }
 };
 
 static int g_current_lang_idx = LANG_EN;
