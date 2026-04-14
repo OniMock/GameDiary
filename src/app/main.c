@@ -26,42 +26,42 @@ int callback_thread(SceSize args, void *argp) {
     return 0;
 }
 
-void setup_callbacks() {
+void setup_callbacks(void) {
     int thid = sceKernelCreateThread("update_thread", callback_thread, 0x11, 0xFA0, 0, 0);
     if (thid >= 0) sceKernelStartThread(thid, 0, 0);
 }
 
 int main(void) {
     setup_callbacks();
-    
-    // 1. Core Rendering & UI
+
+    /* 1. Core Rendering & UI
+     * Font data is embedded in the binary via font_*_embed.c — no file I/O needed.
+     * Works identically on real PSP and PPSSPP without copying any extra files. */
     renderer_init();
     font_init();
-    
-    // 2. Storage & Configuration
+
+    /* 2. Storage & Configuration */
     storage_init("ms0:/PSP/COMMON/GameDiary");
     config_load();
-    
-    // 3. Systems Initialization
+
+    /* 3. Systems Initialization */
     i18n_init(config_get()->language);
     data_load_all();
-    
-    // 4. State Manager
+
+    /* 4. State Manager */
     screen_manager_set(&g_screen_dashboard);
-    
-    // 5. Main Loop
+
+    /* 5. Main Loop */
     while (1) {
         renderer_start_frame();
-        
         screen_manager_update();
         screen_manager_draw();
-        
         renderer_end_frame();
     }
-    
-    // Cleanup
+
+    /* Cleanup */
     font_cleanup();
     data_free();
-    
+
     return 0;
 }

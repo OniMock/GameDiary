@@ -64,14 +64,20 @@ Texture* texture_load_png(const char* filename) {
 
     texture->data = memalign(16, texture->textureWidth * texture->textureHeight * 4);
     
+    int channels = png_get_channels(png_ptr, info_ptr);
+    
     png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
     
     uint32_t* data_ptr = (uint32_t*)texture->data;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             png_bytep row = row_pointers[y];
-            png_bytep ptr = &(row[x * 4]);
-            data_ptr[y * texture->textureWidth + x] = (ptr[3] << 24) | (ptr[2] << 16) | (ptr[1] << 8) | ptr[0];
+            png_bytep ptr = &(row[x * channels]);
+            uint8_t r = ptr[0];
+            uint8_t g = (channels > 1) ? ptr[1] : r;
+            uint8_t b = (channels > 2) ? ptr[2] : g;
+            uint8_t a = (channels > 3) ? ptr[3] : 255;
+            data_ptr[y * texture->textureWidth + x] = (a << 24) | (b << 16) | (g << 8) | r;
         }
     }
 

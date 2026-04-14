@@ -58,3 +58,9 @@ ef0/
 
 *.bak
 *.swp
+
+# Temp
+tmp/
+
+#pycache
+__pycache__/
