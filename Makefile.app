@@ -6,6 +6,9 @@ TARGET = GameDiaryApp
 APP_OBJS = \
   src/app/main.o \
   src/app/i18n/i18n.o \
+  src/app/i18n/i18n_en.o \
+  src/app/i18n/i18n_pt.o \
+  src/app/i18n/i18n_es.o \
   src/app/config/config.o \
   src/app/render/renderer.o \
   src/app/render/font.o \
@@ -13,6 +16,8 @@ APP_OBJS = \
   src/app/data/data_loader.o \
   src/app/data/stats_calculator.o \
   src/app/ui/screen_manager.o \
+  src/app/ui/ui_layout.o \
+  src/app/ui/ui_components.o \
   src/app/ui/dashboard.o \
   src/app/ui/stats.o \
   src/app/ui/game_list.o \

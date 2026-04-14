@@ -50,7 +50,8 @@ void renderer_init(void) {
     sceGuFrontFace(GU_CW);
     sceGuShadeModel(GU_SMOOTH);
     sceGuEnable(GU_CULL_FACE);
-    sceGuEnable(GU_TEXTURE_2D);
+    sceGuEnable(GU_BLEND);
+    sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
     sceGuEnable(GU_CLIP_PLANES);
     
     // Finalize init and clear both buffers to avoid startup static

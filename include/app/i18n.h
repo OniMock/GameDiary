@@ -1,41 +1,53 @@
 #ifndef GAMEDIARY_I18N_H
 #define GAMEDIARY_I18N_H
 
-/**
- * @file i18n.h
- * @brief Runtime internationalization system for GameDiary.
- */
+#include <psptypes.h>
+
+typedef struct {
+    u32 key_hash;
+    const char* value;
+} TranslationEntry;
+
+typedef struct {
+    const char* lang_code;
+    const char* lang_name;
+    const TranslationEntry* entries;
+    int count;
+} LanguagePack;
+
+extern LanguagePack g_lang_en;
+extern LanguagePack g_lang_pt;
+extern LanguagePack g_lang_es;
 
 /**
- * @brief Initializes the i18n system and loads the default language.
- * @param lang_code The language code to load (e.g., "en", "pt").
- * @return 0 on success, negative on error.
+ * Initialize the i18n system with a language code.
  */
-int i18n_init(const char *lang_code);
+void i18n_init(const char* lang_code);
 
 /**
- * @brief Loads a specific language file from the strings directory.
- * @param lang_code The language code to load.
- * @return 0 on success, negative on error.
+ * Switch the active language at runtime.
  */
-int i18n_load(const char *lang_code);
+void i18n_set_language(const char* lang_code);
 
 /**
- * @brief Retrieves a translated string for a given key.
- * @param key The translation key.
- * @return The translated string, or the key itself if not found.
+ * Get a translated string for a key.
+ * If not found, returns the key itself.
  */
-const char* i18n_get(const char *key);
+const char* i18n_get(const char* key);
 
 /**
- * @brief Cleans up i18n resources.
- */
-void i18n_cleanup(void);
-
-/**
- * @brief Gets the current loaded language code.
- * @return String representing the current language code.
+ * Get the current language code.
  */
 const char* i18n_current_lang(void);
+
+/**
+ * Get the total number of supported languages.
+ */
+int i18n_get_lang_count(void);
+
+/**
+ * Get a language pack by index for selection menus.
+ */
+const LanguagePack* i18n_get_lang_pack(int index);
 
 #endif // GAMEDIARY_I18N_H

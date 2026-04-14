@@ -1,4 +1,6 @@
 #include "app/ui/screen.h"
+#include "app/ui/ui_components.h"
+#include "app/ui/ui_layout.h"
 #include "app/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -7,7 +9,6 @@
 #include <stdio.h>
 
 static void dashboard_init(void) {
-    // Recalculate stats for "All Time"
     data_calculate_stats(0, 0xFFFFFFFF);
 }
 
@@ -21,18 +22,27 @@ static void dashboard_update(u32 buttons, u32 pressed) {
 static void format_time(u32 seconds, char *out, size_t size) {
     u32 h = seconds / 3600;
     u32 m = (seconds % 3600) / 60;
-    snprintf(out, size, "%luh %lum", h, m);
+    snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
 }
 
 static void dashboard_draw(void) {
-    renderer_clear(0xFF1A1A1A);
+    renderer_clear(COLOR_BG);
+    
+    Rect screen_rect = {0, 0, 480, 272};
+    Rect safe_rect = rect_padding(screen_rect, 20);
     
     // Header
-    font_draw_string(20, 30, i18n_get("app.title"), 0xFF00AAFF, 1.3f);
+    ui_draw_title(i18n_get("app.title"), safe_rect);
     
-    // Summary Panel
-    renderer_draw_rect(20, 60, 440, 100, 0xFF333333);
-    font_draw_string(40, 85, i18n_get("stats.total_playtime"), 0xFFAAAAAA, 0.9f);
+    // Summary Card (Center)
+    Rect card_rect = {40, 70, 400, 110};
+    ui_draw_card(card_rect, COLOR_CARD, COLOR_BORDER);
+    
+    Rect card_content = rect_padding(card_rect, 15);
+    Rect label_rect = rect_column(card_content, 0, 2, 0);
+    Rect value_rect = rect_column(card_content, 1, 2, 0);
+    
+    ui_draw_text(i18n_get("stats.total_playtime"), label_rect, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
     
     u32 total_play = 0;
     GameStats* games = data_get_games();
@@ -41,12 +51,14 @@ static void dashboard_draw(void) {
     
     char time_str[32];
     format_time(total_play, time_str, sizeof(time_str));
-    font_draw_string(40, 120, time_str, 0xFFFFFFFF, 1.8f);
+    ui_draw_text(time_str, value_rect, COLOR_TEXT, 1.6f, ALIGN_LEFT);
     
-    // Navigation
-    font_draw_string(20, 240, "[L] Settings", 0xFF888888, 0.8f);
-    font_draw_string(380, 240, "Stats [R]", 0xFF888888, 0.8f);
-    font_draw_string_centered(240, 200, i18n_get("menu.games_press_x"), 0xFFFFFFFF, 1.0f);
+    // Interaction Hint
+    ui_draw_text(i18n_get("menu.games_press_x"), (Rect){0, 190, 480, 30}, COLOR_TEXT, 0.9f, ALIGN_CENTER);
+    
+    // Footer Hints
+    ui_draw_hint("[L] Settings", 20, 255, COLOR_SUBTEXT);
+    ui_draw_hint("Stats [R]", 390, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_dashboard = {

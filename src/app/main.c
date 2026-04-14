@@ -34,24 +34,22 @@ void setup_callbacks() {
 int main(void) {
     setup_callbacks();
     
-    // 1. Rendering (Initialize as early as possible)
+    // 1. Core Rendering & UI
     renderer_init();
     font_init();
     
-    // 2. Storage & Config
+    // 2. Storage & Configuration
     storage_init("ms0:/PSP/COMMON/GameDiary");
     config_load();
     
-    // 3. Internationalization
+    // 3. Systems Initialization
     i18n_init(config_get()->language);
-    
-    // 4. Data
     data_load_all();
     
-    // 5. UI Initialization
+    // 4. State Manager
     screen_manager_set(&g_screen_dashboard);
     
-    // 6. Main Loop
+    // 5. Main Loop
     while (1) {
         renderer_start_frame();
         
@@ -61,9 +59,8 @@ int main(void) {
         renderer_end_frame();
     }
     
-    // Cleanup (never reached in this loop, but good practice)
+    // Cleanup
     font_cleanup();
-    i18n_cleanup();
     data_free();
     
     return 0;

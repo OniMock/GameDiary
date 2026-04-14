@@ -1,4 +1,6 @@
 #include "app/ui/screen.h"
+#include "app/ui/ui_components.h"
+#include "app/ui/ui_layout.h"
 #include "app/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -30,7 +32,7 @@ static void game_list_update(u32 buttons, u32 pressed) {
 
     // Scrolling logic
     if (g_selection < g_scroll) g_scroll = g_selection;
-    if (g_selection >= g_scroll + 6) g_scroll = g_selection - 5;
+    if (g_selection >= g_scroll + 5) g_scroll = g_selection - 4;
 
     if (pressed & PSP_CTRL_CIRCLE) screen_manager_set(&g_screen_dashboard);
     
@@ -47,34 +49,45 @@ static void format_time(u32 seconds, char *out, size_t size) {
 }
 
 static void game_list_draw(void) {
-    renderer_clear(0xFF151515);
-    font_draw_string(20, 30, i18n_get("menu.games"), 0xFFFFFFFF, 1.2f);
+    renderer_clear(COLOR_BG);
+    
+    Rect screen_rect = {0, 0, 480, 272};
+    Rect safe_rect = rect_padding(screen_rect, 20);
+    
+    ui_draw_title(i18n_get("menu.games"), safe_rect);
 
     GameStats* games = data_get_games();
     u32 count = data_get_game_count();
 
     if (count == 0) {
-        font_draw_string_centered(240, 136, "No games found", 0xFF888888, 1.0f);
+        ui_draw_text("No games found", (Rect){0, 136, 480, 20}, COLOR_SUBTEXT, 1.0f, ALIGN_CENTER);
         return;
     }
 
-    for (int i = 0; i < 6; i++) {
+    Rect list_area = {30, 80, 420, 150};
+    for (int i = 0; i < 5; i++) {
         int idx = g_scroll + i;
         if (idx >= (int)count) break;
 
-        int y = 60 + i * 32;
-        uint32_t color = (idx == g_selection) ? 0xFF00FFFF : 0xFFCCCCCC;
-        
+        Rect item_rect = rect_column(list_area, i, 5, 5);
         if (idx == g_selection) {
-            renderer_draw_rect(15, y - 20, 450, 30, 0xFF444444);
+            ui_draw_card(item_rect, COLOR_HIGHLIGHT, COLOR_ACCENT);
+        } else {
+            ui_draw_card(item_rect, COLOR_CARD, COLOR_BORDER);
         }
 
-        font_draw_string(30, y, games[idx].entry.game_name, color, 0.9f);
+        u32 color = (idx == g_selection) ? COLOR_ACCENT : COLOR_TEXT;
+        Rect content = rect_padding(item_rect, 5);
+        
+        ui_draw_text(games[idx].entry.game_name, content, color, 0.8f, ALIGN_LEFT);
         
         char time_str[16];
         format_time(games[idx].total_playtime, time_str, sizeof(time_str));
-        font_draw_string(380, y, time_str, color, 0.8f);
+        ui_draw_text(time_str, content, color, 0.7f, ALIGN_RIGHT);
     }
+
+    ui_draw_hint(i18n_get("ctrl.back"), 20, 255, COLOR_SUBTEXT);
+    ui_draw_hint(i18n_get("ctrl.select"), 390, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_game_list = {

@@ -1,4 +1,6 @@
 #include "app/ui/screen.h"
+#include "app/ui/ui_components.h"
+#include "app/ui/ui_layout.h"
 #include "app/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -31,38 +33,51 @@ static void game_details_update(u32 buttons, u32 pressed) {
 static void format_time(u32 seconds, char *out, size_t size) {
     u32 h = seconds / 3600;
     u32 m = (seconds % 3600) / 60;
-    snprintf(out, size, "%luh %lum", h, m);
+    snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
 }
 
 static void game_details_draw(void) {
-    renderer_clear(0xFF101010);
+    renderer_clear(COLOR_BG);
     
     GameStats* games = data_get_games();
     GameStats* g = &games[g_game_idx];
 
+    // Card for the whole section
+    Rect main_card = {20, 20, 440, 220};
+    ui_draw_card(main_card, COLOR_CARD, COLOR_BORDER);
+    
     // Icon
     if (g_game_icon) {
-        texture_draw(g_game_icon, 20, 20, 144, 80);
+        texture_draw(g_game_icon, 40, 40, 144, 80);
     } else {
-        renderer_draw_rect(20, 20, 144, 80, 0xFF333333);
-        font_draw_string(45, 65, "NO ICON", 0xFF888888, 0.8f);
+        renderer_draw_rect(40, 40, 144, 80, 0xFF333333);
+        font_draw_string(65, 85, "NO ICON", COLOR_SUBTEXT, 0.8f);
     }
 
-    font_draw_string(180, 45, g->entry.game_name, 0xFF00FFFF, 1.2f);
-    font_draw_string(180, 75, g->entry.game_id, 0xFFAAAAAA, 0.9f);
+    // Title & ID
+    ui_draw_text(g->entry.game_name, (Rect){200, 40, 240, 40}, COLOR_ACCENT, 1.2f, ALIGN_LEFT);
+    ui_draw_text(g->entry.game_id, (Rect){200, 80, 240, 20}, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
 
-    renderer_draw_rect(20, 120, 440, 120, 0xFF222222);
-    
+    // Separator
+    renderer_draw_rect(40, 135, 400, 1, COLOR_BORDER);
+
+    // Stats Grid inside card
     char buf[64];
-    font_draw_string(40, 150, i18n_get("stats.total_playtime"), 0xFFAAAAAA, 0.9f);
+    Rect stats_area = {40, 150, 400, 80};
+    
+    // Total Playtime row
+    Rect row1 = rect_column(stats_area, 0, 2, 5);
+    ui_draw_text(i18n_get("stats.total_playtime"), row1, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
     format_time(g->total_playtime, buf, sizeof(buf));
-    font_draw_string(250, 150, buf, 0xFFFFFFFF, 0.9f);
+    ui_draw_text(buf, row1, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
 
-    font_draw_string(40, 180, i18n_get("stats.sessions"), 0xFFAAAAAA, 0.9f);
-    snprintf(buf, sizeof(buf), "%lu", g->session_count);
-    font_draw_string(250, 180, buf, 0xFFFFFFFF, 0.9f);
+    // Sessions row
+    Rect row2 = rect_column(stats_area, 1, 2, 5);
+    ui_draw_text(i18n_get("stats.sessions"), row2, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
+    snprintf(buf, sizeof(buf), "%lu", (unsigned long)g->session_count);
+    ui_draw_text(buf, row2, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
 
-    font_draw_string(20, 260, i18n_get("ctrl.back"), 0xFF888888, 0.8f);
+    ui_draw_hint(i18n_get("ctrl.back"), 20, 255, COLOR_SUBTEXT);
 }
 
 static void game_details_destroy(void) {

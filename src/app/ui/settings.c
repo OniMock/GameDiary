@@ -1,42 +1,20 @@
 #include "app/ui/screen.h"
+#include "app/ui/ui_components.h"
+#include "app/ui/ui_layout.h"
 #include "app/i18n.h"
 #include "app/config/config.h"
 #include "app/render/renderer.h"
-#include "app/render/font.h"
 #include <pspctrl.h>
 #include <string.h>
-#include <stdio.h>
-#include <pspkernel.h>
-#include <pspiofilemgr.h>
 
-#define MAX_LANGS 16
-static char g_lang_list[MAX_LANGS][8];
-static int g_lang_count = 0;
 static int g_selection = 0;
 
-static void list_langs(void) {
-    g_lang_count = 0;
-    SceUID dfd = sceIoDopen("ms0:/PSP/COMMON/GameDiary/strings");
-    if (dfd >= 0) {
-        SceIoDirent entry;
-        while (sceIoDread(dfd, &entry) > 0 && g_lang_count < MAX_LANGS) {
-            if (!FIO_S_ISDIR(entry.d_stat.st_mode)) {
-                char *ext = strrchr(entry.d_name, '.');
-                if (ext && strcmp(ext, ".lang") == 0) {
-                    *ext = 0;
-                    strncpy(g_lang_list[g_lang_count++], entry.d_name, 7);
-                }
-            }
-        }
-        sceIoDclose(dfd);
-    }
-}
-
 static void settings_init(void) {
-    list_langs();
     const char* current = i18n_current_lang();
-    for (int i = 0; i < g_lang_count; i++) {
-        if (strcmp(g_lang_list[i], current) == 0) {
+    int count = i18n_get_lang_count();
+    for (int i = 0; i < count; i++) {
+        const LanguagePack* lp = i18n_get_lang_pack(i);
+        if (strcmp(lp->lang_code, current) == 0) {
             g_selection = i;
             break;
         }
@@ -45,20 +23,21 @@ static void settings_init(void) {
 
 static void settings_update(u32 buttons, u32 pressed) {
     (void)buttons;
+    int count = i18n_get_lang_count();
+    
     if (pressed & PSP_CTRL_UP) {
-        g_selection--;
-        if (g_selection < 0) g_selection = g_lang_count - 1;
+        g_selection = (g_selection - 1 + count) % count;
     }
     if (pressed & PSP_CTRL_DOWN) {
-        g_selection++;
-        if (g_selection >= g_lang_count) g_selection = 0;
+        g_selection = (g_selection + 1) % count;
     }
     if (pressed & PSP_CTRL_CROSS) {
-        // Apply language
-        if (i18n_load(g_lang_list[g_selection]) == 0) {
-            strncpy(config_get()->language, g_lang_list[g_selection], 7);
-            config_save();
-        }
+        const LanguagePack* lp = i18n_get_lang_pack(g_selection);
+        i18n_set_language(lp->lang_code);
+        
+        // Save to config
+        strncpy(config_get()->language, lp->lang_code, 7);
+        config_save();
     }
     if (pressed & PSP_CTRL_CIRCLE) {
         screen_manager_set(&g_screen_dashboard);
@@ -66,24 +45,38 @@ static void settings_update(u32 buttons, u32 pressed) {
 }
 
 static void settings_draw(void) {
-    renderer_clear(0xFF222222);
+    renderer_clear(COLOR_BG);
     
-    font_draw_string_centered(240, 40, i18n_get("menu.settings"), 0xFFFFFFFF, 1.2f);
+    Rect screen_rect = {0, 0, 480, 272};
+    Rect safe_rect = rect_padding(screen_rect, 20);
     
-    for (int i = 0; i < g_lang_count; i++) {
-        uint32_t color = (i == g_selection) ? 0xFF00FFFF : 0xFFCCCCCC;
-        char label[32];
-        if (strcmp(g_lang_list[i], i18n_current_lang()) == 0) {
-            snprintf(label, sizeof(label), "> %s", g_lang_list[i]);
-            color = 0xFF00FF00;
+    ui_draw_title(i18n_get("settings.language"), safe_rect);
+    
+    int count = i18n_get_lang_count();
+    Rect list_area = {60, 80, 360, 140};
+    
+    for (int i = 0; i < count; i++) {
+        const LanguagePack* lp = i18n_get_lang_pack(i);
+        Rect item_rect = rect_column(list_area, i, count, 5);
+        
+        if (i == g_selection) {
+            ui_draw_card(item_rect, COLOR_HIGHLIGHT, COLOR_ACCENT);
         } else {
-            snprintf(label, sizeof(label), "  %s", g_lang_list[i]);
+            ui_draw_card(item_rect, COLOR_CARD, COLOR_BORDER);
         }
-        font_draw_string(150, 80 + i * 25, label, color, 1.0f);
+        
+        uint32_t color = (i == g_selection) ? COLOR_ACCENT : COLOR_TEXT;
+        if (strcmp(lp->lang_code, i18n_current_lang()) == 0) {
+            // Current language indicator
+            ui_draw_text(lp->lang_name, rect_padding(item_rect, 5), color, 0.9f, ALIGN_LEFT);
+            ui_draw_text("(Active)", rect_padding(item_rect, 5), COLOR_SUBTEXT, 0.7f, ALIGN_RIGHT);
+        } else {
+            ui_draw_text(lp->lang_name, rect_padding(item_rect, 5), color, 0.9f, ALIGN_LEFT);
+        }
     }
     
-    font_draw_string(20, 250, i18n_get("ctrl.back"), 0xFF888888, 0.8f);
-    font_draw_string(400, 250, i18n_get("ctrl.select"), 0xFF888888, 0.8f);
+    ui_draw_hint(i18n_get("ctrl.back"), 20, 255, COLOR_SUBTEXT);
+    ui_draw_hint(i18n_get("ctrl.select"), 390, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_settings = {

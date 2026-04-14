@@ -1,56 +1,69 @@
 #include "app/ui/screen.h"
+#include "app/ui/ui_components.h"
+#include "app/ui/ui_layout.h"
 #include "app/i18n.h"
 #include "app/render/renderer.h"
-#include "app/render/font.h"
 #include "app/data/data_loader.h"
 #include "app/data/stats_calculator.h"
 #include <pspctrl.h>
 #include <stdio.h>
 
-static int g_tab = 0; // 0: 7d, 1: 30d, 2: All
-
 static void stats_init(void) {
-    g_tab = 0;
-    // Calculate 7 days ago timestamp
-    // Assuming simple seconds for now
-    u32 now = 0xFFFFFFFF; // Temporary hack until we have real time
-    data_calculate_stats(now - 7 * 24 * 3600, now);
-    stats_sort_by_period();
+    // Standard all-time stats
+    data_calculate_stats(0, 0xFFFFFFFF);
 }
 
 static void stats_update(u32 buttons, u32 pressed) {
     (void)buttons;
-    if (pressed & PSP_CTRL_LTRIGGER) {
-        g_tab = (g_tab + 2) % 3;
-    }
-    if (pressed & PSP_CTRL_RTRIGGER) {
-        g_tab = (g_tab + 1) % 3;
-    }
-    
     if (pressed & PSP_CTRL_CIRCLE) screen_manager_set(&g_screen_dashboard);
 }
 
+static void format_time(u32 seconds, char *out, size_t size) {
+    u32 h = seconds / 3600;
+    u32 m = (seconds % 3600) / 60;
+    snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
+}
+
 static void stats_draw(void) {
-    renderer_clear(0xFF101010);
+    renderer_clear(COLOR_BG);
     
-    // Tabs
-    const char* tabs[] = { i18n_get("top.week"), i18n_get("top.month"), i18n_get("top.all") };
-    for (int i = 0; i < 3; i++) {
-        uint32_t color = (i == g_tab) ? 0xFFFFFFFF : 0xFF555555;
-        font_draw_string(50 + i * 150, 40, tabs[i], color, 1.0f);
-    }
+    Rect screen_rect = {0, 0, 480, 272};
+    Rect safe_rect = rect_padding(screen_rect, 20);
     
-    renderer_draw_rect(20, 50, 440, 2, 0xFF333333);
+    ui_draw_title(i18n_get("menu.stats"), safe_rect);
     
+    u32 total_play = 0;
+    u32 total_sessions = 0;
     GameStats* games = data_get_games();
     u32 count = data_get_game_count();
     
-    for (u32 i = 0; i < 5 && i < count; i++) {
-        char rank[4];
-        snprintf(rank, sizeof(rank), "%lu.", i + 1);
-        font_draw_string(30, 80 + i * 35, rank, 0xFFAAAAAA, 0.9f);
-        font_draw_string(60, 80 + i * 35, games[i].entry.game_name, 0xFFFFFFFF, 1.0f);
+    for(u32 i=0; i<count; i++) {
+        total_play += games[i].total_playtime;
+        total_sessions += games[i].session_count;
     }
+    
+    // Stats Grid
+    Rect grid_area = {20, 80, 440, 160};
+    Rect play_rect = rect_column(grid_area, 0, 2, 10);
+    Rect session_rect = rect_column(grid_area, 1, 2, 10);
+    
+    // Playtime Card
+    ui_draw_card(play_rect, COLOR_CARD, COLOR_BORDER);
+    Rect p_cont = rect_padding(play_rect, 10);
+    ui_draw_text(i18n_get("stats.total_playtime"), rect_column(p_cont, 0, 2, 0), COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
+    char time_str[32];
+    format_time(total_play, time_str, sizeof(time_str));
+    ui_draw_text(time_str, rect_column(p_cont, 1, 2, 0), COLOR_TEXT, 1.2f, ALIGN_LEFT);
+    
+    // Sessions Card
+    ui_draw_card(session_rect, COLOR_CARD, COLOR_BORDER);
+    Rect s_cont = rect_padding(session_rect, 10);
+    ui_draw_text(i18n_get("stats.sessions"), rect_column(s_cont, 0, 2, 0), COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
+    char sess_str[16];
+    snprintf(sess_str, sizeof(sess_str), "%lu", (unsigned long)total_sessions);
+    ui_draw_text(sess_str, rect_column(s_cont, 1, 2, 0), COLOR_TEXT, 1.2f, ALIGN_LEFT);
+    
+    ui_draw_hint(i18n_get("ctrl.back"), 20, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_stats = {
