@@ -67,17 +67,17 @@ static void game_details_draw(void) {
     
     // Total Playtime row
     Rect row1 = rect_column(stats_area, 0, 2, 5);
-    ui_draw_text(i18n_get("stats.total_playtime"), row1, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), row1, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
     format_time(g->total_playtime, buf, sizeof(buf));
     ui_draw_text(buf, row1, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
 
     // Sessions row
     Rect row2 = rect_column(stats_area, 1, 2, 5);
-    ui_draw_text(i18n_get("stats.sessions"), row2, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_STATS_SESSIONS), row2, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
     snprintf(buf, sizeof(buf), "%lu", (unsigned long)g->session_count);
     ui_draw_text(buf, row2, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
 
-    ui_draw_hint(i18n_get("ctrl.back"), 20, 255, COLOR_SUBTEXT);
+    ui_draw_hint(i18n_get(MSG_CTRL_BACK), 20, 255, COLOR_SUBTEXT);
 }
 
 static void game_details_destroy(void) {

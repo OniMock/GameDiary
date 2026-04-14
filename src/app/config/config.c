@@ -10,8 +10,8 @@ static AppConfig g_config;
 int config_load(void) {
     SceUID fd = sceIoOpen(CONFIG_PATH, PSP_O_RDONLY, 0777);
     if (fd < 0) {
-        // Default settings
-        strncpy(g_config.language, "en", sizeof(g_config.language));
+        // Default settings: Auto-detect language
+        g_config.language = -1; 
         return config_save(); // Create with defaults
     }
 
@@ -19,7 +19,7 @@ int config_load(void) {
     sceIoClose(fd);
 
     if (res != sizeof(AppConfig)) {
-        strncpy(g_config.language, "en", sizeof(g_config.language));
+        g_config.language = -1;
         return -1;
     }
 

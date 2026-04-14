@@ -3,51 +3,71 @@
 
 #include <psptypes.h>
 
-typedef struct {
-    u32 key_hash;
-    const char* value;
-} TranslationEntry;
+/**
+ * @file i18n.h
+ * @brief Internationalization system using indexed enums for performance.
+ */
 
-typedef struct {
-    const char* lang_code;
-    const char* lang_name;
-    const TranslationEntry* entries;
-    int count;
-} LanguagePack;
+typedef enum {
+    LANG_EN = 0,
+    LANG_PT,
+    LANG_ES,
+    
+    LANG_COUNT,
+    LANG_AUTO = -1
+} LanguageId;
 
-extern LanguagePack g_lang_en;
-extern LanguagePack g_lang_pt;
-extern LanguagePack g_lang_es;
+typedef enum {
+    MSG_APP_TITLE = 0,
+    MSG_MENU_DASHBOARD,
+    MSG_MENU_STATS,
+    MSG_MENU_GAMES,
+    MSG_MENU_SETTINGS,
+    MSG_STATS_TOTAL_PLAYTIME,
+    MSG_STATS_SESSIONS,
+    MSG_STATS_LAST_PLAYED,
+    MSG_MENU_GAMES_PRESS_X,
+    MSG_CTRL_BACK,
+    MSG_CTRL_SELECT,
+    MSG_SETTINGS_LANGUAGE,
+    MSG_TOP_WEEK,
+    MSG_TOP_MONTH,
+    MSG_TOP_ALL,
+    MSG_ERROR_NO_GAMES,
+
+    MSG_COUNT
+} MessageId;
 
 /**
- * Initialize the i18n system with a language code.
+ * Global message pointer for direct access.
+ * Usage: g_i18n_msg[MSG_APP_TITLE]
  */
-void i18n_init(const char* lang_code);
+extern const char **g_i18n_msg;
 
 /**
- * Switch the active language at runtime.
+ * Initialize the i18n system.
+ * @param force_lang Language index to use, or LANG_AUTO to use system setting.
  */
-void i18n_set_language(const char* lang_code);
+void i18n_init(int force_lang);
 
 /**
- * Get a translated string for a key.
- * If not found, returns the key itself.
+ * Change language at runtime.
  */
-const char* i18n_get(const char* key);
+void i18n_set_language(int lang_index);
 
 /**
- * Get the current language code.
+ * Get translated string with optional safety checks.
  */
-const char* i18n_current_lang(void);
+const char* i18n_get(MessageId id);
 
 /**
- * Get the total number of supported languages.
+ * Get the current language index.
  */
-int i18n_get_lang_count(void);
+int i18n_current_lang(void);
 
 /**
- * Get a language pack by index for selection menus.
+ * Get the language name by index (e.g., "English").
  */
-const LanguagePack* i18n_get_lang_pack(int index);
+const char* i18n_get_lang_name(int index);
 
 #endif // GAMEDIARY_I18N_H

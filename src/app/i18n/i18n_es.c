@@ -2,27 +2,20 @@
 
 // Using ISO-8859-1 escape sequences to ensure compatibility with ltn8.pgf
 // í = \xed, ñ = \xf1, á = \xe1, ó = \xf3, ú = \xfa
-static const TranslationEntry es_entries[] = {
-    {0, "Diario de Juego"},
-    {0, "Inicio"},
-    {0, "Estad\xedsticas"},
-    {0, "Juegos"},
-    {0, "Ajustes"},
-    {0, "Tiempo Total"},
-    {0, "Sesiones"},
-    {0, "\xdaltimo Juego"},
-    {0, "Presione X para ver juegos"},
-    {0, "Volver"},
-    {0, "Seleccionar"},
-    {0, "Idioma"},
-    {0, "Semana"},
-    {0, "Mes"},
-    {0, "Siempre"}
-};
-
-LanguagePack g_lang_es = {
-    "es",
-    "Espa\xf1ol",
-    es_entries,
-    sizeof(es_entries) / sizeof(TranslationEntry)
+const char* g_lang_es_entries[MSG_COUNT] = {
+    [MSG_APP_TITLE]            = "Diario de Juego",
+    [MSG_MENU_DASHBOARD]       = "Inicio",
+    [MSG_MENU_STATS]           = "Estad\xedsticas",
+    [MSG_MENU_GAMES]           = "Juegos",
+    [MSG_MENU_SETTINGS]        = "Ajustes",
+    [MSG_STATS_TOTAL_PLAYTIME] = "Tiempo Total",
+    [MSG_STATS_SESSIONS]       = "Sesiones",
+    [MSG_STATS_LAST_PLAYED]    = "\xdaltimo Juego",
+    [MSG_MENU_GAMES_PRESS_X]   = "Presione X para ver juegos",
+    [MSG_CTRL_BACK]            = "Voltar",
+    [MSG_CTRL_SELECT]          = "Seleccionar",
+    [MSG_SETTINGS_LANGUAGE]    = "Idioma",
+    [MSG_TOP_WEEK]             = "Semana",
+    [MSG_TOP_MONTH]            = "Mes",
+    [MSG_TOP_ALL]              = "Siempre"
 };

@@ -32,7 +32,7 @@ static void dashboard_draw(void) {
     Rect safe_rect = rect_padding(screen_rect, 20);
     
     // Header
-    ui_draw_title(i18n_get("app.title"), safe_rect);
+    ui_draw_title(i18n_get(MSG_APP_TITLE), safe_rect);
     
     // Summary Card (Center)
     Rect card_rect = {40, 70, 400, 110};
@@ -42,7 +42,7 @@ static void dashboard_draw(void) {
     Rect label_rect = rect_column(card_content, 0, 2, 0);
     Rect value_rect = rect_column(card_content, 1, 2, 0);
     
-    ui_draw_text(i18n_get("stats.total_playtime"), label_rect, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), label_rect, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
     
     u32 total_play = 0;
     GameStats* games = data_get_games();
@@ -54,7 +54,7 @@ static void dashboard_draw(void) {
     ui_draw_text(time_str, value_rect, COLOR_TEXT, 1.6f, ALIGN_LEFT);
     
     // Interaction Hint
-    ui_draw_text(i18n_get("menu.games_press_x"), (Rect){0, 190, 480, 30}, COLOR_TEXT, 0.9f, ALIGN_CENTER);
+    ui_draw_text(i18n_get(MSG_MENU_GAMES_PRESS_X), (Rect){0, 190, 480, 30}, COLOR_TEXT, 0.9f, ALIGN_CENTER);
     
     // Footer Hints
     ui_draw_hint("[L] Settings", 20, 255, COLOR_SUBTEXT);

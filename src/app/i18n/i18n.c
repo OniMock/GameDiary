@@ -1,101 +1,88 @@
 #include "app/i18n.h"
-#include <string.h>
-#include <stdlib.h>
+#include <psputility.h>
+#include <stddef.h>
 
-/* --- Static Repository of Keys --- */
+/* --- External Language Arrays --- */
+extern const char* g_lang_en_entries[MSG_COUNT];
+extern const char* g_lang_pt_entries[MSG_COUNT];
+extern const char* g_lang_es_entries[MSG_COUNT];
 
-static const char* i18n_keys[] = {
-    "app.title",
-    "menu.dashboard",
-    "menu.stats",
-    "menu.games",
-    "menu.settings",
-    "stats.total_playtime",
-    "stats.sessions",
-    "stats.last_played",
-    "menu.games_press_x",
-    "ctrl.back",
-    "ctrl.select",
-    "settings.language",
-    "top.week",
-    "top.month",
-    "top.all"
+/* --- Global Pointer --- */
+const char **g_i18n_msg = NULL;
+
+/* --- Language Pack Registry --- */
+typedef struct {
+    const char* name;
+    const char** entries;
+} LanguageRegistry;
+
+static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
+    [LANG_EN] = { "English",   g_lang_en_entries },
+    [LANG_PT] = { "Portugu\xeas", g_lang_pt_entries },
+    [LANG_ES] = { "Espa\xf1ol",  g_lang_es_entries }
 };
 
-#define ENTRY_COUNT (sizeof(i18n_keys) / sizeof(i18n_keys[0]))
+static int g_current_lang_idx = LANG_EN;
 
-static const LanguagePack* g_languages[] = {
-    &g_lang_en,
-    &g_lang_pt,
-    &g_lang_es
-};
+/* --- Private Functions --- */
 
-static const LanguagePack* g_current_pack = NULL;
-static const int g_lang_count = 3;
-
-/* --- Logic --- */
-
-static u32 i18n_hash(const char *str) {
-    u32 hash = 5381;
-    int c;
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c;
-    return hash;
-}
-
-// Internal helper to populate hashes in the packs once
-static void i18n_initialize_packs(void) {
-    static int initialized = 0;
-    if (initialized) return;
-
-    for (int l = 0; l < g_lang_count; l++) {
-        LanguagePack* lp = (LanguagePack*)g_languages[l];
-        for (int i = 0; i < lp->count; i++) {
-            ((TranslationEntry*)lp->entries)[i].key_hash = i18n_hash(i18n_keys[i]);
-        }
+static int i18n_detect_system_lang(void) {
+    int lang = 1; // Default to English (1)
+    if (sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &lang) < 0) {
+        return LANG_EN;
     }
-    initialized = 1;
-}
 
-void i18n_init(const char* lang_code) {
-    i18n_initialize_packs();
-    i18n_set_language(lang_code);
-}
-
-void i18n_set_language(const char* lang_code) {
-    for (int i = 0; i < g_lang_count; i++) {
-        if (strcmp(g_languages[i]->lang_code, lang_code) == 0) {
-            g_current_pack = g_languages[i];
-            return;
-        }
+    switch (lang) {
+        case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
+            return LANG_PT;
+        case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
+            return LANG_ES;
+        case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
+        default:
+            return LANG_EN;
     }
-    // Fallback if not found
-    g_current_pack = g_languages[0];
 }
 
-const char* i18n_get(const char* key) {
-    if (!g_current_pack) return key;
+/* --- Public API --- */
 
-    u32 h = i18n_hash(key);
-    for (int i = 0; i < g_current_pack->count; i++) {
-        if (g_current_pack->entries[i].key_hash == h) {
-            return g_current_pack->entries[i].value;
-        }
+void i18n_init(int force_lang) {
+    int target_lang = force_lang;
+
+    if (target_lang == LANG_AUTO) {
+        target_lang = i18n_detect_system_lang();
     }
-    return key;
-}
 
-const char* i18n_current_lang(void) {
-    return g_current_pack ? g_current_pack->lang_code : "en";
-}
-
-int i18n_get_lang_count(void) {
-    return g_lang_count;
-}
-
-const LanguagePack* i18n_get_lang_pack(int index) {
-    if (index >= 0 && index < g_lang_count) {
-        return g_languages[index];
+    // Bounds check
+    if (target_lang < 0 || target_lang >= LANG_COUNT) {
+        target_lang = LANG_EN;
     }
-    return NULL;
+
+    i18n_set_language(target_lang);
+}
+
+void i18n_set_language(int lang_index) {
+    if (lang_index < 0 || lang_index >= LANG_COUNT) {
+        lang_index = LANG_EN;
+    }
+
+    g_current_lang_idx = lang_index;
+    g_i18n_msg = g_lang_registry[lang_index].entries;
+}
+
+const char* i18n_get(MessageId id) {
+    if (id < 0 || id >= MSG_COUNT || !g_i18n_msg) {
+        return "<?>";
+    }
+    return g_i18n_msg[id];
+}
+
+int i18n_current_lang(void) {
+    return g_current_lang_idx;
+}
+
+const char* i18n_get_lang_name(int index) {
+    if (index < 0 || index >= LANG_COUNT) {
+        return "Unknown";
+    }
+    return g_lang_registry[index].name;
 }

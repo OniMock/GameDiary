@@ -30,7 +30,7 @@ static void stats_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
     
-    ui_draw_title(i18n_get("menu.stats"), safe_rect);
+    ui_draw_title(i18n_get(MSG_MENU_STATS), safe_rect);
     
     u32 total_play = 0;
     u32 total_sessions = 0;
@@ -50,7 +50,7 @@ static void stats_draw(void) {
     // Playtime Card
     ui_draw_card(play_rect, COLOR_CARD, COLOR_BORDER);
     Rect p_cont = rect_padding(play_rect, 10);
-    ui_draw_text(i18n_get("stats.total_playtime"), rect_column(p_cont, 0, 2, 0), COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), rect_column(p_cont, 0, 2, 0), COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
     char time_str[32];
     format_time(total_play, time_str, sizeof(time_str));
     ui_draw_text(time_str, rect_column(p_cont, 1, 2, 0), COLOR_TEXT, 1.2f, ALIGN_LEFT);
@@ -58,12 +58,12 @@ static void stats_draw(void) {
     // Sessions Card
     ui_draw_card(session_rect, COLOR_CARD, COLOR_BORDER);
     Rect s_cont = rect_padding(session_rect, 10);
-    ui_draw_text(i18n_get("stats.sessions"), rect_column(s_cont, 0, 2, 0), COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_STATS_SESSIONS), rect_column(s_cont, 0, 2, 0), COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
     char sess_str[16];
     snprintf(sess_str, sizeof(sess_str), "%lu", (unsigned long)total_sessions);
     ui_draw_text(sess_str, rect_column(s_cont, 1, 2, 0), COLOR_TEXT, 1.2f, ALIGN_LEFT);
     
-    ui_draw_hint(i18n_get("ctrl.back"), 20, 255, COLOR_SUBTEXT);
+    ui_draw_hint(i18n_get(MSG_CTRL_BACK), 20, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_stats = {

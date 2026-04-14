@@ -1,26 +1,20 @@
 #include "app/i18n.h"
 
-static const TranslationEntry en_entries[] = {
-    {0, "Game Diary"},
-    {0, "Dashboard"},
-    {0, "Statistics"},
-    {0, "Games"},
-    {0, "Settings"},
-    {0, "Total Playtime"},
-    {0, "Sessions"},
-    {0, "Last Played"},
-    {0, "Press X to view games"},
-    {0, "Back"},
-    {0, "Select"},
-    {0, "Language"},
-    {0, "Week"},
-    {0, "Month"},
-    {0, "All Time"}
-};
-
-LanguagePack g_lang_en = {
-    "en",
-    "English",
-    en_entries,
-    sizeof(en_entries) / sizeof(TranslationEntry)
+const char* g_lang_en_entries[MSG_COUNT] = {
+    [MSG_APP_TITLE]            = "Game Diary",
+    [MSG_MENU_DASHBOARD]       = "Dashboard",
+    [MSG_MENU_STATS]           = "Statistics",
+    [MSG_MENU_GAMES]           = "Games",
+    [MSG_MENU_SETTINGS]        = "Settings",
+    [MSG_STATS_TOTAL_PLAYTIME] = "Total Playtime",
+    [MSG_STATS_SESSIONS]       = "Sessions",
+    [MSG_STATS_LAST_PLAYED]    = "Last Played",
+    [MSG_MENU_GAMES_PRESS_X]   = "Press X to view games",
+    [MSG_CTRL_BACK]            = "Back",
+    [MSG_CTRL_SELECT]          = "Select",
+    [MSG_SETTINGS_LANGUAGE]    = "Language",
+    [MSG_TOP_WEEK]             = "Week",
+    [MSG_TOP_MONTH]            = "Month",
+    [MSG_TOP_ALL]              = "All Time",
+    [MSG_ERROR_NO_GAMES]       = "No games found"
 };

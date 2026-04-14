@@ -54,13 +54,13 @@ static void game_list_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
     
-    ui_draw_title(i18n_get("menu.games"), safe_rect);
+    ui_draw_title(i18n_get(MSG_MENU_GAMES), safe_rect);
 
     GameStats* games = data_get_games();
     u32 count = data_get_game_count();
 
     if (count == 0) {
-        ui_draw_text("No games found", (Rect){0, 136, 480, 20}, COLOR_SUBTEXT, 1.0f, ALIGN_CENTER);
+        ui_draw_text(i18n_get(MSG_ERROR_NO_GAMES), (Rect){0, 136, 480, 20}, COLOR_SUBTEXT, 1.0f, ALIGN_CENTER);
         return;
     }
 
@@ -86,8 +86,8 @@ static void game_list_draw(void) {
         ui_draw_text(time_str, content, color, 0.7f, ALIGN_RIGHT);
     }
 
-    ui_draw_hint(i18n_get("ctrl.back"), 20, 255, COLOR_SUBTEXT);
-    ui_draw_hint(i18n_get("ctrl.select"), 390, 255, COLOR_SUBTEXT);
+    ui_draw_hint(i18n_get(MSG_CTRL_BACK), 20, 255, COLOR_SUBTEXT);
+    ui_draw_hint(i18n_get(MSG_CTRL_SELECT), 390, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_game_list = {
