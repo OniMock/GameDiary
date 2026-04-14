@@ -12,6 +12,7 @@
 #define COLOR_SUBTEXT   0xFFAAAAAA
 #define COLOR_ACCENT    0xFFFFB020 // Soft Orange
 #define COLOR_HIGHLIGHT 0xFF3A3A3A
+#define COLOR_SUCCESS   0xFF20B020 // Green for active items
 
 typedef enum {
     ALIGN_LEFT,

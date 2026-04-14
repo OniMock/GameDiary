@@ -35,6 +35,8 @@ typedef enum {
     MSG_TOP_MONTH,
     MSG_TOP_ALL,
     MSG_ERROR_NO_GAMES,
+    MSG_CTRL_L,
+    MSG_CTRL_R,
 
     MSG_COUNT
 } MessageId;

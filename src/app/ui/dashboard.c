@@ -14,8 +14,8 @@ static void dashboard_init(void) {
 
 static void dashboard_update(u32 buttons, u32 pressed) {
     (void)buttons;
-    if (pressed & PSP_CTRL_RTRIGGER) screen_manager_set(&g_screen_stats);
-    if (pressed & PSP_CTRL_LTRIGGER) screen_manager_set(&g_screen_settings);
+    if (pressed & PSP_CTRL_RTRIGGER) screen_manager_set(&g_screen_settings);
+    if (pressed & PSP_CTRL_LTRIGGER) screen_manager_set(&g_screen_stats);
     if (pressed & PSP_CTRL_CROSS)    screen_manager_set(&g_screen_game_list);
 }
 

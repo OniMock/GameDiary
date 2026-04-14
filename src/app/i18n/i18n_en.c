@@ -15,6 +15,8 @@ const char *g_lang_en_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK] = "Week",
     [MSG_TOP_MONTH] = "Month",
     [MSG_TOP_ALL] = "All Time",
-    [MSG_ERROR_NO_GAMES] = "No games found"
+    [MSG_ERROR_NO_GAMES] = "No games found",
+    [MSG_CTRL_L] = "[L] Settings",
+    [MSG_CTRL_R] = "Stats [R]",
 
   };

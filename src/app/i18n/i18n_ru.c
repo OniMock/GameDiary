@@ -16,5 +16,7 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK]             = "Неделя",
     [MSG_TOP_MONTH]            = "Месяц",
     [MSG_TOP_ALL]              = "Все время",
-    [MSG_ERROR_NO_GAMES]       = "Игры не найдены"
+    [MSG_ERROR_NO_GAMES]       = "Игры не найдены",
+    [MSG_CTRL_L] = "[L] Настройки",
+    [MSG_CTRL_R] = "Статистика [R]",
 };

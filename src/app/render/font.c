@@ -9,7 +9,7 @@
  * Our SDF renderer takes an explicit pixel height.
  * Calibrated by testing: 1.0f intraFont ≈ 10 screen pixels.
  */
-#define INTRAFONT_SCALE_TO_PX(s) ((s) * 18.0f)
+#define INTRAFONT_SCALE_TO_PX(s) ((s) * 16.5f)
 
 int font_init(void) {
     return sdf_font_init();
