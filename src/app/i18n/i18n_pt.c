@@ -14,6 +14,6 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_CTRL_SELECT]          = "Selecionar",
     [MSG_SETTINGS_LANGUAGE]    = "Idioma",
     [MSG_TOP_WEEK]             = "Semana",
-    [MSG_TOP_MONTH]            = "M\xeas",
+    [MSG_TOP_MONTH]            = "Mês",
     [MSG_TOP_ALL]              = "Sempre"
 };
