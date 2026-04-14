@@ -8,12 +8,6 @@
 #include <malloc.h>
 #include <string.h>
 
-#define MAX_CACHED_TEXTURES 32
-static struct {
-    char id[16];
-    Texture* tex;
-} g_texture_cache[MAX_CACHED_TEXTURES];
-static int g_cache_count = 0;
 
 static int get_next_power_of_two(int n) {
     int x = 1;
@@ -54,7 +48,6 @@ Texture* texture_load_png(const char* filename) {
 
     int width = png_get_image_width(png_ptr, info_ptr);
     int height = png_get_image_height(png_ptr, info_ptr);
-    int color_type = png_get_color_type(png_ptr, info_ptr);
 
     Texture* texture = (Texture*)malloc(sizeof(Texture));
     texture->width = width;
@@ -63,11 +56,11 @@ Texture* texture_load_png(const char* filename) {
     texture->textureHeight = get_next_power_of_two(height);
 
     texture->data = memalign(16, texture->textureWidth * texture->textureHeight * 4);
-    
+
     int channels = png_get_channels(png_ptr, info_ptr);
-    
+
     png_bytep* row_pointers = png_get_rows(png_ptr, info_ptr);
-    
+
     uint32_t* data_ptr = (uint32_t*)texture->data;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -83,7 +76,7 @@ Texture* texture_load_png(const char* filename) {
 
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     fclose(fp);
-    
+
     sceKernelDcacheWritebackAll();
     return texture;
 }
@@ -103,7 +96,7 @@ void texture_draw(Texture* tex, int x, int y, int w, int h) {
     sceGuTexFilter(GU_LINEAR, GU_LINEAR);
 
     struct Vertex* vertices = (struct Vertex*)sceGuGetMemory(2 * sizeof(struct Vertex));
-    
+
     vertices[0].u = 0;
     vertices[0].v = 0;
     vertices[0].color = 0xFFFFFFFF;
