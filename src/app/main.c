@@ -1,22 +1,70 @@
-/**
- * @file main.c
- * @brief App entry point stub — placeholder for future GameDiary user-mode app.
- *
- * This file will eventually contain the UI, configuration viewer, and session
- * statistics display. For now it is intentionally minimal so the modular
- * directory structure is ready to receive future development.
- *
- * The app will read data produced by the plugin (PRX) via the common storage
- * layer (common/storage.h) — no kernel-only APIs are required here.
- */
-
 #include "common/common.h"
 #include "common/storage.h"
+#include "app/i18n.h"
+#include "app/config/config.h"
+#include "app/render/renderer.h"
+#include "app/render/font.h"
+#include "app/ui/screen.h"
+#include "app/data/data_loader.h"
+#include <pspkernel.h>
+#include <pspctrl.h>
 
-PSP_MODULE_INFO("GameDiaryApp", 0x0000, 1, 0);
+PSP_MODULE_INFO("GameDiaryApp", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
 
+int exit_callback(int arg1, int arg2, void *common) {
+    (void)arg1; (void)arg2; (void)common;
+    sceKernelExitGame();
+    return 0;
+}
+
+int callback_thread(SceSize args, void *argp) {
+    (void)args; (void)argp;
+    int cbid = sceKernelCreateCallback("Exit Callback", exit_callback, NULL);
+    sceKernelRegisterExitCallback(cbid);
+    sceKernelSleepThreadCB();
+    return 0;
+}
+
+void setup_callbacks() {
+    int thid = sceKernelCreateThread("update_thread", callback_thread, 0x11, 0xFA0, 0, 0);
+    if (thid >= 0) sceKernelStartThread(thid, 0, 0);
+}
+
 int main(void) {
-  /* TODO: initialize display, load session data, render stats. */
-  return 0;
+    setup_callbacks();
+    
+    // 1. Rendering (Initialize as early as possible)
+    renderer_init();
+    font_init();
+    
+    // 2. Storage & Config
+    storage_init("ms0:/PSP/COMMON/GameDiary");
+    config_load();
+    
+    // 3. Internationalization
+    i18n_init(config_get()->language);
+    
+    // 4. Data
+    data_load_all();
+    
+    // 5. UI Initialization
+    screen_manager_set(&g_screen_dashboard);
+    
+    // 6. Main Loop
+    while (1) {
+        renderer_start_frame();
+        
+        screen_manager_update();
+        screen_manager_draw();
+        
+        renderer_end_frame();
+    }
+    
+    // Cleanup (never reached in this loop, but good practice)
+    font_cleanup();
+    i18n_cleanup();
+    data_free();
+    
+    return 0;
 }

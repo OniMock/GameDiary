@@ -1,0 +1,16 @@
+app.title=Diário de Jogos
+menu.dashboard=Painel
+menu.stats=Estatísticas
+menu.games=Jogos
+menu.settings=Configurações
+menu.games_press_x=Pressione X para ver os Jogos
+
+stats.total_playtime=Tempo Total de Jogo
+stats.sessions=Sessões
+
+top.week=Top 7 Dias
+top.month=Top 30 Dias
+top.all=Tudo
+
+ctrl.back=O Voltar
+ctrl.select=X Selecionar
