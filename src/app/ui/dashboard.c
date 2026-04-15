@@ -10,6 +10,7 @@
 
 static void dashboard_init(void) {
     data_calculate_stats(0, 0xFFFFFFFF);
+    ui_reset_graph_animation();
 }
 
 static void dashboard_update(u32 buttons, u32 pressed) {

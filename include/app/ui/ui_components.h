@@ -46,4 +46,9 @@ void ui_draw_title(const char* text, Rect r);
  */
 void ui_draw_weekly_graph(SessionEntry* sessions, int count);
 
+/**
+ * Resets the graph animation state so it plays again on next redraw.
+ */
+void ui_reset_graph_animation(void);
+
 #endif // GAMEDIARY_UI_COMPONENTS_H

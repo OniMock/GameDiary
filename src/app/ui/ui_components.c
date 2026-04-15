@@ -108,7 +108,7 @@ void ui_draw_weekly_graph(SessionEntry* sessions, int count) {
         float target_h = ((float)day_playtime[idx] / max_time) * gh;
         
         // Simple animation state (could use a timer, but this frame-based approach is common in homebrew)
-        g_graph_anim[idx] += (target_h - g_graph_anim[idx]) * 0.15f;
+        g_graph_anim[idx] += (target_h - g_graph_anim[idx]) * 0.07f;
         
         int x = gx + i * (bar_w + spacing);
         int h = (int)g_graph_anim[idx];
@@ -142,4 +142,8 @@ void ui_draw_weekly_graph(SessionEntry* sessions, int count) {
         Rect label_rect = {x, gy + 8, bar_w, 20};
         ui_draw_text(day_name, label_rect, label_color, 0.7f, ALIGN_CENTER);
     }
+}
+
+void ui_reset_graph_animation(void) {
+    memset(g_graph_anim, 0, sizeof(g_graph_anim));
 }
