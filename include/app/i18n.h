@@ -38,6 +38,16 @@ typedef enum {
     MSG_CTRL_L,
     MSG_CTRL_R,
 
+    MSG_DAY_SUN,
+    MSG_DAY_MON,
+    MSG_DAY_TUE,
+    MSG_DAY_WED,
+    MSG_DAY_THU,
+    MSG_DAY_FRI,
+    MSG_DAY_SAT,
+
+    MSG_STATS_NO_ACTIVITY,
+
     MSG_COUNT
 } MessageId;
 

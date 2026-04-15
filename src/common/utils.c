@@ -1,5 +1,6 @@
 #include "common/utils.h"
 #include <pspkernel.h>
+#include <psprtc.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -15,6 +16,14 @@ u32 hash_string(const char *str) {
 // Safely read a 32-bit little-endian value from a potentially unaligned buffer
 u32 utils_get_u32_le(const u8 *p) {
   return p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24);
+}
+
+u32 utils_get_timestamp(void) {
+  u64 tick;
+  sceRtcGetCurrentTick(&tick);
+  // tick is microseconds since 0001-01-01.
+  // UNIX epoch is 1970-01-01. Difference is roughly 62135596800 seconds.
+  return (u32)((tick / 1000000ULL) - 62135596800ULL);
 }
 
 // Helper to copy a file

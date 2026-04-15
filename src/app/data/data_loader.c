@@ -72,6 +72,9 @@ void data_calculate_stats(u32 start_ts, u32 end_ts) {
 u32 data_get_game_count(void) { return g_game_count; }
 GameStats* data_get_games(void) { return g_games; }
 
+u32 data_get_session_count(void) { return g_session_count; }
+SessionEntry* data_get_sessions(void) { return g_sessions; }
+
 void data_free(void) {
     if (g_games) free(g_games);
     if (g_sessions) free(g_sessions);

@@ -1,7 +1,7 @@
 #include "common/storage.h"
 #include "common/db_schema.h"
 #include "common/utils.h"
-#ifdef GDIARY_PLUGIN
+#if defined(GDIARY_PLUGIN) && !defined(GDIARY_APP)
 #include "plugin/icon_capture.h"
 #endif
 
@@ -322,7 +322,7 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
       *uid = new_game.uid;
       add_to_cache(&new_game); // Success! Add to cache now.
 
-#ifdef GDIARY_PLUGIN
+#if defined(GDIARY_PLUGIN) && !defined(GDIARY_APP)
       /* Capture icon using the stored base dir (no sctrl needed here). */
       char source_dir[160];
       snprintf(source_dir, sizeof(source_dir), "%s/source", g_base_dir);

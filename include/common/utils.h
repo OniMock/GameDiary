@@ -28,4 +28,18 @@ int utils_extract_pbp_icon(const char *pbp_path, const char *dst);
  */
 u32 utils_get_u32_le(const u8 *p);
 
+/**
+ * @brief Gets the current UNIX timestamp using the PSP RTC.
+ * Syncs app and plugin time logic.
+ */
+u32 utils_get_timestamp(void);
+
+#ifdef GDIARY_PLUGIN
+/**
+ * @brief Captures/extracts a game icon to the destination directory.
+ * Only available in Plugin context.
+ */
+void utils_capture_icon(const char *game_id, u8 category, const char *dest_dir, const char *executable_path);
+#endif
+
 #endif // _COMMON_UTILS_H_

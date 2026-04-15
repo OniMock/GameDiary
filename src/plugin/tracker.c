@@ -1,5 +1,6 @@
 #include "plugin/tracker.h"
 #include "common/common.h"
+#include "common/utils.h"
 #include "plugin/detector.h"
 #include "common/storage.h"
 #include <psppower.h>
@@ -15,18 +16,6 @@ static SceOff current_session_offset = -1;
 static volatile int is_suspended = 1; // Start suspended until detector confirms
 static u32 current_game_uid = 0;
 
-u32 get_current_timestamp(void);
-
-// UNIX timestamp via RTC
-u32 get_current_timestamp(void) {
-  u64 tick;
-  sceRtcGetCurrentTick(&tick);
-  // tick is microseconds since 0001-01-01.
-  // UNIX epoch is 1970-01-01. Difference is roughly 62135596800 seconds.
-  u32 ts = (u32)((tick / 1000000ULL) - 62135596800ULL);
-  return ts;
-}
-
 static int power_callback(int unknown, int power_info, void *arg) {
   (void)unknown;
   (void)arg;
@@ -36,7 +25,7 @@ static int power_callback(int unknown, int power_info, void *arg) {
     if (pending_seconds > 0 && current_game_uid > 0) {
       session_total_seconds += pending_seconds;
       storage_log_session(current_game_uid, session_total_seconds,
-                             get_current_timestamp(), &current_session_offset);
+                             utils_get_timestamp(), &current_session_offset);
       pending_seconds = 0;
     }
     is_suspended = 1;
@@ -95,7 +84,7 @@ static int tracker_thread_main(SceSize args, void *argp) {
         if (current_game_uid > 0) {
           session_total_seconds += pending_seconds;
           storage_log_session(current_game_uid, session_total_seconds,
-                                 get_current_timestamp(), &current_session_offset);
+                                 utils_get_timestamp(), &current_session_offset);
         }
         pending_seconds = 0;
       }
@@ -119,7 +108,7 @@ void tracker_thread_stop(void) {
   if (pending_seconds > 0 && current_game_uid > 0) {
     session_total_seconds += pending_seconds;
     storage_log_session(current_game_uid, session_total_seconds,
-                           get_current_timestamp(), &current_session_offset);
+                           utils_get_timestamp(), &current_session_offset);
     pending_seconds = 0;
   }
 }

@@ -32,6 +32,9 @@ void data_calculate_stats(u32 start_ts, u32 end_ts);
 u32 data_get_game_count(void);
 GameStats* data_get_games(void);
 
+u32 data_get_session_count(void);
+SessionEntry* data_get_sessions(void);
+
 /**
  * @brief Frees loaded data resources.
  */

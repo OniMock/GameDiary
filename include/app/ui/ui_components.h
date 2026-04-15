@@ -3,6 +3,7 @@
 
 #include <psptypes.h>
 #include "app/ui/ui_layout.h"
+#include "common/db_schema.h"
 
 // Theme Colors (ARGB)
 #define COLOR_BG        0xFF0F0F0F
@@ -39,5 +40,10 @@ void ui_draw_hint(const char* text, int x, int y, u32 color);
  * Draws a section title with underline.
  */
 void ui_draw_title(const char* text, Rect r);
+
+/**
+ * Draws an animated weekly activity graph.
+ */
+void ui_draw_weekly_graph(SessionEntry* sessions, int count);
 
 #endif // GAMEDIARY_UI_COMPONENTS_H

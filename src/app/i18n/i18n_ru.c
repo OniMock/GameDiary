@@ -19,4 +19,14 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_ERROR_NO_GAMES]       = "Игры не найдены",
     [MSG_CTRL_L] = "Настройки",
     [MSG_CTRL_R] = "Статистика",
+
+    [MSG_DAY_SUN] = "В",
+    [MSG_DAY_MON] = "П",
+    [MSG_DAY_TUE] = "В",
+    [MSG_DAY_WED] = "С",
+    [MSG_DAY_THU] = "Ч",
+    [MSG_DAY_FRI] = "П",
+    [MSG_DAY_SAT] = "С",
+
+    [MSG_STATS_NO_ACTIVITY] = "Нет активности",
 };

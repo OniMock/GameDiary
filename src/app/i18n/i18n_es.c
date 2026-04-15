@@ -20,4 +20,14 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_TOP_ALL]              = "Siempre",
     [MSG_CTRL_L] = "Ajustes",
     [MSG_CTRL_R] = "Estadísticas",
+
+    [MSG_DAY_SUN] = "D",
+    [MSG_DAY_MON] = "L",
+    [MSG_DAY_TUE] = "M",
+    [MSG_DAY_WED] = "M",
+    [MSG_DAY_THU] = "J",
+    [MSG_DAY_FRI] = "V",
+    [MSG_DAY_SAT] = "S",
+
+    [MSG_STATS_NO_ACTIVITY] = "Sin actividad reciente",
 };
