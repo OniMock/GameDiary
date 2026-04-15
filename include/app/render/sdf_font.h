@@ -33,6 +33,11 @@ void sdf_font_draw_string(float x, float y, const char *str, uint32_t color, flo
 void sdf_font_draw_string_centered(float x, float y, const char *str, uint32_t color, float size);
 
 /**
+ * Calculate total width of string in pixels.
+ */
+float sdf_font_get_width(const char *str, float size);
+
+/**
  * Cleanup SDF font resources.
  */
 void sdf_font_cleanup(void);

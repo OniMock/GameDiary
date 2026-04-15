@@ -23,8 +23,7 @@ void ui_draw_text(const char* text, Rect r, u32 color, float size, UIAlign align
             font_draw_string_centered(r.x + (r.w / 2.0f), y_pos, text, color, size);
             break;
         case ALIGN_RIGHT:
-            // Right align not implemented in font.h, fallback to left for now or just skip
-            font_draw_string(r.x + r.w - 100, y_pos, text, color, size); 
+            font_draw_string(r.x + r.w - font_get_width(text, size), y_pos, text, color, size); 
             break;
     }
 }

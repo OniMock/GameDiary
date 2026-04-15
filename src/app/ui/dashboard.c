@@ -27,38 +27,48 @@ static void format_time(u32 seconds, char *out, size_t size) {
 
 static void dashboard_draw(void) {
     renderer_clear(COLOR_BG);
-    
+
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
-    
+
     // Header
     ui_draw_title(i18n_get(MSG_APP_TITLE), safe_rect);
-    
+
     // Summary Card (Center)
     Rect card_rect = {40, 70, 400, 110};
     ui_draw_card(card_rect, COLOR_CARD, COLOR_BORDER);
-    
+
     Rect card_content = rect_padding(card_rect, 15);
     Rect label_rect = rect_column(card_content, 0, 2, 0);
     Rect value_rect = rect_column(card_content, 1, 2, 0);
-    
+
     ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), label_rect, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
-    
+
     u32 total_play = 0;
     GameStats* games = data_get_games();
     u32 count = data_get_game_count();
     for(u32 i=0; i<count; i++) total_play += games[i].total_playtime;
-    
+
     char time_str[32];
     format_time(total_play, time_str, sizeof(time_str));
     ui_draw_text(time_str, value_rect, COLOR_TEXT, 1.6f, ALIGN_LEFT);
-    
+
     // Interaction Hint
     ui_draw_text(i18n_get(MSG_MENU_GAMES_PRESS_X), (Rect){0, 190, 480, 30}, COLOR_TEXT, 0.9f, ALIGN_CENTER);
-    
-    // Footer Hints
-    ui_draw_hint("[L] Settings", 20, 255, COLOR_SUBTEXT);
-    ui_draw_hint("Stats [R]", 390, 255, COLOR_SUBTEXT);
+
+    // Footer Hints (10px from edges)
+    const char* stats_label = i18n_get(MSG_CTRL_R);
+    char hint_l[64];
+    snprintf(hint_l, sizeof(hint_l), "[L] %s", stats_label);
+
+    const char* menu_label = i18n_get(MSG_CTRL_L);
+    char hint_r[64];
+    snprintf(hint_r, sizeof(hint_r), "%s [R]", menu_label);
+
+    ui_draw_hint(hint_l, 10, 255, COLOR_SUBTEXT);
+
+    float rw = font_get_width(hint_r, 0.8f);
+    ui_draw_hint(hint_r, 480 - 10 - (int)rw, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_dashboard = {

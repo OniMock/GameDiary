@@ -18,6 +18,6 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK]             = "Semana",
     [MSG_TOP_MONTH]            = "Mes",
     [MSG_TOP_ALL]              = "Siempre",
-    [MSG_CTRL_L] = "[L] Ajustes",
-    [MSG_CTRL_R] = "Estadísticas [R]",
+    [MSG_CTRL_L] = "Ajustes",
+    [MSG_CTRL_R] = "Estadísticas",
 };

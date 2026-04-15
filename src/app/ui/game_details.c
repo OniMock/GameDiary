@@ -18,7 +18,7 @@ void game_details_set_idx(int idx) {
 
 static void game_details_init(void) {
     if (g_game_icon) texture_free(g_game_icon);
-    
+
     GameStats* games = data_get_games();
     char icon_path[256];
     snprintf(icon_path, sizeof(icon_path), "ms0:/PSP/COMMON/GameDiary/source/%s.png", games[g_game_idx].entry.game_id);
@@ -38,14 +38,14 @@ static void format_time(u32 seconds, char *out, size_t size) {
 
 static void game_details_draw(void) {
     renderer_clear(COLOR_BG);
-    
+
     GameStats* games = data_get_games();
     GameStats* g = &games[g_game_idx];
 
     // Card for the whole section
     Rect main_card = {20, 20, 440, 220};
     ui_draw_card(main_card, COLOR_CARD, COLOR_BORDER);
-    
+
     // Icon
     if (g_game_icon) {
         texture_draw(g_game_icon, 40, 40, 144, 80);
@@ -64,7 +64,7 @@ static void game_details_draw(void) {
     // Stats Grid inside card
     char buf[64];
     Rect stats_area = {40, 150, 400, 80};
-    
+
     // Total Playtime row
     Rect row1 = rect_column(stats_area, 0, 2, 5);
     ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), row1, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
@@ -76,8 +76,10 @@ static void game_details_draw(void) {
     ui_draw_text(i18n_get(MSG_STATS_SESSIONS), row2, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
     snprintf(buf, sizeof(buf), "%lu", (unsigned long)g->session_count);
     ui_draw_text(buf, row2, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
-
-    ui_draw_hint(i18n_get(MSG_CTRL_BACK), 20, 255, COLOR_SUBTEXT);
+    const char* back_label = i18n_get(MSG_CTRL_BACK);
+    char hint_o[64];
+    snprintf(hint_o, sizeof(hint_o), "[O] %s", back_label);
+    ui_draw_hint(hint_o, 10, 255, COLOR_SUBTEXT);
 }
 
 static void game_details_destroy(void) {

@@ -406,6 +406,17 @@ static void draw_string_internal(float x, float y, const char *str,
     sceGuDisable(GU_ALPHA_TEST);
 }
 
+float sdf_font_get_width(const char *str, float size) {
+    float tw = 0.0f;
+    const char *p = str;
+    while (*p) {
+        SDFAtlas *at = NULL;
+        SDFGlyph *g = get_glyph(utf8_decode_next(&p), &at);
+        if (g) tw += g->xadv * size;
+    }
+    return tw;
+}
+
 void sdf_font_draw_string(float x, float y, const char *str, uint32_t color, float size) {
     draw_string_internal(x, y, str, color, size, 0);
 }

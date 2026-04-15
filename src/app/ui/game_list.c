@@ -35,7 +35,7 @@ static void game_list_update(u32 buttons, u32 pressed) {
     if (g_selection >= g_scroll + 5) g_scroll = g_selection - 4;
 
     if (pressed & PSP_CTRL_CIRCLE) screen_manager_set(&g_screen_dashboard);
-    
+
     if (pressed & PSP_CTRL_CROSS) {
         game_details_set_idx(g_selection);
         screen_manager_set(&g_screen_game_details);
@@ -50,10 +50,10 @@ static void format_time(u32 seconds, char *out, size_t size) {
 
 static void game_list_draw(void) {
     renderer_clear(COLOR_BG);
-    
+
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
-    
+
     ui_draw_title(i18n_get(MSG_MENU_GAMES), safe_rect);
 
     GameStats* games = data_get_games();
@@ -78,16 +78,25 @@ static void game_list_draw(void) {
 
         u32 color = (idx == g_selection) ? COLOR_ACCENT : COLOR_TEXT;
         Rect content = rect_padding(item_rect, 5);
-        
+
         ui_draw_text(games[idx].entry.game_name, content, color, 0.8f, ALIGN_LEFT);
-        
+
         char time_str[16];
         format_time(games[idx].total_playtime, time_str, sizeof(time_str));
         ui_draw_text(time_str, content, color, 0.7f, ALIGN_RIGHT);
     }
+    const char* back_label = i18n_get(MSG_CTRL_BACK);
+    char hint_o[64];
+    snprintf(hint_o, sizeof(hint_o), "[O] %s", back_label);
 
-    ui_draw_hint(i18n_get(MSG_CTRL_BACK), 20, 255, COLOR_SUBTEXT);
-    ui_draw_hint(i18n_get(MSG_CTRL_SELECT), 390, 255, COLOR_SUBTEXT);
+    const char* select_label = i18n_get(MSG_CTRL_SELECT);
+    char hint_select[64];
+    snprintf(hint_select, sizeof(hint_select), "%s [SEL]", select_label);
+
+    ui_draw_hint(hint_o, 10, 255, COLOR_SUBTEXT);
+
+    float rw = font_get_width(hint_select, 0.8f);
+    ui_draw_hint(hint_select, 480 - 10 - (int)rw, 255, COLOR_SUBTEXT);
 }
 
 Screen g_screen_game_list = {
