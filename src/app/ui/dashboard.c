@@ -38,11 +38,11 @@ static void dashboard_draw(void) {
     // Footer Hints (10px from edges)
     const char* stats_label = i18n_get(MSG_CTRL_R);
     char hint_l[64];
-    snprintf(hint_l, sizeof(hint_l), "[L] %s", stats_label);
+    snprintf(hint_l, sizeof(hint_l), "|L| %s", stats_label);
 
     const char* menu_label = i18n_get(MSG_CTRL_L);
     char hint_r[64];
-    snprintf(hint_r, sizeof(hint_r), "%s [R]", menu_label);
+    snprintf(hint_r, sizeof(hint_r), "%s |R|", menu_label);
 
     ui_draw_hint(hint_l, 10, 255, COLOR_SUBTEXT);
 

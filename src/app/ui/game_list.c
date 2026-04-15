@@ -82,11 +82,12 @@ static void game_list_draw(void) {
     }
     const char* back_label = i18n_get(MSG_CTRL_BACK);
     char hint_o[64];
-    snprintf(hint_o, sizeof(hint_o), "[O] %s", back_label);
+
+    snprintf(hint_o, sizeof(hint_o), "|%s| %s", UI_SYM_CIRCLE_OPEN, back_label);
 
     const char* select_label = i18n_get(MSG_CTRL_SELECT);
     char hint_select[64];
-    snprintf(hint_select, sizeof(hint_select), "%s [SEL]", select_label);
+    snprintf(hint_select, sizeof(hint_select), "%s |X|", select_label);
 
     ui_draw_hint(hint_o, 10, 255, COLOR_SUBTEXT);
 

@@ -51,6 +51,17 @@ typedef enum {
     MSG_COUNT
 } MessageId;
 
+/* Geometric symbols (UTF-8 in hexadecimal escapes) */
+#define UI_SYM_CIRCLE_OPEN     "\xE2\x97\x8B"   /* ○ U+25CB */
+#define UI_SYM_CIRCLE_FILLED   "\xE2\x97\x8F"   /* ● U+25CF */
+#define UI_SYM_DIAMOND_OPEN    "\xE2\x97\x87"   /* ◇ U+25C7 */
+#define UI_SYM_DIAMOND_FILLED  "\xE2\x97\x88"   /* ◆ U+25C8 (opcional) */
+#define UI_SYM_SQUARE_OPEN     "\xE2\x96\xA1"   /* □ U+25A1 */
+#define UI_SYM_SQUARE_FILLED   "\xE2\x96\xA0"   /* ■ U+25A0 */
+#define UI_SYM_TRIANGLE_UP     "\xE2\x96\xB3"   /* △ U+25B3 */
+#define UI_SYM_TRIANGLE_DOWN   "\xE2\x96\xBC"   /* ▼ U+25BC */
+#define UI_SYM_TRIANGLE_LEFT   "\xE2\x97\x80"   /* ◀ U+25C0 */
+#define UI_SYM_TRIANGLE_RIGHT  "\xE2\x96\xB6"   /* ▶ U+25B6 */
 /**
  * Global message pointer for direct access.
  * Usage: g_i18n_msg[MSG_APP_TITLE]

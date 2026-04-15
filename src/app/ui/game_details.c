@@ -73,7 +73,8 @@ static void game_details_draw(void) {
     ui_draw_text(buf, row2, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
     const char* back_label = i18n_get(MSG_CTRL_BACK);
     char hint_o[64];
-    snprintf(hint_o, sizeof(hint_o), "[O] %s", back_label);
+
+    snprintf(hint_o, sizeof(hint_o), "[%s] %s", UI_SYM_CIRCLE_OPEN, back_label);
     ui_draw_hint(hint_o, 10, 255, COLOR_SUBTEXT);
 }
 
