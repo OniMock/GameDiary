@@ -19,13 +19,13 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_CTRL_L] = "Menu",
     [MSG_CTRL_R] = "Estatísticas",
 
-    [MSG_DAY_SUN] = "D",
-    [MSG_DAY_MON] = "S",
-    [MSG_DAY_TUE] = "T",
-    [MSG_DAY_WED] = "Q",
-    [MSG_DAY_THU] = "Q",
-    [MSG_DAY_FRI] = "S",
-    [MSG_DAY_SAT] = "S",
+    [MSG_DAY_SUN] = "Dom",
+    [MSG_DAY_MON] = "Seg",
+    [MSG_DAY_TUE] = "Ter",
+    [MSG_DAY_WED] = "Qua",
+    [MSG_DAY_THU] = "Qui",
+    [MSG_DAY_FRI] = "Sex",
+    [MSG_DAY_SAT] = "Sáb",
 
     [MSG_STATS_NO_ACTIVITY] = "Sem atividade recente",
 };

@@ -21,13 +21,13 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_CTRL_L] = "Ajustes",
     [MSG_CTRL_R] = "Estadísticas",
 
-    [MSG_DAY_SUN] = "D",
-    [MSG_DAY_MON] = "L",
-    [MSG_DAY_TUE] = "M",
-    [MSG_DAY_WED] = "M",
-    [MSG_DAY_THU] = "J",
-    [MSG_DAY_FRI] = "V",
-    [MSG_DAY_SAT] = "S",
+    [MSG_DAY_SUN] = "Dom",
+    [MSG_DAY_MON] = "Lun",
+    [MSG_DAY_TUE] = "Mar",
+    [MSG_DAY_WED] = "Mié",
+    [MSG_DAY_THU] = "Jue",
+    [MSG_DAY_FRI] = "Vie",
+    [MSG_DAY_SAT] = "Sáb",
 
     [MSG_STATS_NO_ACTIVITY] = "Sin actividad reciente",
 };

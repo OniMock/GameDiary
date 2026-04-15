@@ -20,13 +20,13 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_CTRL_L] = "Настройки",
     [MSG_CTRL_R] = "Статистика",
 
-    [MSG_DAY_SUN] = "В",
-    [MSG_DAY_MON] = "П",
-    [MSG_DAY_TUE] = "В",
-    [MSG_DAY_WED] = "С",
-    [MSG_DAY_THU] = "Ч",
-    [MSG_DAY_FRI] = "П",
-    [MSG_DAY_SAT] = "С",
+    [MSG_DAY_SUN] = "Вс",
+    [MSG_DAY_MON] = "Пн",
+    [MSG_DAY_TUE] = "Вт",
+    [MSG_DAY_WED] = "Ср",
+    [MSG_DAY_THU] = "Чт",
+    [MSG_DAY_FRI] = "Пт",
+    [MSG_DAY_SAT] = "Сб",
 
     [MSG_STATS_NO_ACTIVITY] = "Нет активности",
 };
