@@ -51,41 +51,42 @@ void ui_draw_title(const char* text, Rect r) {
 void ui_draw_weekly_graph(SessionEntry* sessions, int count) {
     u32 day_playtime[7] = {0};
     u32 now_ts = utils_get_timestamp();
-    time_t now = (time_t)now_ts;
+    time_t now_val = (time_t)now_ts;
     
     // Normalize to start of today (local midnight)
-    struct tm *lt = localtime(&now);
-    int now_year = lt->tm_year;
-    int now_yday = lt->tm_yday;
-    
-    // Reference for label generation
-    lt->tm_hour = 0; lt->tm_min = 0; lt->tm_sec = 0;
-    time_t today_start = mktime(lt);
+    // We copy the struct because localtime returns a static pointer which might be overwritten
+    struct tm today_tm = *localtime(&now_val);
+    today_tm.tm_hour = 0;
+    today_tm.tm_min = 0;
+    today_tm.tm_sec = 0;
+    time_t today_start = mktime(&today_tm);
 
     int found_any = 0;
 
-    // Aggregate sessions
+    // Aggregate sessions for the last 7 days (including today)
     for (int i = 0; i < count; i++) {
-        time_t session_time = (time_t)sessions[i].timestamp;
-        struct tm *st = localtime(&session_time);
+        time_t s_time = (time_t)sessions[i].timestamp;
         
-        int days_ago = -1;
-        if (st->tm_year == now_year) {
-            days_ago = now_yday - st->tm_yday;
-        } else if (st->tm_year == now_year - 1) {
-            // Check for year wraparound
-            days_ago = now_yday + ( (now_year % 4 == 0) ? 366 : 365 ) - st->tm_yday;
-        }
-        
-        if (days_ago >= 0 && days_ago < 7) {
-            day_playtime[days_ago] += sessions[i].duration;
-            if (sessions[i].duration > 0) found_any = 1;
+        // Check if session falls in the [Today-6, Today] window
+        // s_time >= today_start - 6 days
+        if (s_time >= (today_start - 6 * 86400) && s_time < (today_start + 86400)) {
+            int days_ago;
+            if (s_time >= today_start) {
+                days_ago = 0;
+            } else {
+                days_ago = (today_start - s_time) / 86400 + 1;
+            }
+
+            if (days_ago >= 0 && days_ago < 7) {
+                day_playtime[days_ago] += sessions[i].duration;
+                if (sessions[i].duration > 0) found_any = 1;
+            }
         }
     }
 
     // Graph Layout
     int gx = 60, gy = 170, gw = 360, gh = 80;
-    int bar_w = 28;
+    int bar_w = 30;
     int spacing = (gw - (7 * bar_w)) / 6;
 
     // Draw Base Line
@@ -97,30 +98,48 @@ void ui_draw_weekly_graph(SessionEntry* sessions, int count) {
     }
 
     // Scaling and rendering
-    u32 max_time = 3600; 
+    u32 max_time = 3600; // Min scale 1h
     for (int i = 0; i < 7; i++) {
         if (day_playtime[i] > max_time) max_time = day_playtime[i];
     }
 
     for (int i = 0; i < 7; i++) {
-        int idx = 6 - i;
+        int idx = 6 - i; // idx 0 is today (rightmost), idx 6 is 6 days ago (leftmost)
         float target_h = ((float)day_playtime[idx] / max_time) * gh;
-        g_graph_anim[idx] += (target_h - g_graph_anim[idx]) * 0.1f;
+        
+        // Simple animation state (could use a timer, but this frame-based approach is common in homebrew)
+        g_graph_anim[idx] += (target_h - g_graph_anim[idx]) * 0.15f;
         
         int x = gx + i * (bar_w + spacing);
         int h = (int)g_graph_anim[idx];
         if (h < 2 && day_playtime[idx] > 0) h = 2;
 
-        u32 bar_color = (idx == 0) ? COLOR_ACCENT : (COLOR_ACCENT & 0x66FFFFFF);
+        // Visual highlights: Today (idx=0) is bright, others are dimmed
+        u32 bar_color = (idx == 0) ? COLOR_ACCENT : (COLOR_ACCENT & 0x44FFFFFF);
+        u32 label_color = (idx == 0) ? COLOR_ACCENT : COLOR_SUBTEXT;
+
         if (h > 0) {
             renderer_draw_rect(x, gy - h, bar_w, h, bar_color);
-            if (h > 4) renderer_draw_rect(x, gy - h, bar_w, 2, 0x44FFFFFF);
+            // "Glossy" top edge for today
+            if (idx == 0 && h > 4) {
+                renderer_draw_rect(x, gy - h, bar_w, 2, 0x88FFFFFF);
+            } else if (h > 4) {
+                renderer_draw_rect(x, gy - h, bar_w, 2, 0x22FFFFFF);
+            }
+
+            // Draw playtime text on top
+            char time_buf[16];
+            utils_format_duration_compact(day_playtime[idx], time_buf, sizeof(time_buf));
+            Rect time_rect = {x - 5, gy - h - 14, bar_w + 10, 10};
+            ui_draw_text(time_buf, time_rect, label_color, 0.6f, ALIGN_CENTER);
         }
 
-        time_t day_time = today_start - (idx * 86400);
-        struct tm *dt = localtime(&day_time);
-        const char* day_label = i18n_get(MSG_DAY_SUN + dt->tm_wday);
-        Rect label_rect = {x, gy + 5, bar_w, 20};
-        ui_draw_text(day_label, label_rect, COLOR_SUBTEXT, 0.7f, ALIGN_CENTER);
+        // Labels rotated based on today
+        time_t bar_day_time = today_start - (idx * 86400);
+        struct tm bar_tm = *localtime(&bar_day_time);
+        const char* day_name = i18n_get(MSG_DAY_SUN + bar_tm.tm_wday);
+        
+        Rect label_rect = {x, gy + 8, bar_w, 20};
+        ui_draw_text(day_name, label_rect, label_color, 0.7f, ALIGN_CENTER);
     }
 }

@@ -32,6 +32,20 @@ void utils_format_time(u32 seconds, char *out, size_t size) {
   snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
 }
 
+void utils_format_duration_compact(u32 seconds, char *out, size_t size) {
+  u32 h = seconds / 3600;
+  u32 m = (seconds % 3600) / 60;
+  if (h > 0) {
+    if (m > 0) {
+      snprintf(out, size, "%luh%lum", (unsigned long)h, (unsigned long)m);
+    } else {
+      snprintf(out, size, "%luh", (unsigned long)h);
+    }
+  } else {
+    snprintf(out, size, "%lum", (unsigned long)m);
+  }
+}
+
 // Helper to copy a file
 int utils_copy_file(const char *src, const char *dst) {
   SceUID f_in = sceIoOpen(src, PSP_O_RDONLY, 0777);
