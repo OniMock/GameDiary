@@ -15,4 +15,5 @@ app:
 clean:
 	$(MAKE) -f Makefile.plugin clean
 	$(MAKE) -f Makefile.app clean
+	rm -rf obj
 	rm -f build_log.txt

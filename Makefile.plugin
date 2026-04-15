@@ -19,7 +19,22 @@ COMMON_OBJS = \
   src/common/sfo_parser.o \
   src/common/utils.o
 
-OBJS = $(PLUGIN_OBJS) $(COMMON_OBJS)
+OBJS_RAW = $(PLUGIN_OBJS) $(COMMON_OBJS)
+
+# Build in a separate directory to avoid collisions with the app objects
+OBJDIR = obj/plugin
+OBJS := $(addprefix $(OBJDIR)/, $(OBJS_RAW))
+
+# -----------------------------------------------------------------------
+# Rules
+# -----------------------------------------------------------------------
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 INCDIR = include
 CFLAGS = -O2 -Os -G0 -Wall -Wextra -D_PSP_FW_VERSION=661 -DGDIARY_PLUGIN \

@@ -5,6 +5,7 @@
 #include "app/render/renderer.h"
 #include "app/render/font.h"
 #include "app/data/data_loader.h"
+#include "common/utils.h"
 #include <pspctrl.h>
 #include <stdio.h>
 
@@ -42,12 +43,6 @@ static void game_list_update(u32 buttons, u32 pressed) {
     }
 }
 
-static void format_time(u32 seconds, char *out, size_t size) {
-    u32 h = seconds / 3600;
-    u32 m = (seconds % 3600) / 60;
-    snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
-}
-
 static void game_list_draw(void) {
     renderer_clear(COLOR_BG);
 
@@ -82,7 +77,7 @@ static void game_list_draw(void) {
         ui_draw_text(games[idx].entry.game_name, content, color, 0.8f, ALIGN_LEFT);
 
         char time_str[16];
-        format_time(games[idx].total_playtime, time_str, sizeof(time_str));
+        utils_format_time(games[idx].total_playtime, time_str, sizeof(time_str));
         ui_draw_text(time_str, content, color, 0.7f, ALIGN_RIGHT);
     }
     const char* back_label = i18n_get(MSG_CTRL_BACK);

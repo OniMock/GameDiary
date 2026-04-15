@@ -6,6 +6,7 @@
 #include "app/render/font.h"
 #include "app/render/texture.h"
 #include "app/data/data_loader.h"
+#include "common/utils.h"
 #include <pspctrl.h>
 #include <stdio.h>
 
@@ -28,12 +29,6 @@ static void game_details_init(void) {
 static void game_details_update(u32 buttons, u32 pressed) {
     (void)buttons;
     if (pressed & PSP_CTRL_CIRCLE) screen_manager_set(&g_screen_game_list);
-}
-
-static void format_time(u32 seconds, char *out, size_t size) {
-    u32 h = seconds / 3600;
-    u32 m = (seconds % 3600) / 60;
-    snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
 }
 
 static void game_details_draw(void) {
@@ -68,7 +63,7 @@ static void game_details_draw(void) {
     // Total Playtime row
     Rect row1 = rect_column(stats_area, 0, 2, 5);
     ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), row1, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
-    format_time(g->total_playtime, buf, sizeof(buf));
+    utils_format_time(g->total_playtime, buf, sizeof(buf));
     ui_draw_text(buf, row1, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
 
     // Sessions row

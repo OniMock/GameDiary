@@ -5,6 +5,7 @@
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
+#include "common/utils.h"
 #include <pspctrl.h>
 #include <stdio.h>
 
@@ -20,11 +21,6 @@ static void stats_update(u32 buttons, u32 pressed) {
     screen_manager_set(&g_screen_dashboard);
 }
 
-static void format_time(u32 seconds, char *out, size_t size) {
-  u32 h = seconds / 3600;
-  u32 m = (seconds % 3600) / 60;
-  snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
-}
 
 static void stats_draw(void) {
   renderer_clear(COLOR_BG);
@@ -55,7 +51,7 @@ static void stats_draw(void) {
   ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), rect_column(p_cont, 0, 2, 0),
                COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
   char time_str[32];
-  format_time(total_play, time_str, sizeof(time_str));
+  utils_format_time(total_play, time_str, sizeof(time_str));
   ui_draw_text(time_str, rect_column(p_cont, 1, 2, 0), COLOR_TEXT, 1.2f,
                ALIGN_LEFT);
 

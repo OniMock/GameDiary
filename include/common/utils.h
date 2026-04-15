@@ -34,6 +34,11 @@ u32 utils_get_u32_le(const u8 *p);
  */
 u32 utils_get_timestamp(void);
 
+/**
+ * @brief Formats seconds into a human-readable "h m" string.
+ */
+void utils_format_time(u32 seconds, char *out, size_t size);
+
 #ifdef GDIARY_PLUGIN
 /**
  * @brief Captures/extracts a game icon to the destination directory.

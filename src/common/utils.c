@@ -26,6 +26,12 @@ u32 utils_get_timestamp(void) {
   return (u32)((tick / 1000000ULL) - 62135596800ULL);
 }
 
+void utils_format_time(u32 seconds, char *out, size_t size) {
+  u32 h = seconds / 3600;
+  u32 m = (seconds % 3600) / 60;
+  snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
+}
+
 // Helper to copy a file
 int utils_copy_file(const char *src, const char *dst) {
   SceUID f_in = sceIoOpen(src, PSP_O_RDONLY, 0777);

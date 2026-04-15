@@ -8,8 +8,21 @@ COMMON_SRCS := $(shell find src/common -name "*.c" -o -name "*.cpp")
 
 SRCS := $(APP_SRCS) $(COMMON_SRCS)
 
-OBJS := $(SRCS:.c=.o)
+# Build in a separate directory to avoid collisions with the plugin objects
+OBJDIR = obj/app
+OBJS := $(addprefix $(OBJDIR)/, $(SRCS:.c=.o))
 OBJS := $(OBJS:.cpp=.o)
+
+# -----------------------------------------------------------------------
+# Rules
+# -----------------------------------------------------------------------
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # -----------------------------------------------------------------------
 # Compiler / flags
