@@ -1,4 +1,5 @@
 #include "app/data/data_loader.h"
+#include "common/utils.h"
 #include <pspkernel.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,9 +12,12 @@ static SessionEntry *g_sessions = NULL;
 static u32 g_session_count = 0;
 
 int data_load_all(void) {
+    const char *prefix = utils_get_device_prefix();
+    utils_ensure_storage_dirs(prefix);
+
     // 1. Load games.dat
     char path[256];
-    snprintf(path, sizeof(path), "ms0:/PSP/COMMON/GameDiary/db/games.dat");
+    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/db/games.dat", prefix);
     SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     if (fd < 0) return -1;
 
@@ -29,7 +33,7 @@ int data_load_all(void) {
     sceIoClose(fd);
 
     // 2. Load sessions.dat
-    snprintf(path, sizeof(path), "ms0:/PSP/COMMON/GameDiary/db/sessions.dat");
+    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/db/sessions.dat", prefix);
     fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     if (fd >= 0) {
         SceOff size = sceIoLseek(fd, 0, PSP_SEEK_END);

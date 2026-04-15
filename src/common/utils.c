@@ -46,6 +46,54 @@ void utils_format_duration_compact(u32 seconds, char *out, size_t size) {
   }
 }
 
+const char *utils_get_device_prefix(void) {
+  static const char *cached = NULL;
+  if (cached)
+    return cached;
+
+  SceUID fd;
+
+  // 1. Check for existing database on Memory Stick (ms0) - Standard Priority
+  fd = sceIoOpen("ms0:/PSP/COMMON/GameDiary/db/games.dat", PSP_O_RDONLY, 0);
+  if (fd >= 0) {
+    sceIoClose(fd);
+    cached = "ms0:";
+    return cached;
+  }
+
+  // 2. Check for existing database on Internal Storage (ef0)
+  fd = sceIoOpen("ef0:/PSP/COMMON/GameDiary/db/games.dat", PSP_O_RDONLY, 0);
+  if (fd >= 0) {
+    sceIoClose(fd);
+    cached = "ef0:";
+    return cached;
+  }
+
+  // 3. Detect if ef0 exists (PSP Go internal memory)
+  SceUID dir = sceIoDopen("ef0:/");
+  if (dir >= 0) {
+    sceIoDclose(dir);
+    cached = "ef0:";
+    return cached;
+  }
+
+  // 4. Default Fallback
+  cached = "ms0:";
+  return cached;
+}
+
+void utils_ensure_storage_dirs(const char *prefix) {
+  char path[128];
+
+  // 1. Create root GameDiary folder
+  snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary", prefix);
+  sceIoMkdir(path, 0777);
+
+  // 2. Create db subfolder
+  snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/db", prefix);
+  sceIoMkdir(path, 0777);
+}
+
 // Helper to copy a file
 int utils_copy_file(const char *src, const char *dst) {
   SceUID f_in = sceIoOpen(src, PSP_O_RDONLY, 0777);

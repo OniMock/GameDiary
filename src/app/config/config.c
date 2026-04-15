@@ -3,12 +3,15 @@
 #include <string.h>
 #include <pspkernel.h>
 
-#define CONFIG_PATH "ms0:/PSP/COMMON/GameDiary/config.dat"
+#include "common/utils.h"
 
 static AppConfig g_config;
 
 int config_load(void) {
-    SceUID fd = sceIoOpen(CONFIG_PATH, PSP_O_RDONLY, 0777);
+    char path[256];
+    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/config.dat", utils_get_device_prefix());
+
+    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     if (fd < 0) {
         // Default settings: Auto-detect language
         g_config.language = -1; 
@@ -27,7 +30,10 @@ int config_load(void) {
 }
 
 int config_save(void) {
-    SceUID fd = sceIoOpen(CONFIG_PATH, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    char path[256];
+    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/config.dat", utils_get_device_prefix());
+
+    SceUID fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (fd < 0) return -1;
 
     int res = sceIoWrite(fd, &g_config, sizeof(AppConfig));

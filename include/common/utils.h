@@ -39,6 +39,8 @@ u32 utils_get_timestamp(void);
  */
 void utils_format_time(u32 seconds, char *out, size_t size);
 void utils_format_duration_compact(u32 seconds, char *out, size_t size);
+const char* utils_get_device_prefix(void);
+void utils_ensure_storage_dirs(const char* prefix);
 
 #ifdef GDIARY_PLUGIN
 /**
