@@ -6,12 +6,22 @@
 #include "common/utils.h"
 
 static AppConfig g_config;
+static char g_config_path[256] = {0};
+
+void config_init(const char *app_path) {
+    /* If app_path is a file (e.g. EBOOT.PBP), extract the directory. */
+    snprintf(g_config_path, sizeof(g_config_path), "%s", app_path);
+    char *last_slash = strrchr(g_config_path, '/');
+    if (last_slash) {
+        *(last_slash + 1) = '\0'; // Keep the trailing slash
+    }
+    strcat(g_config_path, "config.dat");
+}
 
 int config_load(void) {
-    char path[256];
-    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/config.dat", utils_get_device_prefix());
+    if (g_config_path[0] == '\0') return -1;
 
-    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+    SceUID fd = sceIoOpen(g_config_path, PSP_O_RDONLY, 0777);
     if (fd < 0) {
         // Default settings: Auto-detect language
         g_config.language = -1; 
@@ -21,7 +31,7 @@ int config_load(void) {
     int res = sceIoRead(fd, &g_config, sizeof(AppConfig));
     sceIoClose(fd);
 
-    if (res != sizeof(AppConfig)) {
+    if (res != (int)sizeof(AppConfig)) {
         g_config.language = -1;
         return -1;
     }
@@ -30,16 +40,15 @@ int config_load(void) {
 }
 
 int config_save(void) {
-    char path[256];
-    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/config.dat", utils_get_device_prefix());
+    if (g_config_path[0] == '\0') return -1;
 
-    SceUID fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    SceUID fd = sceIoOpen(g_config_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (fd < 0) return -1;
 
     int res = sceIoWrite(fd, &g_config, sizeof(AppConfig));
     sceIoClose(fd);
 
-    return (res == sizeof(AppConfig)) ? 0 : -2;
+    return (res == (int)sizeof(AppConfig)) ? 0 : -2;
 }
 
 AppConfig* config_get(void) {

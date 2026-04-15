@@ -12,6 +12,12 @@ typedef struct {
 } AppConfig;
 
 /**
+ * @brief Initializes configuration with the application base path.
+ * @param app_path Full path to the executable or its directory.
+ */
+void config_init(const char *app_path);
+
+/**
  * @brief Loads the application configuration.
  * @return 0 on success, negative on error.
  */

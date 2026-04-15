@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "common/utils.h"
 #include "common/storage.h"
 #include "app/i18n.h"
 #include "app/config/config.h"
@@ -31,7 +32,7 @@ void setup_callbacks(void) {
     if (thid >= 0) sceKernelStartThread(thid, 0, 0);
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
     setup_callbacks();
 
     /* 1. Core Rendering & UI
@@ -40,9 +41,20 @@ int main(void) {
     renderer_init();
     font_init();
 
-    /* 2. Storage & Configuration */
-    storage_init("ms0:/PSP/COMMON/GameDiary");
+    /* 2. Storage & Configuration
+     * Use argv[0] to determine application root for local config.dat. */
+    if (argc > 0 && argv[0]) {
+        config_init(argv[0]);
+    } else {
+        config_init("ms0:/PSP/GAME/GameDiary/EBOOT.PBP"); // Fallback
+    }
+    
     config_load();
+
+    /* Initialize storage with dynamic device prefix (ms0: vs ef0:) */
+    char base_path[128];
+    snprintf(base_path, sizeof(base_path), "%s/PSP/COMMON/GameDiary", utils_get_device_prefix());
+    storage_init(base_path);
 
     /* 3. Systems Initialization */
     i18n_init(config_get()->language);
