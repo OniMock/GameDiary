@@ -48,6 +48,9 @@ typedef enum {
     MSG_DAY_SAT,
 
     MSG_STATS_NO_ACTIVITY,
+    MSG_STATS_DAYS_ACTIVE,
+    MSG_STATS_NEVER,
+    MSG_DATE_FORMAT,
 
     MSG_COUNT
 } MessageId;

@@ -155,3 +155,36 @@ void texture_free(Texture* tex) {
         free(tex);
     }
 }
+
+void texture_draw_tinted(Texture* tex, int x, int y, int w, int h, u32 color) {
+    if (!tex) return;
+
+    /* Same vertex format as texture_draw but with caller-supplied tint color.
+     * Using GU_TFX_MODULATE: final_color = texture_color * vertex_color.
+     * Pass 0xFFFFFFFF for no tint (identity modulation).               */
+    struct Vertex {
+        float        u, v;
+        unsigned int color;
+        float        x, y, z;
+    };
+
+    sceGuEnable(GU_TEXTURE_2D);
+    sceGuEnable(GU_BLEND);
+    sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+    sceGuTexMode(GU_PSM_8888, 0, 0, 0);
+    sceGuTexImage(0, tex->textureWidth, tex->textureHeight, tex->textureWidth,
+                  tex->data);
+    sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+    sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+
+    struct Vertex* v = (struct Vertex*)sceGuGetMemory(2 * sizeof(struct Vertex));
+    v[0].u = 0;           v[0].v = 0;
+    v[0].color = color;   v[0].x = (float)x;       v[0].y = (float)y;       v[0].z = 0;
+    v[1].u = tex->width;  v[1].v = tex->height;
+    v[1].color = color;   v[1].x = (float)(x + w); v[1].y = (float)(y + h); v[1].z = 0;
+
+    sceGuDrawArray(GU_SPRITES,
+                   GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF |
+                   GU_TRANSFORM_2D,
+                   2, 0, v);
+}

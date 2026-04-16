@@ -28,4 +28,7 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_DAY_SAT] = "Sáb",
 
     [MSG_STATS_NO_ACTIVITY] = "Sem atividade recente",
+    [MSG_STATS_DAYS_ACTIVE] = "Dias Ativos: %d",
+    [MSG_STATS_NEVER]       = "Nunca",
+    [MSG_DATE_FORMAT]      = "%d/%m/%Y",
 };

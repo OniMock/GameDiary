@@ -193,6 +193,122 @@ void ui_reset_graph_animation(void) {
   memset(g_graph_anim, 0, sizeof(g_graph_anim));
 }
 
+/* -----------------------------------------------------------------------
+ * Session Bar Graph
+ *
+ * Shows the last MAX_SESSION_BARS sessions for ONE specific game.
+ * Inspiration: Steam's "recent playtime" activity chart.
+ *   - Bars ordered oldest (left) → newest (right).
+ *   - Opacity gradient: oldest bars are dim, newest bar is full accent.
+ *   - Heights animated with a lerp grow-in on first draw.
+ * ----------------------------------------------------------------------- */
+#define MAX_SESSION_BARS 8
+
+static float g_session_anim[MAX_SESSION_BARS] = {0.0f};
+
+void ui_reset_session_graph_animation(void) {
+  memset(g_session_anim, 0, sizeof(g_session_anim));
+}
+
+void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
+                               u32 game_uid, int max_bars,
+                               int center_x, int baseline_y, int max_bar_h) {
+  /* Clamp so we never exceed the static animation buffer. */
+  if (max_bars <= 0 || max_bars > MAX_SESSION_BARS)
+    max_bars = MAX_SESSION_BARS;
+
+  /* ----------------------------------------------------------------
+   * Collect indices of sessions that belong to this game, in order.
+   * We only need the LAST max_bars, so we keep a rolling window.
+   * ---------------------------------------------------------------- */
+  int  matching[MAX_SESSION_BARS];
+  int  match_count = 0;
+
+  for (int i = 0; i < count; i++) {
+    if (sessions[i].game_uid != game_uid || sessions[i].duration == 0)
+      continue;
+    /* Slide window: discard oldest when full. */
+    if (match_count == max_bars) {
+      for (int j = 0; j < max_bars - 1; j++) matching[j] = matching[j + 1];
+      matching[max_bars - 1] = i;
+    } else {
+      matching[match_count++] = i;
+    }
+  }
+
+  if (match_count == 0) return; /* No sessions — draw nothing. */
+
+  /* ----------------------------------------------------------------
+   * Layout: center the graph horizontally around center_x
+   * ---------------------------------------------------------------- */
+  int bar_w = 40;
+  int gap   = 16;
+  int total_w = match_count * bar_w + (match_count - 1) * gap;
+  int gx    = center_x - (total_w / 2);
+
+  /* Baseline separator */
+  renderer_draw_rect(gx - 10, baseline_y, total_w + 20, 1, COLOR_BORDER);
+
+  /* ----------------------------------------------------------------
+   * Find maximum duration to scale bar heights.
+   * Minimum scale = 60 s so very short sessions still show a sliver.
+   * ---------------------------------------------------------------- */
+  u32 max_dur = 60u;
+  for (int b = 0; b < match_count; b++) {
+    u32 d = sessions[matching[b]].duration;
+    if (d > max_dur) max_dur = d;
+  }
+
+  /* ----------------------------------------------------------------
+   * Draw bars
+   * ---------------------------------------------------------------- */
+  for (int b = 0; b < match_count; b++) {
+    u32 dur        = sessions[matching[b]].duration;
+    float target_h = ((float)dur / (float)max_dur) * (float)max_bar_h;
+
+    /* Lerp animation: bar height grows toward target each frame. */
+    g_session_anim[b] += (target_h - g_session_anim[b]) * 0.09f;
+    int h = (int)g_session_anim[b];
+    if (h < 2 && dur > 0) h = 2; /* Always render a visible minimum. */
+
+    int bx = gx + b * (bar_w + gap);
+
+    /* Opacity gradient: oldest (b=0) at 25%, newest (b=max-1) at 100%. */
+    float recency = (float)(b + 1) / (float)match_count; /* 0..1 */
+    u8 alpha = (u8)(64.0f + 191.0f * recency);            /* 64..255 */
+
+    u32 bar_color = ((u32)alpha << 24) | (COLOR_ACCENT & 0x00FFFFFFu);
+
+    /* Bar body */
+    if (h > 0) {
+      renderer_draw_rect(bx, baseline_y - h, bar_w, h, bar_color);
+
+      /* Glossy top highlight */
+      u8 gloss_a = alpha >> 1;
+      renderer_draw_rect(bx, baseline_y - h, bar_w, 2,
+                         ((u32)gloss_a << 24) | 0x00FFFFFFu);
+    }
+
+    /* Duration label above bar */
+    char dur_buf[12];
+    utils_format_duration_compact(dur, dur_buf, sizeof(dur_buf));
+    u32 lbl_color = (b == match_count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
+    Rect lbl_rect = {bx - 4, baseline_y - h - 14, bar_w + 8, 10};
+    ui_draw_text(dur_buf, lbl_rect, lbl_color, 0.55f, ALIGN_CENTER);
+
+    /* Date label below bar */
+    time_t s_time = (time_t)sessions[matching[b]].timestamp;
+    struct tm ts_tm = *localtime(&s_time);
+    char date_buf[16];
+    snprintf(date_buf, sizeof(date_buf), "%02d/%02d", ts_tm.tm_mday,
+             ts_tm.tm_mon + 1);
+
+    Rect date_rect = {bx - 4, baseline_y + 4, bar_w + 8, 10};
+    ui_draw_text(date_buf, date_rect, COLOR_SUBTEXT, 0.55f, ALIGN_CENTER);
+  }
+}
+
+
 void ui_draw_menu_item(int x, int y, int w, int h, const char *label,
                        bool selected, const ImageResource *left_icon,
                        const ImageResource *right_icon, int custom_icon_size) {

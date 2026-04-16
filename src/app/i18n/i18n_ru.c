@@ -29,4 +29,7 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_DAY_SAT] = "Сб",
 
     [MSG_STATS_NO_ACTIVITY] = "Нет активности",
+    [MSG_STATS_DAYS_ACTIVE] = "Дней активности: %d",
+    [MSG_STATS_NEVER]       = "Никогда",
+    [MSG_DATE_FORMAT]      = "%d.%m.%Y",
 };

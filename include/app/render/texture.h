@@ -48,4 +48,13 @@ void texture_draw_resource(const ImageResource* res, int x, int y, int w, int h)
  */
 void texture_free(Texture* tex);
 
+/**
+ * @brief Draws a texture with a custom tint/alpha color.
+ * @param tex   Pointer to the texture.
+ * @param x,y   Top-left screen position.
+ * @param w,h   Draw dimensions.
+ * @param color ARGB tint color (0xAARRGGBB). 0xFFFFFFFF = no tint.
+ */
+void texture_draw_tinted(Texture* tex, int x, int y, int w, int h, u32 color);
+
 #endif // GAMEDIARY_TEXTURE_H
