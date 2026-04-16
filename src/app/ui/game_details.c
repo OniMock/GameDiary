@@ -41,11 +41,18 @@ static void game_details_draw(void) {
     Rect main_card = {20, 20, 440, 220};
     ui_draw_card(main_card, COLOR_CARD, COLOR_BORDER);
 
-    // Icon
+    // Icon (Centered in 144x80 box at x=40)
     if (g_game_icon) {
-        texture_draw(g_game_icon, 40, 40, 144, 80);
+        int draw_w = g_game_icon->width;
+        int draw_h = g_game_icon->height;
+        int off_x = 40 + (144 - draw_w) / 2;
+        int off_y = 40 + (80 - draw_h) / 2;
+        texture_draw(g_game_icon, off_x, off_y, draw_w, draw_h);
     } else {
-        texture_draw_resource(&GD_IMG_ICON_NOT_FOUND_PNG, 40, 40, 144, 80);
+        const ImageResource* res = &GD_IMG_ICON_NOT_FOUND_PNG;
+        int off_x = 40 + (144 - res->width) / 2;
+        int off_y = 40 + (80 - res->height) / 2;
+        texture_draw_resource(res, off_x, off_y, res->width, res->height);
     }
 
     // Title & ID
