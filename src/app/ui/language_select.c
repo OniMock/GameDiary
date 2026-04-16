@@ -72,7 +72,7 @@ static void language_select_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
 
-    ui_draw_title(i18n_get(MSG_SETTINGS_LANGUAGE), safe_rect);
+    ui_draw_title_auto(i18n_get(MSG_SETTINGS_LANGUAGE), safe_rect, &GD_IMG_LANGUAGE_ICON_PNG);
 
     int menu_count = LANG_COUNT + 1;
     Rect list_area = {60, 70, 360, 160}; // Height for 4 items (~40px each)
@@ -91,23 +91,22 @@ static void language_select_draw(void) {
 
         int current_config = config_get()->language;
         int item_lang = (idx == 0) ? LANG_AUTO : idx - 1;
+        // Active Language Check
+        bool is_active = (item_lang == current_config);
 
-        uint32_t bg_color = COLOR_CARD;
-        uint32_t border_color = COLOR_BORDER;
+        const ImageResource* right_flag = NULL;
 
-        // Active Language Color (Success Green)
-        if (item_lang == current_config) {
-            bg_color = COLOR_SUCCESS;
+        if (idx != 0) {
+          right_flag = i18n_get_lang_flag(idx - 1);
         }
 
-        // Selection Highlight (Accent Border)
-        if (idx == g_selection) {
-            border_color = COLOR_ACCENT;
-            if (bg_color == COLOR_CARD) bg_color = COLOR_HIGHLIGHT;
-        }
+        ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
+                         name, (idx == g_selection), NULL, right_flag);
 
-        ui_draw_card(item_rect, bg_color, border_color);
-        ui_draw_text(name, rect_padding(item_rect, 8), COLOR_TEXT, 0.9f, ALIGN_LEFT);
+        // indicator for the active language if not selected
+        if (is_active && idx != g_selection) {
+             renderer_draw_rect(item_rect.x + item_rect.w - 5, item_rect.y + 10, 3, item_rect.h - 20, COLOR_SUCCESS);
+        }
     }
 
     // Scrollbar

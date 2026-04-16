@@ -4,9 +4,11 @@
 #include <stdint.h>
 
 // PSP GU format constants if not using pspgu.h
-#ifndef GU_PSM_8888
-#define GU_PSM_8888 3
-#endif
+//#ifndef GU_PSM_8888
+//#define GU_PSM_8888 3
+//#endif
+
+#include <pspgu.h>
 
 typedef struct {
     uint16_t width;      // Original width
@@ -22,6 +24,14 @@ typedef struct {
 #define GD_IMAGE_SIZE(img) ((img)->size)
 #define GD_IMAGE_BYTES(img) ((img)->size)
 
+extern const ImageResource GD_IMG_FLAG_EN_PNG;
+extern const ImageResource GD_IMG_FLAG_ES_PNG;
+extern const ImageResource GD_IMG_FLAG_PT_PNG;
+extern const ImageResource GD_IMG_FLAG_RU_PNG;
+extern const ImageResource GD_IMG_GAME_ICON_PNG;
 extern const ImageResource GD_IMG_ICON_NOT_FOUND_PNG;
+extern const ImageResource GD_IMG_LANGUAGE_ICON_PNG;
+extern const ImageResource GD_IMG_MENU_ICON_PNG;
+extern const ImageResource GD_IMG_STATS_ICON_PNG;
 
 #endif // GAMEDIARY_IMAGE_RESOURCES_H

@@ -42,22 +42,25 @@ static void settings_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
 
-    ui_draw_title(i18n_get(MSG_MENU_SETTINGS), safe_rect);
+    ui_draw_title_auto(i18n_get(MSG_MENU_SETTINGS), safe_rect, &GD_IMG_MENU_ICON_PNG);
 
     Rect list_area = {60, 70, 360, 160};
 
     for (int i = 0; i < SETTINGS_MENU_COUNT; i++) {
-        Rect item_rect = rect_column(list_area, i, 4, 10); // Standard height
-
-        uint32_t bg_color = (i == g_selection) ? COLOR_HIGHLIGHT : COLOR_CARD;
-        uint32_t border_color = (i == g_selection) ? COLOR_ACCENT : COLOR_BORDER;
-
-        ui_draw_card(item_rect, bg_color, border_color);
+        Rect item_rect = rect_column(list_area, i, 4, 10);
 
         const char* label = "";
-        if (i == 0) label = i18n_get(MSG_SETTINGS_LANGUAGE);
+        const ImageResource* left_icon = NULL;
+        const ImageResource* right_icon = NULL;
 
-        ui_draw_text(label, rect_padding(item_rect, 10), COLOR_TEXT, 1.0f, ALIGN_LEFT);
+        if (i == 0) {
+            label = i18n_get(MSG_SETTINGS_LANGUAGE);
+            left_icon = &GD_IMG_LANGUAGE_ICON_PNG;
+            right_icon = i18n_get_current_flag();
+        }
+
+        ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
+                         label, (i == g_selection), left_icon, right_icon);
     }
 
     const char* back_label = i18n_get(MSG_CTRL_BACK);

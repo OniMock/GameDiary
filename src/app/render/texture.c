@@ -130,13 +130,12 @@ void texture_draw_resource(const ImageResource* res, int x, int y, int w, int h)
     sceGuEnable(GU_BLEND);
     sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
     
-    sceGuColor(0xFFFFFFFF);
     sceGuTexMode(res->format, 0, 0, GU_FALSE);
     sceGuTexImage(0, res->pot_width, res->pot_height, res->stride, res->data);
     
     sceGuTexWrap(GU_CLAMP, GU_CLAMP);
     sceGuTexFilter(GU_LINEAR, GU_LINEAR);
-    sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
+    sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA); // Modulate to support tinting via sceGuColor
 
     Vertex* vertices = (Vertex*)sceGuGetMemory(2 * sizeof(Vertex));
 

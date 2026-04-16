@@ -15,15 +15,28 @@ const char **g_i18n_msg = NULL;
 typedef struct {
   const char *name;
   const char **entries;
+  const ImageResource *flag;
 } LanguageRegistry;
 
-static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
-    [LANG_EN] = {"English", g_lang_en_entries},
-    [LANG_PT] = {"Português", g_lang_pt_entries},
-    [LANG_ES] = {"Español", g_lang_es_entries},
-    [LANG_RU] = {"Русский", g_lang_ru_entries}};
+const ImageResource* i18n_get_current_flag(void);
+const ImageResource* i18n_get_lang_flag(int index);
 
+static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
+    [LANG_EN] = {"English", g_lang_en_entries, &GD_IMG_FLAG_EN_PNG},
+    [LANG_PT] = {"Português", g_lang_pt_entries, &GD_IMG_FLAG_PT_PNG},
+    [LANG_ES] = {"Español", g_lang_es_entries, &GD_IMG_FLAG_ES_PNG},
+    [LANG_RU] = {"Русский", g_lang_ru_entries, &GD_IMG_FLAG_RU_PNG}};
+    
 static int g_current_lang_idx = LANG_EN;
+
+const ImageResource* i18n_get_current_flag(void) {
+    return g_lang_registry[g_current_lang_idx].flag;
+}
+
+const ImageResource* i18n_get_lang_flag(int index) {
+    if (index < 0 || index >= LANG_COUNT) return NULL;
+    return g_lang_registry[index].flag;
+}
 
 /* --- Private Functions --- */
 

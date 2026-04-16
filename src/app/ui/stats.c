@@ -28,7 +28,7 @@ static void stats_draw(void) {
   Rect screen_rect = {0, 0, 480, 272};
   Rect safe_rect = rect_padding(screen_rect, 20);
 
-  ui_draw_title(i18n_get(MSG_MENU_STATS), safe_rect);
+  ui_draw_title_auto(i18n_get(MSG_MENU_STATS), safe_rect, &GD_IMG_STATS_ICON_PNG);
 
   u32 total_play = 0;
   u32 total_sessions = 0;

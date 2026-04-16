@@ -2,6 +2,7 @@
 #define GAMEDIARY_I18N_H
 
 #include <psptypes.h>
+#include "app/render/image_resources.h"
 
 /**
  * @file i18n.h
@@ -93,5 +94,15 @@ int i18n_current_lang(void);
  * Get the language name by index (e.g., "English").
  */
 const char* i18n_get_lang_name(int index);
+
+/**
+ * Get the flag image resource for the current language.
+ */
+const ImageResource* i18n_get_current_flag(void);
+
+/**
+ * Get the flag image resource for a specific language index.
+ */
+const ImageResource* i18n_get_lang_flag(int index);
 
 #endif // GAMEDIARY_I18N_H

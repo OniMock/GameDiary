@@ -19,7 +19,7 @@ class ImageReader:
             with Image.open(self.filepath) as img:
                 img = img.convert("RGBA")
                 self.width, self.height = img.size
-                
+
                 if self.width > 512 or self.height > 512:
                     return False, f"Image too large: {self.width}x{self.height} (max 512x512)"
 
@@ -35,7 +35,7 @@ class ImageReader:
                         val = (a << 24) | (b << 16) | (g << 8) | r
                         row.append(val)
                     self.pixels.append(row)
-                
+
                 return True, ""
         except Exception as e:
             return False, str(e)
@@ -61,25 +61,25 @@ class CodeGenerator:
 
     def add_asset(self, filename, width, height, pixels):
         symbol = self.sanitize_name(filename)
-        
+
         # Calculate Power of Two dimensions
         pot_w = self.get_pot(width)
         pot_height = self.get_pot(height)
-        
+
         # In PSP, the texture buffer width (stride) must be a multiple of 16
         # and for POT textures, it's usually = pot_w
-        stride = pot_w 
-        
+        stride = pot_w
+
         # Initialize padded data with 0 (transparent)
         # We produce pot_w * pot_height uint32 pixels
         data_size = pot_w * pot_height
         padded_pixels = [0] * data_size
-        
+
         # Fill the original pixels into the top-left of the POT buffer
         for y in range(height):
             for x in range(width):
                 padded_pixels[y * pot_w + x] = pixels[y][x]
-            
+
         self.assets.append({
             'symbol': symbol,
             'name': os.path.basename(filename),
@@ -100,9 +100,10 @@ class CodeGenerator:
             f.write("#define GAMEDIARY_IMAGE_RESOURCES_H\n\n")
             f.write("#include <stdint.h>\n\n")
             f.write("// PSP GU format constants if not using pspgu.h\n")
-            f.write("#ifndef GU_PSM_8888\n")
-            f.write("#define GU_PSM_8888 3\n")
-            f.write("#endif\n\n")
+            f.write("//#ifndef GU_PSM_8888\n")
+            f.write("//#define GU_PSM_8888 3\n")
+            f.write("//#endif\n\n")
+            f.write("#include <pspgu.h>\n\n")
             f.write("typedef struct {\n")
             f.write("    uint16_t width;      // Original width\n")
             f.write("    uint16_t height;     // Original height\n")
@@ -115,26 +116,26 @@ class CodeGenerator:
             f.write("} ImageResource;\n\n")
             f.write("#define GD_IMAGE_SIZE(img) ((img)->size)\n")
             f.write("#define GD_IMAGE_BYTES(img) ((img)->size)\n\n")
-            
+
             # Sort assets by symbol for consistent generation
             self.assets.sort(key=lambda x: x['symbol'])
             for asset in self.assets:
                 f.write(f"extern const ImageResource {asset['symbol']};\n")
-                
+
             f.write("\n#endif // GAMEDIARY_IMAGE_RESOURCES_H\n")
 
     def write_source(self):
         c_path = os.path.join(self.output_dir, "image_resources.c")
         with open(c_path, 'w') as f:
             f.write("#include \"app/render/image_resources.h\"\n\n")
-            
+
             # Sort assets by symbol for consistent generation
             self.assets.sort(key=lambda x: x['symbol'])
             for asset in self.assets:
                 f.write(f"// Data for {asset['symbol']} ({asset['name']})\n")
                 f.write("__attribute__((aligned(16)))\n")
                 f.write(f"static const uint32_t {asset['symbol']}_DATA[] = {{\n")
-                
+
                 # Format pixels in a nice grid (8 columns)
                 for i, pixel in enumerate(asset['data']):
                     if i % 8 == 0:
@@ -142,11 +143,11 @@ class CodeGenerator:
                     f.write(f"0x{pixel:08X}, ")
                     if (i + 1) % 8 == 0:
                         f.write("\n")
-                
+
                 if len(asset['data']) % 8 != 0:
                     f.write("\n")
                 f.write("};\n\n")
-                
+
                 f.write(f"const ImageResource {asset['symbol']} = {{\n")
                 f.write(f"    .width = {asset['width']},\n")
                 f.write(f"    .height = {asset['height']},\n")
@@ -169,10 +170,10 @@ def main():
         sys.exit(1)
 
     gen = CodeGenerator(output_src_dir, output_inc_dir)
-    
+
     any_img = False
     valid_extensions = ('.bmp', '.png', '.jpg', '.jpeg', '.tga')
-    
+
     for filename in sorted(os.listdir(assets_dir)):
         if filename.lower().endswith(valid_extensions):
             any_img = True

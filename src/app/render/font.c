@@ -27,6 +27,10 @@ float font_get_width(const char *str, float size) {
     return sdf_font_get_width(str, INTRAFONT_SCALE_TO_PX(size));
 }
 
+float font_get_height(float size) {
+    return INTRAFONT_SCALE_TO_PX(size);
+}
+
 void font_cleanup(void) {
     sdf_font_cleanup();
 }

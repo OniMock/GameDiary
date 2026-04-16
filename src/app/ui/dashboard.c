@@ -4,7 +4,9 @@
 #include "app/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
+#include "app/render/texture.h"
 #include "app/data/data_loader.h"
+#include <pspgu.h>
 #include <pspctrl.h>
 #include <stdio.h>
 
@@ -28,7 +30,7 @@ static void dashboard_draw(void) {
     Rect safe_rect = rect_padding(screen_rect, 20);
 
     // Header
-    ui_draw_title(i18n_get(MSG_APP_TITLE), safe_rect);
+    ui_draw_title_auto(i18n_get(MSG_APP_TITLE), safe_rect, NULL);
 
     // Weekly Graph (Center area)
     ui_draw_weekly_graph(data_get_sessions(), data_get_session_count());
@@ -49,6 +51,7 @@ static void dashboard_draw(void) {
 
     float rw = font_get_width(hint_r, 0.8f);
     ui_draw_hint(hint_r, 480 - 10 - (int)rw, 255, COLOR_SUBTEXT);
+
 }
 
 Screen g_screen_dashboard = {
