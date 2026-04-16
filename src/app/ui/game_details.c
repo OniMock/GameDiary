@@ -45,8 +45,7 @@ static void game_details_draw(void) {
     if (g_game_icon) {
         texture_draw(g_game_icon, 40, 40, 144, 80);
     } else {
-        renderer_draw_rect(40, 40, 144, 80, 0xFF333333);
-        font_draw_string(65, 85, "NO ICON", COLOR_SUBTEXT, 0.8f);
+        texture_draw_resource(&GD_IMG_ICON_NOT_FOUND_PNG, 40, 40, 144, 80);
     }
 
     // Title & ID

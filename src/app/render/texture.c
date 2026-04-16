@@ -114,6 +114,42 @@ void texture_draw(Texture* tex, int x, int y, int w, int h) {
     sceGuDrawArray(GU_SPRITES, GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 }
 
+void texture_draw_resource(const ImageResource* res, int x, int y, int w, int h) {
+    if (!res || !res->data) return;
+
+    typedef struct {
+        float u, v;
+        float x, y, z;
+    } Vertex;
+
+    // Flush cache to ensure GPU sees the correct data
+    sceKernelDcacheWritebackRange(res->data, res->size);
+
+    sceGuEnable(GU_TEXTURE_2D);
+    sceGuDisable(GU_DEPTH_TEST);
+    sceGuEnable(GU_BLEND);
+    sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+    
+    sceGuColor(0xFFFFFFFF);
+    sceGuTexMode(res->format, 0, 0, GU_FALSE);
+    sceGuTexImage(0, res->pot_width, res->pot_height, res->stride, res->data);
+    
+    sceGuTexWrap(GU_CLAMP, GU_CLAMP);
+    sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+    sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
+
+    Vertex* vertices = (Vertex*)sceGuGetMemory(2 * sizeof(Vertex));
+
+    // UV coordinates based on actual dimensions, not stride
+    float u = (float)res->width;
+    float v = (float)res->height;
+
+    vertices[0] = (Vertex){0, 0, (float)x, (float)y, 0};
+    vertices[1] = (Vertex){u, v, (float)(x + w), (float)(y + h), 0};
+
+    sceGuDrawArray(GU_SPRITES, GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
+}
+
 void texture_free(Texture* tex) {
     if (tex) {
         if (tex->data) free(tex->data);

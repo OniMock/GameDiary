@@ -5,6 +5,7 @@
  * @file texture.h
  * @brief Texture loading and rendering utilities.
  */
+#include "app/render/image_resources.h"
 
 typedef struct {
     int width;
@@ -30,6 +31,16 @@ Texture* texture_load_png(const char* filename);
  * @param h Height to draw.
  */
 void texture_draw(Texture* tex, int x, int y, int w, int h);
+
+/**
+ * @brief Draws an embedded ImageResource on the screen.
+ * @param res Pointer to the ImageResource.
+ * @param x X coordinate.
+ * @param y Y coordinate.
+ * @param w Width to draw.
+ * @param h Height to draw.
+ */
+void texture_draw_resource(const ImageResource* res, int x, int y, int w, int h);
 
 /**
  * @brief Frees texture resources.
