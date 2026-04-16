@@ -42,6 +42,7 @@ static void game_details_draw(void) {
     ui_draw_card(main_card, COLOR_CARD, COLOR_BORDER);
 
     // Icon (Centered in 144x80 box at x=40)
+    sceGuColor(0xFFFFFFFF); // Important: reset color tint state
     if (g_game_icon) {
         int draw_w = g_game_icon->width;
         int draw_h = g_game_icon->height;

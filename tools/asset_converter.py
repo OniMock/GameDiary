@@ -31,7 +31,6 @@ class ImageReader:
                     for x in range(self.width):
                         r, g, b, a = raw_data[y * self.width + x]
                         # PSP Format: 0xAABBGGRR (Little Endian MIPS)
-                        # value = (a << 24) | (b << 16) | (g << 8) | r
                         val = (a << 24) | (b << 16) | (g << 8) | r
                         row.append(val)
                     self.pixels.append(row)
