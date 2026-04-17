@@ -1,4 +1,4 @@
-#include "app/i18n.h"
+#include "app/i18n/i18n.h"
 
 // Using ISO-8859-1 escape sequences to ensure compatibility with ltn8.pgf
 // í = \xed, ñ = \xf1, á = \xe1, ó = \xf3, ú = \xfa

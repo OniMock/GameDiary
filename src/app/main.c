@@ -1,7 +1,7 @@
 #include "common/common.h"
 #include "common/utils.h"
 #include "common/storage.h"
-#include "app/i18n.h"
+#include "app/i18n/i18n.h"
 #include "app/config/config.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     } else {
         config_init("ms0:/PSP/GAME/GameDiary/EBOOT.PBP"); // Fallback
     }
-    
+
     config_load();
 
     /* Initialize storage with dynamic device prefix (ms0: vs ef0:) */

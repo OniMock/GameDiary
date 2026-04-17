@@ -24,7 +24,7 @@
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
 #include "app/ui/carousel_state.h"
-#include "app/i18n.h"
+#include "app/i18n/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
 #include "app/render/texture.h"

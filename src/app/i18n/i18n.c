@@ -1,4 +1,4 @@
-#include "app/i18n.h"
+#include "app/i18n/i18n.h"
 #include <psputility.h>
 #include <stddef.h>
 
@@ -26,7 +26,7 @@ static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
     [LANG_PT] = {"Português", g_lang_pt_entries, &GD_IMG_FLAG_PT_PNG},
     [LANG_ES] = {"Español", g_lang_es_entries, &GD_IMG_FLAG_ES_PNG},
     [LANG_RU] = {"Русский", g_lang_ru_entries, &GD_IMG_FLAG_RU_PNG}};
-    
+
 static int g_current_lang_idx = LANG_EN;
 
 const ImageResource* i18n_get_current_flag(void) {

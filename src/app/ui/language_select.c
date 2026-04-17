@@ -1,7 +1,7 @@
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
-#include "app/i18n.h"
+#include "app/i18n/i18n.h"
 #include "app/config/config.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"

@@ -1,4 +1,4 @@
-#include "app/i18n.h"
+#include "app/i18n/i18n.h"
 
 const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_APP_TITLE]            = "Diário de Jogo",
