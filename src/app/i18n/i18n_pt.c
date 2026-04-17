@@ -16,6 +16,7 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK]             = "Semana",
     [MSG_TOP_MONTH]            = "Mês",
     [MSG_TOP_ALL]              = "Sempre",
+    [MSG_ERROR_NO_GAMES]       = "Nenhum jogo encontrado",
     [MSG_CTRL_L] = "Menu",
     [MSG_CTRL_R] = "Estatísticas",
 
