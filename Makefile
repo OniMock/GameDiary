@@ -5,15 +5,15 @@
 all: plugin app
 
 plugin:
-	$(MAKE) -f Makefile.plugin clean
-	$(MAKE) -f Makefile.plugin
+	$(MAKE) -f Makefile_Plugin clean
+	$(MAKE) -f Makefile_Plugin
 
 app:
-	$(MAKE) -f Makefile.app clean
-	$(MAKE) -f Makefile.app
+	$(MAKE) -f Makefile_App clean
+	$(MAKE) -f Makefile_App
 
 clean:
-	$(MAKE) -f Makefile.plugin clean
-	$(MAKE) -f Makefile.app clean
+	$(MAKE) -f Makefile_Plugin clean
+	$(MAKE) -f Makefile_App clean
 	rm -rf obj
 	rm -f build_log.txt
