@@ -7,7 +7,7 @@
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
 ![Last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
 
-# GameDiary
+# 🎮 GameDiary
 
 > A modern playtime tracking system for the PlayStation Portable.
 
@@ -37,7 +37,7 @@ A complete playtime tracking and game management suite for the PlayStation Porta
 
 ---
 
-## Overview
+## 📖 Overview
 
 **GameDiary** is a background kernel-mode plugin (PRX) and a premium user-mode application (EBOOT) for the PlayStation Portable (PSP).
 
@@ -50,23 +50,23 @@ It exists to give PSP power-users modern, console-like play tracking capabilitie
 
 ---
 
-## Features
+## ✨ Features
 
-### Core
+### ⚙️ Core
 * **Seamless Background Tracking**: Minimal footprint kernel plugin starts silently with your games and records your playtime accurately.
 * **Automatic Icon Management**: Automatically extracts `ICON0.PNG`
 from EBOOTs and ISOs for a rich visual diary without manual scraping.
-### UI / UX
+### 🎨 UI / UX
 * **Premium User Interface**: Fluid carousel navigation, smooth
 transitions, depth-sorted overlapping icons, and dynamic backgrounds built from the ground up to feel like native OS features.
 * **Comprehensive Stats**: View total playtime, session history, and detailed graphs.
-### System
+### 🧩 System
 * **Internationalization (i18n)**: Fully localized in English, Spanish, and Portuguese with automatic detection based on PSP system settings.
 * **POPS Compatibility**: Reliable tracking and icon parsing for PlayStation 1 classics running via the official emulator.
 
 ---
 
-## Screenshots / UI
+## 🖼️ Screenshots / UI
 
 | Home / Carousel | Session Statistics |
 | :---: | :---: |
@@ -75,7 +75,7 @@ transitions, depth-sorted overlapping icons, and dynamic backgrounds built from 
 
 ---
 
-## How It Works
+## ⚙️ How It Works
 
 GameDiary operates in two layers:
 
@@ -84,14 +84,14 @@ GameDiary operates in two layers:
 2. User Application (EBOOT)
    - Reads and visualizes collected data
 
-## Installation
+## 📦 Installation
 
-### Requirements
+### 📋 Requirements
 * A PlayStation Portable (PSP 1000/2000/3000 or Go).
 * Custom Firmware (CFW) installed (such as PRO, ME, or ARK-4).
 * A Memory Stick (or MicroSD to MS adapter).
 
-### Folder Preparation
+### 🗂️ Folder Preparation
 Ensure you have the latest release downloaded from the [Releases](https://github.com/OniMock/GameDiary/releases) page. The release contains two main components: the App and the Plugin.
 
 ### 1. Installing the Plugin (Tracker)
@@ -112,12 +112,12 @@ Ensure you have the latest release downloaded from the [Releases](https://github
 
 ---
 
-## Usage
+## 🚀 Usage
 
-### Launching the App
+### ▶️ Launching the App
 Simply navigate to your PSP's **Game** menu on the XMB and launch **GameDiary** like any other homebrew.
 
-### Controls
+### 🎮 Controls
 
 | Button | Action |
 | :--- | :--- |
@@ -128,13 +128,13 @@ Simply navigate to your PSP's **Game** menu on the XMB and launch **GameDiary** 
 | **Square (□)** | Change graph sorting modes |
 | **L/R Triggers** | Fast jump between letters/pages |
 
-### Example Workflows
+### 🔄 Example Workflows
 1. **Playing a game**: Boot up a UMD or ISO. The plugin silently detects the game ID, extracts the icon if missing, and begins tracking your playtime.
 2. **Reviewing stats**: Run the GameDiary Application from the XMB. Scroll through the carousel to find your game, hit **X** (or **O**) to view your weekly and all-time playtime statistics.
 
 ---
 
-## Project Structure
+## 🏗️ Project Structure
 
 A clean, modular architecture separating kernel plugin operations from user-mode presentation.
 
@@ -158,7 +158,7 @@ GameDiary/
 
 ---
 
-## Configuration
+## 🛠️ Configuration
 
 GameDiary data is stored inside the `ms0:/PSP/COMMON/GameDiary/` directory to keep your Memory Stick tidy.
 
@@ -168,11 +168,11 @@ GameDiary data is stored inside the `ms0:/PSP/COMMON/GameDiary/` directory to ke
 
 ---
 
-## Development
+## 👨‍💻 Development
 
 GameDiary is built using the standard [pspdev implementation of the PSPSDK](https://github.com/pspdev/pspdev).
 
-### Building Locally
+### 🧪 Building Locally
 1. Ensure `pspdev` is installed and the environment variables (`PSPSDK`, `PATH`) are configured.
 2. Clone the repository:
    ```bash
@@ -184,18 +184,18 @@ GameDiary is built using the standard [pspdev implementation of the PSPSDK](http
    make clean all
    ```
 
-### Docker
+### 🐳 Docker
 Alternatively, use the official Docker image to compile without setting up local tools:
 ```bash
 docker run --rm -it -v "${PWD}:/workspace" pspdev/pspdev Make clean all
 ```
 
-### Running on Emulator
+### 🖥️ Running on Emulator
 The user-mode application can be tested using [PPSSPP](https://www.ppsspp.org/). Testing the kernel-plugin typically requires a real PSP, though specific module debugging can sometimes be simulated with advanced emulator setups.
 
 ---
 
-## Plugin Details
+## 🔌 Plugin Details
 
 The tracking system relies on kernel thread manipulation and syscall hooks to calculate precise uptime accurately.
 
@@ -205,7 +205,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
 - [x] Background play tracking and database mapping.
 - [x] MSDF font rendering and multi-language support.
@@ -215,7 +215,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Please adhere to the following guidelines:
 
@@ -225,36 +225,35 @@ We welcome contributions! Please adhere to the following guidelines:
 
 ---
 
-## Support
+## ☕ Support
 
 If you like this project and want to support its continuous development, consider buying me a coffee or sending a crypto donation!
 
-<div style="display: flex; justify-content: space-between; align-items: center;">
+<table width="100%" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="left">
+      <strong>Buy Me a Coffee</strong><br><br>
+      <img src=".github/sources/qr_coffee.bmp" width="140"/>
+    </td>
+    <td align="right">
+      <strong>Crypto Wallet (EVM)</strong><br><br>
+      <img src=".github/sources/qr_wallet.bmp" width="140"/>
+    </td>
+  </tr>
+</table>
 
-<div align="center">
-  <strong>Buy Me a Coffee</strong><br>
-  <img src=".github/sources/qr_coffee.bmp" width="128"/>
-</div>
-
-<div align="center">
-  <strong>Crypto Wallet (EVM)</strong><br>
-  <img src=".github/sources/qr_wallet.bmp" width="128"/>
-</div>
-
-</div>
-
-## License
+## 📝 License
 
 This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## Credits
+## 🌟 Credits
 
 * [pspdev](https://github.com/pspdev/pspdev) SDK and community for maintaining modern PSP toolchains.
 * Developers of PRO / ARK-4 CFW for mapping the boundaries of modern PSP kernel development.
 
-## Author
+## 👤 Author
 
 Developed by [OniMock](https://github.com/OniMock).
 
