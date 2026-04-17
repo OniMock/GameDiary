@@ -30,7 +30,15 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_DAY_SAT] = "Sáb",
 
     [MSG_STATS_NO_ACTIVITY] = "Sin actividad reciente",
-    [MSG_STATS_DAYS_ACTIVE] = "D\xed\x61s Activos: %d", // Días
+    [MSG_STATS_DAYS_ACTIVE] = "Días Activos: %d",
     [MSG_STATS_NEVER]       = "Nunca",
+
+    // Format Time
     [MSG_DATE_FORMAT]      = "%d/%m/%Y",
+    [MSG_DATE_FORMAT_SHORT] = "%d/%m",
+    [MSG_DURATION_DAYS]    = "%dd",
+    [MSG_DURATION_HOURS]   = "%dh",
+    [MSG_DURATION_MINS]    = "%dm",
+    [MSG_DURATION_H_M]     = "%dh %dm",
+    [MSG_DURATION_D_H_M]   = "%dd %dh %dm",
 };

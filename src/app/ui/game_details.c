@@ -70,7 +70,7 @@ static void game_details_draw(void) {
     // Total Playtime row
     Rect row1 = rect_column(stats_area, 0, 2, 5);
     ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), row1, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
-    utils_format_time(g->total_playtime, buf, sizeof(buf));
+    ui_format_duration(g->total_playtime, buf, sizeof(buf));
     ui_draw_text(buf, row1, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
 
     // Sessions row

@@ -26,24 +26,10 @@ u32 utils_get_timestamp(void) {
   return (u32)((tick / 1000000ULL) - 62135596800ULL);
 }
 
-void utils_format_time(u32 seconds, char *out, size_t size) {
-  u32 h = seconds / 3600;
-  u32 m = (seconds % 3600) / 60;
-  snprintf(out, size, "%luh %lum", (unsigned long)h, (unsigned long)m);
-}
-
 void utils_format_duration_compact(u32 seconds, char *out, size_t size) {
-  u32 h = seconds / 3600;
-  u32 m = (seconds % 3600) / 60;
-  if (h > 0) {
-    if (m > 0) {
-      snprintf(out, size, "%luh%lum", (unsigned long)h, (unsigned long)m);
-    } else {
-      snprintf(out, size, "%luh", (unsigned long)h);
-    }
-  } else {
-    snprintf(out, size, "%lum", (unsigned long)m);
-  }
+  (void)seconds;
+  (void)out;
+  (void)size;
 }
 
 const char *utils_get_device_prefix(void) {

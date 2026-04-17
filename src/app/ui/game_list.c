@@ -143,7 +143,7 @@ static void draw_stats_block(const GameStats *g,
     /* Total Playtime */
     Rect box1 = {start_x, start_y, box_w, box_h};
     ui_draw_card(box1, COLOR_CARD, COLOR_BORDER);
-    utils_format_time(g->total_playtime, val_buf, sizeof(val_buf));
+    ui_format_duration(g->total_playtime, val_buf, sizeof(val_buf));
     snprintf(text_buf, sizeof(text_buf), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), val_buf);
     ui_draw_text(text_buf, (Rect){start_x + 10, start_y + 7, box_w - 20, 10},
                  COLOR_TEXT, 0.7f, ALIGN_LEFT);

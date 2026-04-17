@@ -34,10 +34,6 @@ u32 utils_get_u32_le(const u8 *p);
  */
 u32 utils_get_timestamp(void);
 
-/**
- * @brief Formats seconds into a human-readable "h m" string.
- */
-void utils_format_time(u32 seconds, char *out, size_t size);
 void utils_format_duration_compact(u32 seconds, char *out, size_t size);
 const char* utils_get_device_prefix(void);
 void utils_ensure_storage_dirs(const char* prefix);

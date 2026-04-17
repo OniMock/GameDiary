@@ -28,8 +28,15 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_DAY_FRI] = "Пт",
     [MSG_DAY_SAT] = "Сб",
 
+    // Format Time
     [MSG_STATS_NO_ACTIVITY] = "Нет активности",
     [MSG_STATS_DAYS_ACTIVE] = "Дней активности: %d",
     [MSG_STATS_NEVER]       = "Никогда",
     [MSG_DATE_FORMAT]      = "%d.%m.%Y",
+    [MSG_DATE_FORMAT_SHORT] = "%d.%m",
+    [MSG_DURATION_DAYS]    = "%dд",
+    [MSG_DURATION_HOURS]   = "%uч",
+    [MSG_DURATION_MINS]    = "%uм",
+    [MSG_DURATION_H_M]     = "%uч %uм",
+    [MSG_DURATION_D_H_M]   = "%dд %uч %uм",
 };

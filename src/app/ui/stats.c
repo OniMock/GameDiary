@@ -51,7 +51,7 @@ static void stats_draw(void) {
   ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), rect_column(p_cont, 0, 2, 0),
                COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
   char time_str[32];
-  utils_format_time(total_play, time_str, sizeof(time_str));
+  ui_format_duration(total_play, time_str, sizeof(time_str));
   ui_draw_text(time_str, rect_column(p_cont, 1, 2, 0), COLOR_TEXT, 1.2f,
                ALIGN_LEFT);
 

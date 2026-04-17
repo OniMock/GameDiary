@@ -173,8 +173,7 @@ void ui_draw_weekly_graph(SessionEntry *sessions, int count) {
 
       // Draw playtime text on top
       char time_buf[16];
-      utils_format_duration_compact(day_playtime[idx], time_buf,
-                                    sizeof(time_buf));
+      ui_format_duration(day_playtime[idx], time_buf, sizeof(time_buf));
       Rect time_rect = {x - 5, gy - h - 14, bar_w + 10, 10};
       ui_draw_text(time_buf, time_rect, label_color, 0.6f, ALIGN_CENTER);
     }
@@ -290,8 +289,8 @@ void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
     }
 
     /* Duration label above bar */
-    char dur_buf[12];
-    utils_format_duration_compact(dur, dur_buf, sizeof(dur_buf));
+    char dur_buf[16];
+    ui_format_duration(dur, dur_buf, sizeof(dur_buf));
     u32 lbl_color = (b == match_count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
     Rect lbl_rect = {bx - 4, baseline_y - h - 14, bar_w + 8, 10};
     ui_draw_text(dur_buf, lbl_rect, lbl_color, 0.55f, ALIGN_CENTER);
@@ -300,8 +299,7 @@ void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
     time_t s_time = (time_t)sessions[matching[b]].timestamp;
     struct tm ts_tm = *localtime(&s_time);
     char date_buf[16];
-    snprintf(date_buf, sizeof(date_buf), "%02d/%02d", ts_tm.tm_mday,
-             ts_tm.tm_mon + 1);
+    strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT_SHORT), &ts_tm);
 
     Rect date_rect = {bx - 4, baseline_y + 4, bar_w + 8, 10};
     ui_draw_text(date_buf, date_rect, COLOR_SUBTEXT, 0.55f, ALIGN_CENTER);
@@ -376,4 +374,22 @@ void ui_draw_menu_item_auto(int x, int y, int w, int h, const char *label,
                             bool selected, const ImageResource *left_icon,
                             const ImageResource *right_icon) {
   ui_draw_menu_item(x, y, w, h, label, selected, left_icon, right_icon, -1);
+}
+
+void ui_format_duration(u32 seconds, char *out, size_t size) {
+  u32 d = seconds / 86400;
+  u32 h = (seconds % 86400) / 3600;
+  u32 m = (seconds % 3600) / 60;
+
+  if (d > 0) {
+    snprintf(out, size, i18n_get(MSG_DURATION_D_H_M), d, h, m);
+  } else if (h > 0) {
+    if (m > 0) {
+      snprintf(out, size, i18n_get(MSG_DURATION_H_M), h, m);
+    } else {
+      snprintf(out, size, i18n_get(MSG_DURATION_HOURS), h);
+    }
+  } else {
+    snprintf(out, size, i18n_get(MSG_DURATION_MINS), m);
+  }
 }

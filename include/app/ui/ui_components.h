@@ -99,4 +99,10 @@ void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
  */
 void ui_reset_session_graph_animation(void);
 
+/**
+ * Formats a duration in seconds into a localized human-readable string.
+ * Handles days, hours, and minutes based on value.
+ */
+void ui_format_duration(u32 seconds, char *out, size_t size);
+
 #endif // GAMEDIARY_UI_COMPONENTS_H

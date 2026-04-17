@@ -30,5 +30,14 @@ const char *g_lang_en_entries[MSG_COUNT] = {
     [MSG_STATS_NO_ACTIVITY] = "No recent activity",
     [MSG_STATS_DAYS_ACTIVE] = "Days Active: %d",
     [MSG_STATS_NEVER]       = "Never",
+
+    // Format Time
     [MSG_DATE_FORMAT]      = "%m/%d/%Y",
+    [MSG_DATE_FORMAT_SHORT] = "%m/%d",
+    [MSG_DURATION_DAYS]    = "%dd",
+    [MSG_DURATION_HOURS]   = "%dh",
+    [MSG_DURATION_MINS]    = "%dm",
+    [MSG_DURATION_H_M]     = "%dh %dm",
+    [MSG_DURATION_D_H_M]   = "%dd %dh %dm",
+
 };
