@@ -1,0 +1,267 @@
+name: Build GameDiary PSP
+
+on:
+  push:
+    branches: [ main, master ]
+    paths-ignore:
+      - CHANGELOG.md
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: pspdev/pspdev:latest
+
+    steps:
+      # -------------------------------------------------------
+      # 📥 Checkout
+      # -------------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------
+      # 📦 Dependecies
+      # -------------------------------------------------------
+      - name: Install dependencies
+        run: |
+          apk add --no-cache build-base python3 rar
+
+      # -------------------------------------------------------
+      # 🔍 Validate Language Keys
+      # -------------------------------------------------------
+      - name: Validate Language Keys
+        run: |
+          python3 .github/scripts/check_lang_keys.py
+
+      # -------------------------------------------------------
+      # 🛠️ Build
+      # -------------------------------------------------------
+      - name: Build Project
+        run: |
+          export PSPSDK=$(psp-config --pspsdk-path)
+          export PSPDEV=$(psp-config --pspdev-path)
+          export PATH=$PATH:$PSPDEV/bin
+
+          make clean || true
+          make
+
+      # -------------------------------------------------------
+      # 📦 Prepare artifact structure
+      # -------------------------------------------------------
+      - name: Prepare artifact structure
+        run: |
+          mkdir -p release/GameDiary
+
+          # Copy PRX
+          if [ -f GameDiary.prx ]; then
+            cp GameDiary.prx release/
+          else
+            echo "❌ GameDiary.prx not found"
+            exit 1
+          fi
+
+          # Copy EBOOT
+          if [ -f EBOOT.PBP ]; then
+            cp EBOOT.PBP release/GameDiary/EBOOT.PBP
+          else
+            echo "❌ EBOOT.PBP not found"
+            exit 1
+          fi
+
+          echo "📂 Final structure:"
+          find release -type f -exec ls -lh {} \;
+
+      # -------------------------------------------------------
+      # 📦 Create RAR
+      # -------------------------------------------------------
+      - name: Create RAR
+        run: |
+          cd release
+          rar a ../GameDiary.rar .
+          cd ..
+          ls -lh GameDiary.rar
+
+      # -------------------------------------------------------
+      # 📤 Upload artifact
+      # -------------------------------------------------------
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameDiary
+          path: GameDiary.rar
+
+  # ===========================================================
+  # 🚀 AUTOMATIC RELEASE
+  # ===========================================================
+  release:
+    name: Create GitHub Release
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -------------------------------------------------------
+      # 🔢 Version from Makefile_App
+      # -------------------------------------------------------
+      - name: Get project version
+        id: get_version
+        run: |
+          VERSION=$(grep -E '^PROJECT_VERSION' Makefile_App | cut -d '=' -f2 | xargs)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      # -------------------------------------------------------
+      # 🏷️ Check if tag exists
+      # -------------------------------------------------------
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          git fetch --tags
+          if git tag -l "${{ steps.get_version.outputs.tag }}" | grep -q .; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      # -------------------------------------------------------
+      # 📥 Download artifact
+      # -------------------------------------------------------
+      - name: Download artifact
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: GameDiary
+
+      # -------------------------------------------------------
+      # 📝 Generate Changelog
+      # -------------------------------------------------------
+      - name: Generate Changelog
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: .github/scripts/cliff.toml
+          args: --latest --strip header --tag ${{ steps.get_version.outputs.tag }} --output CHANGELOG.tmp.md
+
+      - name: Update CHANGELOG.md (prepend)
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            cat CHANGELOG.tmp.md CHANGELOG.md > CHANGELOG.new.md
+            mv CHANGELOG.new.md CHANGELOG.md
+          else
+            mv CHANGELOG.tmp.md CHANGELOG.md
+          fi
+
+          rm -f CHANGELOG.tmp.md
+
+      - name: Commit changelog
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git config user.name "onimock-actions"
+          git config user.email "onimock-actions@github.com"
+
+          git add CHANGELOG.md
+
+          git commit -m "chore(release): update changelog ${{ steps.get_version.outputs.tag }} [skip cliff]" || echo "No changes"
+
+          git push
+
+
+      # -------------------------------------------------------
+      # 🏷️ Create tag
+      # -------------------------------------------------------
+      - name: Create tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git config user.name "onimock-actions"
+          git config user.email "onimock-actions@github.com"
+          git tag ${{ steps.get_version.outputs.tag }}
+          git push origin ${{ steps.get_version.outputs.tag }}
+
+      # -------------------------------------------------------
+      # 🚀 Create release
+      # -------------------------------------------------------
+      - name: Create Release
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: GameDiary ${{ steps.get_version.outputs.tag }}
+          body: |
+            ## 🎮 GameDiary PSP
+
+            New version available.
+
+            ---
+
+            ## 📦 Download
+
+            * GameDiary.rar (PRX + EBOOT)
+              https://github.com/OniMock/GameDiary/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.rar
+
+            ---
+
+            ## ⚙️ Installation
+
+            ### 📌 Plugin (GameDiary.prx)
+
+            1. Copy `GameDiary.prx` to:
+
+            ```
+            /SEPLUGINS/
+            ```
+
+            2. Enable the plugin in ARK-4:
+
+            * For PSP games:
+
+            ```
+            ms0:/SEPLUGINS/GameDiary.prx 1
+            ```
+
+            (or `ef0:/` on PSP Go)
+
+            * For POPS (PS1):
+
+            ```
+            ms0:/SEPLUGINS/GameDiary.prx 1
+            ```
+
+            ---
+
+            ### 🎮 Application (EBOOT)
+
+            1. Copy the `GameDiary` folder to:
+
+            ```
+            /PSP/GAME/
+            ```
+
+            2. Final structure:
+
+            ```
+            PSP/
+              GAME/
+                GameDiary/
+                  EBOOT.PBP
+            ```
+
+            ---
+
+            ## 📝 Changelog
+
+            ${{ steps.git-cliff.outputs.content }}
+          files: GameDiary.rar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
