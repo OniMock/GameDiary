@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+/**
+ * @file metadata_repository.c
+ * @brief Metadata repository implementation.
+ */
+
 #include "plugin/metadata_repository.h"
 #include "plugin/apitype.h"
 #include "common/common.h"
@@ -15,7 +30,7 @@
 static void set_default_metadata(GameMetadata *metadata) {
     strncpy(metadata->game_id, "UNKNOWN-00000", sizeof(metadata->game_id) - 1);
     metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
-    
+
     strncpy(metadata->game_name, "Unknown Game", sizeof(metadata->game_name) - 1);
     metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
 }
@@ -81,10 +96,10 @@ static void fetch_homebrew_fallback_id(GameMetadata *metadata) {
 int metadata_fetch(GameMetadata *metadata) {
     int apitype = sceKernelInitApitype();
     metadata->category = apitype_detect_category(apitype);
-    
+
     snprintf(metadata->apitype_str, sizeof(metadata->apitype_str), "0x%03X", (unsigned int)apitype);
     set_default_metadata(metadata);
-    
+
     // Resolve executable path
     memset(metadata->file_path, 0, sizeof(metadata->file_path));
     if (kuKernelInitFileName(metadata->file_path) < 0) {
@@ -137,7 +152,7 @@ int metadata_fetch_from_umd(GameMetadata *metadata) {
 
     // Try to get Title from UMD SFO
     sfo_read_string("disc0:/PSP_GAME/PARAM.SFO", "TITLE", metadata->game_name, sizeof(metadata->game_name));
-    
+
     return 1;
 }
 

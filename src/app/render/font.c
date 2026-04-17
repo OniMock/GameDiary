@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+ /**
+  * @file font.c
+  * @brief Font system implementation.
+  */
+
 #include "app/render/font.h"
 #include "app/render/sdf_font.h"
 #include <pspkernel.h>

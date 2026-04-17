@@ -1,3 +1,13 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
 #ifndef GAMEDIARY_DATA_LOADER_H
 #define GAMEDIARY_DATA_LOADER_H
 
@@ -13,7 +23,7 @@ typedef struct {
     u32 total_playtime;
     u32 session_count;
     u32 last_played_ts;
-    u32 period_playtime; 
+    u32 period_playtime;
 } GameStats;
 
 /**

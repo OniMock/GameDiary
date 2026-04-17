@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+/**
+ * @file ui_layout.c
+ * @brief UI layout implementation.
+ */
+
 #include "app/ui/ui_layout.h"
 
 Rect rect_padding(Rect r, int p) {

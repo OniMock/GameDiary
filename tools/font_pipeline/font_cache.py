@@ -1,3 +1,13 @@
+"""
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+"""
+
 import os
 import json
 import hashlib
@@ -23,7 +33,7 @@ class FontCache:
 
     def update(self, group_name, charset_text):
         self.cache[group_name] = get_hash(charset_text)
-        
+
     def save(self):
         with open(self.cache_file, 'w') as f:
             json.dump(self.cache, f)

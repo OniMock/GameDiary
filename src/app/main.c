@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+/**
+ * @file main.c
+ * @brief Main application entry point.
+ */
+
 #include "common/common.h"
 #include "common/utils.h"
 #include "common/storage.h"

@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+/**
+ * @file apitype.c
+ * @brief API type detection implementation.
+ */
+
 #include "plugin/apitype.h"
 
 int apitype_detect_category(int apitype) {

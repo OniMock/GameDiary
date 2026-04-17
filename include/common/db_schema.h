@@ -1,6 +1,16 @@
 #ifndef _DB_SCHEMA_H_
 #define _DB_SCHEMA_H_
 
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
 #include <pspkernel.h>
 
 // Magic "GAMD"
@@ -14,6 +24,10 @@
 #define GAMES_DAT "games.dat"
 #define GAMES_TMP "games.tmp"
 #define SESSIONS_DAT "sessions.dat"
+
+/**
+ * @brief Game entry structure.
+ */
 
 #pragma pack(push, 1)
 

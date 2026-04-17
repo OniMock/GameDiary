@@ -1,3 +1,13 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
 #include "app/i18n/i18n.h"
 
 const char* g_lang_ru_entries[MSG_COUNT] = {

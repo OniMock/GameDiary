@@ -1,3 +1,13 @@
+"""
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+"""
+
 import os
 
 # Define unicode blocks for our 3 target atlases
@@ -36,32 +46,32 @@ def build_charsets(characters, out_dir):
     Returns a dictionary of group_name -> set_of_characters
     """
     os.makedirs(out_dir, exist_ok=True)
-    
+
     groups = {
         "latin_cyrillic": set(),
         "cjk": set(),
         "symbols": set()
     }
-    
+
     # MANDATORY: Always include the full printable ASCII set in the latin atlas.
     # Runtime strings (formatted numbers, brackets, slashes etc.) are generated
     # at runtime and are NOT present in i18n files, so the scanner can't find them.
     for cp in range(0x20, 0x7F):  # space (0x20) through ~ (0x7E)
         groups["latin_cyrillic"].add(chr(cp))
-    
+
     # Also add a fallback '?' to all atlases so the glyph-not-found path renders
     for g in groups.values():
         g.add('?')
-        
+
     for c in characters:
         group = get_group_for_char(c)
         groups[group].add(c)
-        
+
     # Write to files
     for group_name, chars in groups.items():
         if not chars:
             continue
-        
+
         filepath = os.path.join(out_dir, f"{group_name}.txt")
         # msdf-atlas-gen expects comma-separated list of hex values, or strings, etc.
         # Safest is comma-separated hex (e.g. 0x0041, 0x0042)
@@ -69,7 +79,7 @@ def build_charsets(characters, out_dir):
             sorted_chars = sorted(list(chars))
             hex_list = [f"0x{ord(c):X}" for c in sorted_chars]
             f.write(", ".join(hex_list))
-            
+
     return groups
 
 if __name__ == '__main__':

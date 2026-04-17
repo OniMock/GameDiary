@@ -1,3 +1,13 @@
+"""
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+"""
+
 #!/usr/bin/env python3
 import os
 import sys
@@ -95,6 +105,15 @@ class CodeGenerator:
     def write_header(self):
         h_path = os.path.join(self.header_dir, "image_resources.h")
         with open(h_path, 'w') as f:
+            f.write("/**\n")
+            f.write(" * -------------------------------------------------------------\n")
+            f.write(" *  GameDiary\n")
+            f.write(" *  Playtime Tracking System for the PlayStation Portable (PSP)\n")
+            f.write(" *\n")
+            f.write(" *  Developed by OniMock\n")
+            f.write(" *  Copyright (c) 2026 OniMock. All rights reserved.\n")
+            f.write(" * -------------------------------------------------------------\n")
+            f.write("*/\n\n")
             f.write("#ifndef GAMEDIARY_IMAGE_RESOURCES_H\n")
             f.write("#define GAMEDIARY_IMAGE_RESOURCES_H\n\n")
             f.write("#include <stdint.h>\n\n")
@@ -126,6 +145,15 @@ class CodeGenerator:
     def write_source(self):
         c_path = os.path.join(self.output_dir, "image_resources.c")
         with open(c_path, 'w') as f:
+            f.write("/**\n")
+            f.write(" * -------------------------------------------------------------\n")
+            f.write(" *  GameDiary\n")
+            f.write(" *  Playtime Tracking System for the PlayStation Portable (PSP)\n")
+            f.write(" *\n")
+            f.write(" *  Developed by OniMock\n")
+            f.write(" *  Copyright (c) 2026 OniMock. All rights reserved.\n")
+            f.write(" * -------------------------------------------------------------\n")
+            f.write("*/\n\n")
             f.write("#include \"app/render/image_resources.h\"\n\n")
 
             # Sort assets by symbol for consistent generation

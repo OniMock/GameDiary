@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+ /**
+  * @file texture.c
+  * @brief Texture system implementation.
+  */
+
 #include "app/render/texture.h"
 #include <pspkernel.h>
 #include <pspgu.h>
@@ -129,10 +144,10 @@ void texture_draw_resource(const ImageResource* res, int x, int y, int w, int h)
     sceGuDisable(GU_DEPTH_TEST);
     sceGuEnable(GU_BLEND);
     sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-    
+
     sceGuTexMode(res->format, 0, 0, GU_FALSE);
     sceGuTexImage(0, res->pot_width, res->pot_height, res->stride, res->data);
-    
+
     sceGuTexWrap(GU_CLAMP, GU_CLAMP);
     sceGuTexFilter(GU_LINEAR, GU_LINEAR);
     sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA); // Modulate to support tinting via sceGuColor

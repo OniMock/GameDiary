@@ -1,3 +1,13 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  Copyright (c) 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+*/
+
 #include "app/render/image_resources.h"
 
 // Data for GD_IMG_FLAG_EN_PNG (flag_en.png)

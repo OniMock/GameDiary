@@ -1,3 +1,13 @@
+"""
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+"""
+
 import os
 import glob
 import re
@@ -38,7 +48,7 @@ def decode_c_string(c_str):
         else:
             res += c_str[i]
         i += 1
-        
+
     return res
 
 def extract_strings_from_file(filepath):
@@ -57,14 +67,14 @@ def extract_strings_from_file(filepath):
     # Match string literals: "..."
     # This regex handles escaped quotes \" inside the string.
     str_regex = re.compile(r'"((?:\\.|[^"\\])*)"')
-    
+
     unique_chars = set()
     for match in str_regex.finditer(content):
         raw_str = match.group(1)
         decoded_str = decode_c_string(raw_str)
         # Add all characters to the set
         unique_chars.update(decoded_str)
-        
+
     return unique_chars
 
 def scan_all_i18n(directories):

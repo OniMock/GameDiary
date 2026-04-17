@@ -1,4 +1,14 @@
 /**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+/**
  * @file game_list.c
  * @brief Lateral icon carousel screen — replaces the old text list.
  *

@@ -1,3 +1,17 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+ /**
+  * @file config.c
+  * @brief Configuration system implementation.
+  */
 #include "app/config/config.h"
 #include <stdio.h>
 #include <string.h>
@@ -24,7 +38,7 @@ int config_load(void) {
     SceUID fd = sceIoOpen(g_config_path, PSP_O_RDONLY, 0777);
     if (fd < 0) {
         // Default settings: Auto-detect language
-        g_config.language = -1; 
+        g_config.language = -1;
         return config_save(); // Create with defaults
     }
 

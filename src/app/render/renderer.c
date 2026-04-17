@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+ /**
+  * @file renderer.c
+  * @brief Renderer system implementation.
+  */
+
 #include "app/render/renderer.h"
 #include <pspkernel.h>
 #include <pspdisplay.h>
@@ -31,17 +46,17 @@ void renderer_init(void) {
     sceGuInit();
 
     sceGuStart(GU_DIRECT, list);
-    
+
     // Setup buffers (relative to VRAM base)
     sceGuDrawBuffer(GU_PSM_8888, g_draw_buffer, BUF_WIDTH);
     sceGuDispBuffer(SCR_WIDTH, SCR_HEIGHT, g_display_buffer, BUF_WIDTH);
     sceGuDepthBuffer(g_z_buffer, BUF_WIDTH);
-    
+
     sceGuOffset(2048 - (SCR_WIDTH / 2), 2048 - (SCR_HEIGHT / 2));
     sceGuViewport(2048, 2048, SCR_WIDTH, SCR_HEIGHT);
     sceGuDepthRange(0xc350, 0x2710);
     sceGuScissor(0, 0, SCR_WIDTH, SCR_HEIGHT);
-    
+
     sceGuEnable(GU_SCISSOR_TEST);
     sceGuAlphaFunc(GU_GREATER, 0, 0xff);
     sceGuEnable(GU_ALPHA_TEST);
@@ -53,12 +68,12 @@ void renderer_init(void) {
     sceGuEnable(GU_BLEND);
     sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
     sceGuEnable(GU_CLIP_PLANES);
-    
+
     // Finalize init and clear both buffers to avoid startup static
     sceGuClearColor(0xFF000000);
     sceGuClearDepth(0);
     sceGuClear(GU_COLOR_BUFFER_BIT | GU_DEPTH_BUFFER_BIT);
-    
+
     sceGuFinish();
     sceGuSync(0, 0);
 
@@ -76,7 +91,7 @@ void renderer_end_frame(void) {
     sceGuFinish();
     sceGuSync(0, 0);
     sceDisplayWaitVblankStart();
-    
+
     // Swap buffers and get the new draw buffer pointer
     g_display_buffer = g_draw_buffer;
     g_draw_buffer = sceGuSwapBuffers();

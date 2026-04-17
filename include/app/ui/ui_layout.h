@@ -1,5 +1,16 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
 #ifndef GAMEDIARY_UI_LAYOUT_H
 #define GAMEDIARY_UI_LAYOUT_H
+
 
 typedef struct {
     int x, y, w, h;

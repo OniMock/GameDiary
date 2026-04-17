@@ -1,8 +1,24 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
 #ifndef GAMEDIARY_SCREEN_H
 #define GAMEDIARY_SCREEN_H
 
 #include <psptypes.h>
 
+/**
+ * @brief Screen interface for the application.
+ *
+ * This struct defines the interface for a screen in the application.
+ * Each screen has an init, update, draw, and destroy function.
+ */
 typedef struct {
     void (*init)(void);
     void (*update)(u32 buttons, u32 pressed);

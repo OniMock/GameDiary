@@ -1,4 +1,14 @@
 /**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+/**
  * @file carousel_state.c
  * @brief Domain implementation for the lateral icon carousel.
  *

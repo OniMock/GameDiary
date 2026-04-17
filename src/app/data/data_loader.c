@@ -1,3 +1,18 @@
+/**
+ * -------------------------------------------------------------
+ *  GameDiary
+ *  Playtime Tracking System for the PlayStation Portable (PSP)
+ *
+ *  Developed by OniMock
+ *  © 2026 OniMock. All rights reserved.
+ * -------------------------------------------------------------
+ */
+
+ /**
+  * @file data_loader.c
+  * @brief Data loader implementation.
+  */
+
 #include "app/data/data_loader.h"
 #include "common/utils.h"
 #include <pspkernel.h>
@@ -23,10 +38,10 @@ int data_load_all(void) {
 
     GameRegistryHeader header;
     sceIoRead(fd, &header, sizeof(GameRegistryHeader));
-    
+
     g_game_count = header.num_entries;
     g_games = (GameStats*)calloc(g_game_count, sizeof(GameStats));
-    
+
     for (u32 i = 0; i < g_game_count; i++) {
         sceIoRead(fd, &g_games[i].entry, sizeof(GameEntry));
     }
@@ -43,7 +58,7 @@ int data_load_all(void) {
         sceIoRead(fd, g_sessions, size);
         sceIoClose(fd);
     }
-    
+
     return 0;
 }
 
@@ -63,7 +78,7 @@ void data_calculate_stats(u32 start_ts, u32 end_ts) {
                 if (g_sessions[i].timestamp > g_games[j].last_played_ts) {
                     g_games[j].last_played_ts = g_sessions[i].timestamp;
                 }
-                
+
                 if (g_sessions[i].timestamp >= start_ts && g_sessions[i].timestamp <= end_ts) {
                     g_games[j].period_playtime += g_sessions[i].duration;
                 }
