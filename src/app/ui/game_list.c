@@ -242,9 +242,6 @@ static void game_list_update(u32 buttons, u32 pressed) {
 
     carousel_update(&g_cs, mapped_buttons, mapped_pressed);
 
-    /* Empty logic */
-    ui_reset_session_graph_animation();
-    g_prev_idx = g_cs.current_idx;
     /* Infinite wrapping logic for getting the active game */
     int wrap_idx = ((g_cs.current_idx % (int)count) + (int)count) % (int)count;
 
@@ -409,7 +406,7 @@ static void game_list_draw(void) {
     ui_draw_session_bar_graph(sessions, (int)sess_count, g->entry.uid,
                               3,
                               360,          /* center_x of Graph is 360 */
-                              240,          /* baseline_y */
+                              228,          /* baseline_y */
                               55);          /* max_height */
 
     /* ----------------------------------------------------------------
