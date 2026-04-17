@@ -71,10 +71,10 @@ static void settings_draw(void) {
     char hint_select[64];
     snprintf(hint_select, sizeof(hint_select), "%s |X|", select_label);
 
-    ui_draw_hint(hint_o, 10, 255, COLOR_SUBTEXT);
+    ui_draw_hint_footer(hint_o, 10, COLOR_SUBTEXT);
 
     float rw = font_get_width(hint_select, 0.8f);
-    ui_draw_hint(hint_select, 480 - 10 - (int)rw, 255, COLOR_SUBTEXT);
+    ui_draw_hint_footer(hint_select, 480 - 10 - (int)rw, COLOR_SUBTEXT);
 }
 
 Screen g_screen_settings = {

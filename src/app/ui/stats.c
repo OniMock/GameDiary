@@ -67,7 +67,7 @@ static void stats_draw(void) {
   const char *back_label = i18n_get(MSG_CTRL_BACK);
   char hint_o[64];
   snprintf(hint_o, sizeof(hint_o), "[%s] %s", UI_SYM_CIRCLE_OPEN, back_label);
-  ui_draw_hint(hint_o, 10, 255, COLOR_SUBTEXT);
+  ui_draw_hint_footer(hint_o, 10, COLOR_SUBTEXT);
 }
 
 Screen g_screen_stats = {stats_init, stats_update, stats_draw, NULL};

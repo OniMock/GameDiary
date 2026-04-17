@@ -47,10 +47,10 @@ static void dashboard_draw(void) {
     char hint_r[64];
     snprintf(hint_r, sizeof(hint_r), "%s |R|", menu_label);
 
-    ui_draw_hint(hint_l, 10, 255, COLOR_SUBTEXT);
+    ui_draw_hint_footer(hint_l, 10, COLOR_SUBTEXT);
 
     float rw = font_get_width(hint_r, 0.8f);
-    ui_draw_hint(hint_r, 480 - 10 - (int)rw, 255, COLOR_SUBTEXT);
+    ui_draw_hint_footer(hint_r, 480 - 10 - (int)rw, COLOR_SUBTEXT);
 
 }
 

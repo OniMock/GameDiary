@@ -46,6 +46,10 @@ void ui_draw_hint(const char *text, int x, int y, u32 color) {
   font_draw_string(x, y, text, color, 0.8f);
 }
 
+void ui_draw_hint_footer(const char *text, int x, u32 color) {
+  font_draw_string(x, 267, text, color, 0.8f);
+}
+
 void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
                    int custom_icon_size) {
   int text_x = r.x;
@@ -58,7 +62,7 @@ void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
       (custom_icon_size > 0) ? custom_icon_size : (int)(text_h * 0.9f);
   int spacing = 12;
 
-  int baseline_y = r.y + 20;
+  int baseline_y = r.y + 8;
 
   // The key to perfect alignment: use the same center pivot as ui_draw_text
   // In ui_draw_text: baseline = center + (size * 6.0f) So: center =
@@ -68,7 +72,7 @@ void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
   int total_w = (int)text_w + (icon ? (icon_size + spacing) : 0);
 
   if (icon) {
-    // Centraliza o ícone com base no centro visual do texto
+    // Center icon based on text visual center
     int icon_y = (int)(text_center_y - (icon_size / 2.0f));
     sceGuColor(COLOR_ACCENT);
     texture_draw_resource(icon, r.x, icon_y, icon_size, icon_size);
@@ -77,7 +81,7 @@ void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
 
   font_draw_string(text_x, baseline_y, text, COLOR_ACCENT, text_size);
 
-  // Linha logo abaixo
+  // Line below title
   renderer_draw_rect(r.x, baseline_y + 10, total_w, 2, COLOR_ACCENT);
 }
 

@@ -412,9 +412,9 @@ static void game_list_draw(void) {
              UI_SYM_CIRCLE_OPEN, back_label);
     snprintf(hint_sel,  sizeof(hint_sel),  "%s |X|", select_label);
 
-    ui_draw_hint(hint_back, 10, 255, COLOR_SUBTEXT);
+    ui_draw_hint_footer(hint_back, 10, COLOR_SUBTEXT);
     float rw = font_get_width(hint_sel, 0.8f);
-    ui_draw_hint(hint_sel, 480 - 10 - (int)rw, 255, COLOR_SUBTEXT);
+    ui_draw_hint_footer(hint_sel, 480 - 10 - (int)rw, COLOR_SUBTEXT);
 }
 
 static void game_list_destroy(void) {

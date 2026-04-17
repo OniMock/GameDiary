@@ -36,6 +36,11 @@ void ui_draw_text(const char *text, Rect r, u32 color, float size,
 void ui_draw_hint(const char *text, int x, int y, u32 color);
 
 /**
+ * Draws a button hint in footer (e.g., "[X] Select").
+ */
+void ui_draw_hint_footer(const char *text, int x, u32 color);
+
+/**
  * Draws a section title with underline.
  */
 void ui_draw_title(const char *text, Rect r, const ImageResource *icon, int custom_icon_size);

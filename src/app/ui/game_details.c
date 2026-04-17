@@ -82,7 +82,7 @@ static void game_details_draw(void) {
     char hint_o[64];
 
     snprintf(hint_o, sizeof(hint_o), "[%s] %s", UI_SYM_CIRCLE_OPEN, back_label);
-    ui_draw_hint(hint_o, 10, 255, COLOR_SUBTEXT);
+    ui_draw_hint_footer(hint_o, 10, COLOR_SUBTEXT);
 }
 
 static void game_details_destroy(void) {
