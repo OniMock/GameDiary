@@ -104,28 +104,69 @@ void ui_draw_title_auto(const char *text, Rect r, const ImageResource *icon) {
   ui_draw_title(text, r, icon, -1);
 }
 
-void ui_draw_weekly_graph(SessionEntry *sessions, int count) {
-  u32 day_playtime[7] = {0};
+/* -----------------------------------------------------------------------
+ * Graph Drawing Utilities (Layer 1)
+ * Reusable, lightweight functions to prevent duplication in graph rendering
+ * without adding complex indirection/configurations.
+ * ----------------------------------------------------------------------- */
+
+static float ui_graph_scale(u32 value, u32 max, int max_height) {
+  if (max == 0) return 0.0f;
+  return ((float)value / (float)max) * (float)max_height;
+}
+
+static float ui_graph_lerp(float current, float target, float speed) {
+  return current + (target - current) * speed;
+}
+
+static void ui_graph_draw_bar(int x, int baseline_y, int w, int h, u32 color) {
+  if (h > 0) {
+    renderer_draw_rect(x, baseline_y - h, w, h, color);
+  }
+}
+
+static void ui_graph_draw_gloss(int x, int baseline_y, int w, int h, u8 gloss_alpha) {
+  if (h > 4 && gloss_alpha > 0) {
+    renderer_draw_rect(x, baseline_y - h, w, 2, ((u32)gloss_alpha << 24) | 0x00FFFFFFu);
+  }
+}
+
+static void draw_bar_column(int x, int baseline_y, int bar_w, int h,
+                            u32 bar_color, u8 gloss_alpha,
+                            const char* top_text, float top_size, u32 top_color,
+                            const char* btm_text, float btm_size, u32 btm_color) {
+  if (h > 0) {
+    ui_graph_draw_bar(x, baseline_y, bar_w, h, bar_color);
+    ui_graph_draw_gloss(x, baseline_y, bar_w, h, gloss_alpha);
+
+    if (top_text) {
+      Rect top_rect = {x - 8, baseline_y - h - 16, bar_w + 16, 12};
+      ui_draw_text(top_text, top_rect, top_color, top_size, ALIGN_CENTER);
+    }
+  }
+
+  if (btm_text) {
+    Rect btm_rect = {x - 8, baseline_y + 4, bar_w + 16, 12};
+    ui_draw_text(btm_text, btm_rect, btm_color, btm_size, ALIGN_CENTER);
+  }
+}
+
+static int compute_weekly_data(const SessionEntry *sessions, int count, u32 day_playtime[7], u32 *max_time_out, time_t *today_start_out) {
   u32 now_ts = utils_get_timestamp();
   time_t now_val = (time_t)now_ts;
 
-  // Normalize to start of today (local midnight)
-  // We copy the struct because localtime returns a static pointer which might
-  // be overwritten
   struct tm today_tm = *localtime(&now_val);
   today_tm.tm_hour = 0;
   today_tm.tm_min = 0;
   today_tm.tm_sec = 0;
   time_t today_start = mktime(&today_tm);
+  *today_start_out = today_start;
 
+  memset(day_playtime, 0, 7 * sizeof(u32));
   int found_any = 0;
 
-  // Aggregate sessions for the last 7 days (including today)
   for (int i = 0; i < count; i++) {
     time_t s_time = (time_t)sessions[i].timestamp;
-
-    // Check if session falls in the [Today-6, Today] window
-    // s_time >= today_start - 6 days
     if (s_time >= (today_start - 6 * 86400) && s_time < (today_start + 86400)) {
       int days_ago;
       if (s_time >= today_start) {
@@ -142,6 +183,23 @@ void ui_draw_weekly_graph(SessionEntry *sessions, int count) {
     }
   }
 
+  u32 max_time = 3600; // Min scale 1h
+  for (int i = 0; i < 7; i++) {
+    if (day_playtime[i] > max_time)
+      max_time = day_playtime[i];
+  }
+  *max_time_out = max_time;
+
+  return found_any;
+}
+
+void ui_draw_weekly_graph(SessionEntry *sessions, int count) {
+  u32 day_playtime[7];
+  u32 max_time;
+  time_t today_start;
+
+  int found_any = compute_weekly_data(sessions, count, day_playtime, &max_time, &today_start);
+
   // Graph Layout
   int gx = 60, gy = 170, gw = 360, gh = 80;
   int bar_w = 30;
@@ -156,21 +214,13 @@ void ui_draw_weekly_graph(SessionEntry *sessions, int count) {
                  ALIGN_CENTER);
   }
 
-  // Scaling and rendering
-  u32 max_time = 3600; // Min scale 1h
+  // Rendering
   for (int i = 0; i < 7; i++) {
-    if (day_playtime[i] > max_time)
-      max_time = day_playtime[i];
-  }
+    int idx = 6 - i; // idx 0 is today (rightmost), idx 6 is 6 days ago (leftmost)
+    float target_h = ui_graph_scale(day_playtime[idx], max_time, gh);
 
-  for (int i = 0; i < 7; i++) {
-    int idx =
-        6 - i; // idx 0 is today (rightmost), idx 6 is 6 days ago (leftmost)
-    float target_h = ((float)day_playtime[idx] / max_time) * gh;
-
-    // Simple animation state (could use a timer, but this frame-based approach
-    // is common in homebrew)
-    g_graph_anim[idx] += (target_h - g_graph_anim[idx]) * 0.07f;
+    // Simple animation state
+    g_graph_anim[idx] = ui_graph_lerp(g_graph_anim[idx], target_h, 0.07f);
 
     int x = gx + i * (bar_w + spacing);
     int h = (int)g_graph_anim[idx];
@@ -180,30 +230,22 @@ void ui_draw_weekly_graph(SessionEntry *sessions, int count) {
     // Visual highlights: Today (idx=0) is bright, others are dimmed
     u32 bar_color = (idx == 0) ? COLOR_ACCENT : (COLOR_ACCENT & 0x44FFFFFF);
     u32 label_color = (idx == 0) ? COLOR_ACCENT : COLOR_SUBTEXT;
+    u8 gloss_a = (idx == 0) ? 0x88 : 0x22;
 
+    // Value text
+    char time_buf[16] = {0};
     if (h > 0) {
-      renderer_draw_rect(x, gy - h, bar_w, h, bar_color);
-      // "Glossy" top edge for today
-      if (idx == 0 && h > 4) {
-        renderer_draw_rect(x, gy - h, bar_w, 2, 0x88FFFFFF);
-      } else if (h > 4) {
-        renderer_draw_rect(x, gy - h, bar_w, 2, 0x22FFFFFF);
-      }
-
-      // Draw playtime text on top
-      char time_buf[16];
       ui_format_duration(day_playtime[idx], time_buf, sizeof(time_buf));
-      Rect time_rect = {x - 5, gy - h - 14, bar_w + 10, 10};
-      ui_draw_text(time_buf, time_rect, label_color, 0.6f, ALIGN_CENTER);
     }
 
-    // Labels rotated based on today
+    // Label text
     time_t bar_day_time = today_start - (idx * 86400);
     struct tm bar_tm = *localtime(&bar_day_time);
     const char *day_name = i18n_get(MSG_DAY_SUN + bar_tm.tm_wday);
 
-    Rect label_rect = {x, gy + 8, bar_w, 20};
-    ui_draw_text(day_name, label_rect, label_color, 0.7f, ALIGN_CENTER);
+    draw_bar_column(x, gy, bar_w, h, bar_color, gloss_a,
+                    h > 0 ? time_buf : NULL, 0.6f, label_color,
+                    day_name, 0.7f, label_color);
   }
 }
 
@@ -228,100 +270,86 @@ void ui_reset_session_graph_animation(void) {
   memset(g_session_anim, 0, sizeof(g_session_anim));
 }
 
+static int compute_session_data(const SessionEntry *sessions, int count, u32 game_uid, int max_bars, int matching[], u32 *max_dur_out) {
+  int match_count = 0;
+
+  /* Traverse backward: stop early as soon as we collect max_bars. O(k) best-case */
+  for (int i = count - 1; i >= 0 && match_count < max_bars; i--) {
+    if (sessions[i].game_uid != game_uid || sessions[i].duration == 0)
+      continue;
+    matching[match_count++] = i;
+  }
+
+  /* matching[0] is newest. Reverse array to order: oldest (left) -> newest (right) */
+  for (int i = 0; i < match_count / 2; i++) {
+    int tmp = matching[i];
+    matching[i] = matching[match_count - 1 - i];
+    matching[match_count - 1 - i] = tmp;
+  }
+
+  u32 max_dur = 60u; /* Minimum scale = 60s */
+  for (int b = 0; b < match_count; b++) {
+    u32 d = sessions[matching[b]].duration;
+    if (d > max_dur) max_dur = d;
+  }
+  *max_dur_out = max_dur;
+
+  return match_count;
+}
+
 void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
                                u32 game_uid, int max_bars,
                                int center_x, int baseline_y, int max_bar_h) {
-  /* Clamp so we never exceed the static animation buffer. */
   if (max_bars <= 0 || max_bars > MAX_SESSION_BARS)
     max_bars = MAX_SESSION_BARS;
 
-  /* ----------------------------------------------------------------
-   * Collect indices of sessions that belong to this game, in order.
-   * We only need the LAST max_bars, so we keep a rolling window.
-   * ---------------------------------------------------------------- */
-  int  matching[MAX_SESSION_BARS];
-  int  match_count = 0;
-
-  for (int i = 0; i < count; i++) {
-    if (sessions[i].game_uid != game_uid || sessions[i].duration == 0)
-      continue;
-    /* Slide window: discard oldest when full. */
-    if (match_count == max_bars) {
-      for (int j = 0; j < max_bars - 1; j++) matching[j] = matching[j + 1];
-      matching[max_bars - 1] = i;
-    } else {
-      matching[match_count++] = i;
-    }
-  }
+  int matching[MAX_SESSION_BARS];
+  u32 max_dur;
+  int match_count = compute_session_data(sessions, count, game_uid, max_bars, matching, &max_dur);
 
   if (match_count == 0) return; /* No sessions — draw nothing. */
 
-  /* ----------------------------------------------------------------
-   * Layout: center the graph horizontally around center_x
-   * ---------------------------------------------------------------- */
+  /* Layout */
   int bar_w = 24;
-  int gap   = 12;
+  int gap   = 16;
   int total_w = match_count * bar_w + (match_count - 1) * gap;
   int gx    = center_x - (total_w / 2);
 
   /* Baseline separator */
   renderer_draw_rect(gx - 10, baseline_y, total_w + 20, 1, COLOR_BORDER);
 
-  /* ----------------------------------------------------------------
-   * Find maximum duration to scale bar heights.
-   * Minimum scale = 60 s so very short sessions still show a sliver.
-   * ---------------------------------------------------------------- */
-  u32 max_dur = 60u;
-  for (int b = 0; b < match_count; b++) {
-    u32 d = sessions[matching[b]].duration;
-    if (d > max_dur) max_dur = d;
-  }
-
-  /* ----------------------------------------------------------------
-   * Draw bars
-   * ---------------------------------------------------------------- */
+  /* Rendering */
   for (int b = 0; b < match_count; b++) {
     u32 dur        = sessions[matching[b]].duration;
-    float target_h = ((float)dur / (float)max_dur) * (float)max_bar_h;
+    float target_h = ui_graph_scale(dur, max_dur, max_bar_h);
 
-    /* Lerp animation: bar height grows toward target each frame. */
-    g_session_anim[b] += (target_h - g_session_anim[b]) * 0.09f;
+    g_session_anim[b] = ui_graph_lerp(g_session_anim[b], target_h, 0.09f);
     int h = (int)g_session_anim[b];
-    if (h < 2 && dur > 0) h = 2; /* Always render a visible minimum. */
+    if (h < 2 && dur > 0) h = 2;
 
     int bx = gx + b * (bar_w + gap);
 
-    /* Opacity gradient: oldest (b=0) at 25%, newest (b=max-1) at 100%. */
-    float recency = (float)(b + 1) / (float)match_count; /* 0..1 */
-    u8 alpha = (u8)(64.0f + 191.0f * recency);            /* 64..255 */
-
+    float recency = (float)(b + 1) / (float)match_count;
+    u8 alpha = (u8)(64.0f + 191.0f * recency);
+    u8 gloss_a = alpha >> 1;
     u32 bar_color = ((u32)alpha << 24) | (COLOR_ACCENT & 0x00FFFFFFu);
 
-    /* Bar body */
+    // Value text
+    char dur_buf[16] = {0};
     if (h > 0) {
-      renderer_draw_rect(bx, baseline_y - h, bar_w, h, bar_color);
-
-      /* Glossy top highlight */
-      u8 gloss_a = alpha >> 1;
-      renderer_draw_rect(bx, baseline_y - h, bar_w, 2,
-                         ((u32)gloss_a << 24) | 0x00FFFFFFu);
+      ui_format_duration(dur, dur_buf, sizeof(dur_buf));
     }
-
-    /* Duration label above bar */
-    char dur_buf[16];
-    ui_format_duration(dur, dur_buf, sizeof(dur_buf));
     u32 lbl_color = (b == match_count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
-    Rect lbl_rect = {bx - 8, baseline_y - h - 16, bar_w + 16, 12};
-    ui_draw_text(dur_buf, lbl_rect, lbl_color, 0.75f, ALIGN_CENTER);
 
-    /* Date label below bar */
+    // Date text
     time_t s_time = (time_t)sessions[matching[b]].timestamp;
     struct tm ts_tm = *localtime(&s_time);
     char date_buf[16];
     strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT_SHORT), &ts_tm);
 
-    Rect date_rect = {bx - 8, baseline_y + 4, bar_w + 16, 12};
-    ui_draw_text(date_buf, date_rect, COLOR_SUBTEXT, 0.75f, ALIGN_CENTER);
+    draw_bar_column(bx, baseline_y, bar_w, h, bar_color, gloss_a,
+                    h > 0 ? dur_buf : NULL, 0.75f, lbl_color,
+                    date_buf, 0.75f, COLOR_SUBTEXT);
   }
 }
 
