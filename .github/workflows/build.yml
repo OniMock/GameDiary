@@ -27,7 +27,7 @@ jobs:
       # -------------------------------------------------------
       - name: Install dependencies
         run: |
-          apk add --no-cache build-base python3 rar
+          apk add --no-cache build-base python3 zip
 
       # -------------------------------------------------------
       # 🔍 Validate Language Keys
@@ -75,14 +75,14 @@ jobs:
           find release -type f -exec ls -lh {} \;
 
       # -------------------------------------------------------
-      # 📦 Create RAR
+      # 📦 Create ZIP
       # -------------------------------------------------------
-      - name: Create RAR
+      - name: Create ZIP
         run: |
           cd release
-          rar a ../GameDiary.rar .
+          zip -r ../GameDiary.zip .
           cd ..
-          ls -lh GameDiary.rar
+          ls -lh GameDiary.zip
 
       # -------------------------------------------------------
       # 📤 Upload artifact
@@ -91,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GameDiary
-          path: GameDiary.rar
+          path: GameDiary.zip
 
   # ===========================================================
   # 🚀 AUTOMATIC RELEASE
@@ -207,8 +207,8 @@ jobs:
 
             ## 📦 Download
 
-            * GameDiary.rar (PRX + EBOOT)
-              https://github.com/OniMock/GameDiary/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.rar
+            * GameDiary.zip (PRX + EBOOT)
+              https://github.com/OniMock/GameDiary/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.zip
 
             ---
 
@@ -262,6 +262,6 @@ jobs:
             ## 📝 Changelog
 
             ${{ steps.git-cliff.outputs.content }}
-          files: GameDiary.rar
+          files: GameDiary.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
