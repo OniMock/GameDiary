@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform: PSP](https://img.shields.io/badge/Platform-PSP-informational.svg)](https://en.wikipedia.org/wiki/PlayStation_Portable)
 [![Language: C/C++](https://img.shields.io/badge/Language-C%20%2F%20C%2B%2B-orange.svg)](https://en.cppreference.com/)
-[![Version](https://img.shields.io/badge/Version-1.0.0-success.svg)](https://github.com/OniMock/GameDiary/releases)
+[![Version](https://img.shields.io/github/v/tag/OniMock/GameDiary?label=Version)](https://github.com/OniMock/GameDiary/releases)
 ![GitHub stars](https://img.shields.io/github/stars/OniMock/GameDiary?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
 ![Last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
