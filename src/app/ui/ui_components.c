@@ -259,8 +259,8 @@ void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
   /* ----------------------------------------------------------------
    * Layout: center the graph horizontally around center_x
    * ---------------------------------------------------------------- */
-  int bar_w = 40;
-  int gap   = 16;
+  int bar_w = 24;
+  int gap   = 12;
   int total_w = match_count * bar_w + (match_count - 1) * gap;
   int gx    = center_x - (total_w / 2);
 
@@ -311,8 +311,8 @@ void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
     char dur_buf[16];
     ui_format_duration(dur, dur_buf, sizeof(dur_buf));
     u32 lbl_color = (b == match_count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
-    Rect lbl_rect = {bx - 4, baseline_y - h - 14, bar_w + 8, 10};
-    ui_draw_text(dur_buf, lbl_rect, lbl_color, 0.55f, ALIGN_CENTER);
+    Rect lbl_rect = {bx - 8, baseline_y - h - 16, bar_w + 16, 12};
+    ui_draw_text(dur_buf, lbl_rect, lbl_color, 0.75f, ALIGN_CENTER);
 
     /* Date label below bar */
     time_t s_time = (time_t)sessions[matching[b]].timestamp;
@@ -320,8 +320,8 @@ void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
     char date_buf[16];
     strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT_SHORT), &ts_tm);
 
-    Rect date_rect = {bx - 4, baseline_y + 4, bar_w + 8, 10};
-    ui_draw_text(date_buf, date_rect, COLOR_SUBTEXT, 0.55f, ALIGN_CENTER);
+    Rect date_rect = {bx - 8, baseline_y + 4, bar_w + 16, 12};
+    ui_draw_text(date_buf, date_rect, COLOR_SUBTEXT, 0.75f, ALIGN_CENTER);
   }
 }
 

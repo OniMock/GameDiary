@@ -156,7 +156,7 @@ static void draw_stats_block(const GameStats *g,
     ui_format_duration(g->total_playtime, val_buf, sizeof(val_buf));
     snprintf(text_buf, sizeof(text_buf), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), val_buf);
     ui_draw_text(text_buf, (Rect){start_x + 10, start_y + 7, box_w - 20, 10},
-                 COLOR_TEXT, 0.7f, ALIGN_LEFT);
+                 COLOR_TEXT, 0.9f, ALIGN_LEFT);
 
     /* Last Played Date */
     time_t last_time = 0;
@@ -175,7 +175,7 @@ static void draw_stats_block(const GameStats *g,
     ui_draw_card(box2, COLOR_CARD, COLOR_BORDER);
     snprintf(text_buf, sizeof(text_buf), "%s: %s", i18n_get(MSG_STATS_LAST_PLAYED), last_str);
     ui_draw_text(text_buf, (Rect){start_x + 10, start_y + line_gap + 7, box_w - 20, 10},
-                 COLOR_TEXT, 0.7f, ALIGN_LEFT);
+                 COLOR_TEXT, 0.9f, ALIGN_LEFT);
 
     /* Days Active */
     Rect box3 = {start_x, start_y + line_gap * 2, box_w, box_h};
@@ -183,7 +183,7 @@ static void draw_stats_block(const GameStats *g,
     int days = carousel_count_days_active(sessions, sess_count, g->entry.uid);
     snprintf(text_buf, sizeof(text_buf), i18n_get(MSG_STATS_DAYS_ACTIVE), days);
     ui_draw_text(text_buf, (Rect){start_x + 10, start_y + line_gap * 2 + 7, box_w - 20, 10},
-                 COLOR_TEXT, 0.7f, ALIGN_LEFT);
+                 COLOR_TEXT, 0.9f, ALIGN_LEFT);
 }
 
 /* -----------------------------------------------------------------------
