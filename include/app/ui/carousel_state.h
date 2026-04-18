@@ -51,10 +51,18 @@
  * Data types
  * ----------------------------------------------------------------------- */
 
+/** State of an icon cache slot for lazy loading. */
+typedef enum {
+    CACHE_SLOT_EMPTY = 0,
+    CACHE_SLOT_PENDING,
+    CACHE_SLOT_LOADED
+} CacheSlotState;
+
 /** One slot in the sliding-window texture cache. */
 typedef struct {
-    Texture *tex;     /**< NULL when slot is empty or load failed.          */
-    int      inf_idx; /**< Absolute logical index of game in this slot.     */
+    Texture       *tex;     /**< NULL when slot is empty or load failed.          */
+    int            inf_idx; /**< Absolute logical index of game in this slot.     */
+    CacheSlotState state;   /**< Current load state of this slot.                 */
 } IconCacheSlot;
 
 /**
