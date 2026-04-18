@@ -66,24 +66,50 @@ void ui_draw_hint_footer(const char *text, int x, u32 color) {
 }
 
 void ui_draw_standard_hints(void) {
-    // We will space them out across the 480 pixel width.
-    // To make it fit, we use concise labels.
-    // Triangle is 0x25B3 (△).
-    const char* h1 = "[<- ->] Nav";
-    const char* h2 = "[X/O] Abrir";
-    const char* h3 = "[\xE2\x96\xB3] Voltar";
-    const char* h4 = "[START] Menu";
-    const char* h5 = "[SELECT] Config";
-
     int y = 267;
     u32 col = COLOR_SUBTEXT;
-    float sz = 0.7f; // Smaller font to fit everything
+    float sz = 0.7f;
 
-    font_draw_string(5, y, h1, col, sz);
-    font_draw_string(90, y, h2, col, sz);
-    font_draw_string(180, y, h3, col, sz);
-    font_draw_string(270, y, h4, col, sz);
-    font_draw_string(365, y, h5, col, sz);
+    const char* labels[] = {
+        i18n_get(MSG_CTRL_NAVIGATE),
+        i18n_get(MSG_CTRL_SELECT),
+        i18n_get(MSG_CTRL_BACK),
+        i18n_get(MSG_CTRL_MENU),
+        i18n_get(MSG_CTRL_CONFIG)
+    };
+
+    const char* icons[] = {
+        "[← →]",
+        "[X/O]",
+        "[△]",
+        "[START]",
+        "[SELECT]"
+    };
+
+    int count = 5;
+    int padding = 5;
+    float widths[5];
+    float total_width = 0.0f;
+
+    // Calculate total width
+    for (int i = 0; i < count; i++) {
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%s %s", icons[i], labels[i]);
+
+        widths[i] = font_get_width(buffer, sz);
+        total_width += widths[i];
+    }
+
+    float spacing = (480.0f - total_width - (padding * 2)) / (count - 1);
+    float x = (float)padding;
+
+    for (int i = 0; i < count; i++) {
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%s %s", icons[i], labels[i]);
+
+        font_draw_string((int)x, y, buffer, col, sz);
+        x += widths[i] + spacing;
+    }
 }
 
 void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
