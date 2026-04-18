@@ -19,7 +19,6 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_STATS_TOTAL_PLAYTIME] = "Tempo Total",
     [MSG_STATS_SESSIONS]       = "Sessões",
     [MSG_STATS_LAST_PLAYED]    = "Último Jogo",
-    [MSG_MENU_GAMES_PRESS_X]   = "Pressione X para os jogos",
     [MSG_CTRL_BACK]            = "Voltar",
     [MSG_CTRL_SELECT]          = "Selecionar",
     [MSG_CTRL_MENU]            = "Menu",
@@ -29,8 +28,7 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_TOP_MONTH]            = "Mês",
     [MSG_TOP_ALL]              = "Sempre",
     [MSG_ERROR_NO_GAMES]       = "Nenhum jogo encontrado",
-    [MSG_CTRL_L]               = "Menu",
-    [MSG_CTRL_R]               = "Estatísticas",
+    [MSG_CTRL_NAVIGATE]        = "Navegar",
 
     [MSG_DAY_SUN]              = "Dom",
     [MSG_DAY_MON]              = "Seg",
