@@ -266,70 +266,99 @@ void ui_reset_graph_animation(void) {
 
 static float g_session_anim[MAX_SESSION_BARS] = {0.0f};
 
-void ui_reset_session_graph_animation(void) {
+void ui_reset_game_daily_graph_animation(void) {
   memset(g_session_anim, 0, sizeof(g_session_anim));
 }
 
-static int compute_session_data(const SessionEntry *sessions, int count, u32 game_uid, int max_bars, int matching[], u32 *max_dur_out) {
-  int match_count = 0;
+typedef struct {
+  time_t day_start; /* Normalized to local midnight */
+  u32 duration;
+} DailyPlayData;
 
-  /* Traverse backward: stop early as soon as we collect max_bars. O(k) best-case */
-  for (int i = count - 1; i >= 0 && match_count < max_bars; i--) {
+static int compute_game_daily_data(const SessionEntry *sessions, int count,
+                                   u32 game_uid, int max_days,
+                                   DailyPlayData aggregated[], u32 *max_dur_out) {
+  int day_count = 0;
+  u32 max_dur = 60u;
+
+  /* Traverse backward through sessions to find the most recent days */
+  for (int i = count - 1; i >= 0 && day_count < max_days; i--) {
     if (sessions[i].game_uid != game_uid || sessions[i].duration == 0)
       continue;
-    matching[match_count++] = i;
+
+    time_t s_time = (time_t)sessions[i].timestamp;
+    struct tm ts_tm = *localtime(&s_time);
+    ts_tm.tm_hour = 0;
+    ts_tm.tm_min = 0;
+    ts_tm.tm_sec = 0;
+    time_t s_day_start = mktime(&ts_tm);
+
+    /* Check if this session belongs to the current "latest" day we're collecting */
+    if (day_count > 0 && aggregated[day_count - 1].day_start == s_day_start) {
+      aggregated[day_count - 1].duration += sessions[i].duration;
+    } else {
+      /* New day found */
+      if (day_count < max_days) {
+        aggregated[day_count].day_start = s_day_start;
+        aggregated[day_count].duration = sessions[i].duration;
+        day_count++;
+      }
+    }
   }
 
-  /* matching[0] is newest. Reverse array to order: oldest (left) -> newest (right) */
-  for (int i = 0; i < match_count / 2; i++) {
-    int tmp = matching[i];
-    matching[i] = matching[match_count - 1 - i];
-    matching[match_count - 1 - i] = tmp;
+  /* Reverse so oldest is index 0 (left) and newest is index day_count-1 (right) */
+  for (int i = 0; i < day_count / 2; i++) {
+    DailyPlayData tmp = aggregated[i];
+    aggregated[i] = aggregated[day_count - 1 - i];
+    aggregated[day_count - 1 - i] = tmp;
   }
 
-  u32 max_dur = 60u; /* Minimum scale = 60s */
-  for (int b = 0; b < match_count; b++) {
-    u32 d = sessions[matching[b]].duration;
-    if (d > max_dur) max_dur = d;
+  /* Find max duration for scaling */
+  for (int i = 0; i < day_count; i++) {
+    if (aggregated[i].duration > max_dur)
+      max_dur = aggregated[i].duration;
   }
   *max_dur_out = max_dur;
 
-  return match_count;
+  return day_count;
 }
 
-void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
+void ui_draw_game_daily_graph(const SessionEntry *sessions, int count,
                                u32 game_uid, int max_bars,
                                int center_x, int baseline_y, int max_bar_h) {
   if (max_bars <= 0 || max_bars > MAX_SESSION_BARS)
     max_bars = MAX_SESSION_BARS;
 
-  int matching[MAX_SESSION_BARS];
+  DailyPlayData daily_data[MAX_SESSION_BARS];
   u32 max_dur;
-  int match_count = compute_session_data(sessions, count, game_uid, max_bars, matching, &max_dur);
+  int day_count = compute_game_daily_data(sessions, count, game_uid, max_bars,
+                                          daily_data, &max_dur);
 
-  if (match_count == 0) return; /* No sessions — draw nothing. */
+  if (day_count == 0)
+    return; /* No activity — draw nothing. */
 
   /* Layout */
   int bar_w = 24;
-  int gap   = 16;
-  int total_w = match_count * bar_w + (match_count - 1) * gap;
-  int gx    = center_x - (total_w / 2);
+  int gap = 16;
+  int total_w = day_count * bar_w + (day_count - 1) * gap;
+  int gx = center_x - (total_w / 2);
 
   /* Baseline separator */
   renderer_draw_rect(gx - 10, baseline_y, total_w + 20, 1, COLOR_BORDER);
 
   /* Rendering */
-  for (int b = 0; b < match_count; b++) {
-    u32 dur        = sessions[matching[b]].duration;
+  for (int b = 0; b < day_count; b++) {
+    u32 dur = daily_data[b].duration;
     float target_h = ui_graph_scale(dur, max_dur, max_bar_h);
 
     g_session_anim[b] = ui_graph_lerp(g_session_anim[b], target_h, 0.09f);
     int h = (int)g_session_anim[b];
-    if (h < 2 && dur > 0) h = 2;
+    if (h < 2 && dur > 0)
+      h = 2;
 
     int bx = gx + b * (bar_w + gap);
 
-    float recency = (float)(b + 1) / (float)match_count;
+    float recency = (float)(b + 1) / (float)day_count;
     u8 alpha = (u8)(64.0f + 191.0f * recency);
     u8 gloss_a = alpha >> 1;
     u32 bar_color = ((u32)alpha << 24) | (COLOR_ACCENT & 0x00FFFFFFu);
@@ -339,17 +368,17 @@ void ui_draw_session_bar_graph(const SessionEntry *sessions, int count,
     if (h > 0) {
       ui_format_duration(dur, dur_buf, sizeof(dur_buf));
     }
-    u32 lbl_color = (b == match_count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
+    u32 lbl_color = (b == day_count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
 
     // Date text
-    time_t s_time = (time_t)sessions[matching[b]].timestamp;
-    struct tm ts_tm = *localtime(&s_time);
+    struct tm ts_tm = *localtime(&daily_data[b].day_start);
     char date_buf[16];
-    strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT_SHORT), &ts_tm);
+    strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT_SHORT),
+             &ts_tm);
 
     draw_bar_column(bx, baseline_y, bar_w, h, bar_color, gloss_a,
-                    h > 0 ? dur_buf : NULL, 0.75f, lbl_color,
-                    date_buf, 0.75f, COLOR_SUBTEXT);
+                    h > 0 ? dur_buf : NULL, 0.75f, lbl_color, date_buf, 0.75f,
+                    COLOR_SUBTEXT);
   }
 }
 

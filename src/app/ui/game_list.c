@@ -201,7 +201,7 @@ static void game_list_init(void) {
     u32 count = data_get_game_count();
     carousel_init(&g_cs, (int)count);
     g_prev_idx = -1;
-    ui_reset_session_graph_animation();
+    ui_reset_game_daily_graph_animation();
 
     /* Restore selection if transitioning back from game_details */
     if (s_last_selected_uid != 0) {
@@ -246,7 +246,7 @@ static void game_list_update(u32 buttons, u32 pressed) {
     int wrap_idx = ((g_cs.current_idx % (int)count) + (int)count) % (int)count;
 
     if (wrap_idx != g_prev_idx) {
-        ui_reset_session_graph_animation();
+        ui_reset_game_daily_graph_animation();
         g_prev_idx = wrap_idx;
     }
 
@@ -401,13 +401,13 @@ static void game_list_draw(void) {
     draw_stats_block(g, sessions, (int)sess_count);
 
     /* ----------------------------------------------------------------
-     * Session bar graph (Right Side, 3 bars max, dates shown)
+     * Game activity graph (Right Side, 4 most active days)
      * ---------------------------------------------------------------- */
-    ui_draw_session_bar_graph(sessions, (int)sess_count, g->entry.uid,
-                              3,
-                              360,          /* center_x of Graph is 360 */
-                              228,          /* baseline_y */
-                              55);          /* max_height */
+    ui_draw_game_daily_graph(sessions, (int)sess_count, g->entry.uid,
+                             4,
+                             360,          /* center_x */
+                             228,          /* baseline_y */
+                             55);          /* max_height */
 
     /* ----------------------------------------------------------------
      * Control hints
