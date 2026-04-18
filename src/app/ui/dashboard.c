@@ -33,11 +33,9 @@ static void dashboard_init(void) {
 
 static void dashboard_update(u32 buttons, u32 pressed) {
     (void)buttons;
-    if (pressed & PSP_CTRL_RTRIGGER) screen_manager_set(&g_screen_settings);
-    if (pressed & PSP_CTRL_LTRIGGER) screen_manager_set(&g_screen_stats);
-    if (pressed & PSP_CTRL_CROSS)    screen_manager_set(&g_screen_game_list);
+    (void)pressed;
+    // inputs like Triangle, Start, Select are handled globally by screen_manager
 }
-
 
 static void dashboard_draw(void) {
     renderer_clear(COLOR_BG);
@@ -51,23 +49,7 @@ static void dashboard_draw(void) {
     // Weekly Graph (Center area)
     ui_draw_weekly_graph(data_get_sessions(), data_get_session_count());
 
-    // Interaction Hint
-    ui_draw_text(i18n_get(MSG_MENU_GAMES_PRESS_X), (Rect){0, 195, 480, 30}, COLOR_TEXT, 0.9f, ALIGN_CENTER);
-
-    // Footer Hints (10px from edges)
-    const char* stats_label = i18n_get(MSG_CTRL_R);
-    char hint_l[64];
-    snprintf(hint_l, sizeof(hint_l), "|L| %s", stats_label);
-
-    const char* menu_label = i18n_get(MSG_CTRL_L);
-    char hint_r[64];
-    snprintf(hint_r, sizeof(hint_r), "%s |R|", menu_label);
-
-    ui_draw_hint_footer(hint_l, 10, COLOR_SUBTEXT);
-
-    float rw = font_get_width(hint_r, 0.8f);
-    ui_draw_hint_footer(hint_r, 480 - 10 - (int)rw, COLOR_SUBTEXT);
-
+    ui_draw_standard_hints();
 }
 
 Screen g_screen_dashboard = {

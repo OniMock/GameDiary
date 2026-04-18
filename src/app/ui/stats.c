@@ -32,8 +32,8 @@ static void stats_init(void) {
 
 static void stats_update(u32 buttons, u32 pressed) {
   (void)buttons;
-  if (pressed & PSP_CTRL_CIRCLE)
-    screen_manager_set(&g_screen_dashboard);
+  (void)pressed;
+  // Handled by global inputs in screen_manager.c
 }
 
 
@@ -79,10 +79,7 @@ static void stats_draw(void) {
   snprintf(sess_str, sizeof(sess_str), "%lu", (unsigned long)total_sessions);
   ui_draw_text(sess_str, rect_column(s_cont, 1, 2, 0), COLOR_TEXT, 1.2f,
                ALIGN_LEFT);
-  const char *back_label = i18n_get(MSG_CTRL_BACK);
-  char hint_o[64];
-  snprintf(hint_o, sizeof(hint_o), "[%s] %s", UI_SYM_CIRCLE_OPEN, back_label);
-  ui_draw_hint_footer(hint_o, 10, COLOR_SUBTEXT);
+  ui_draw_standard_hints();
 }
 
 Screen g_screen_stats = {stats_init, stats_update, stats_draw, NULL};

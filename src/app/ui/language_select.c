@@ -69,15 +69,11 @@ static void language_select_update(u32 buttons, u32 pressed) {
         }
     }
 
-    if (pressed & PSP_CTRL_CROSS) {
+    if (pressed & (PSP_CTRL_CROSS | PSP_CTRL_CIRCLE)) {
         int target_lang = (g_selection == 0) ? LANG_AUTO : g_selection - 1;
         i18n_init(target_lang);
         config_get()->language = target_lang;
         config_save();
-    }
-
-    if (pressed & PSP_CTRL_CIRCLE) {
-        screen_manager_set(&g_screen_settings);
     }
 }
 
@@ -134,19 +130,7 @@ static void language_select_draw(void) {
         renderer_draw_rect(scroll_bg.x, list_area.y + (int)handle_y, scroll_bg.w, (int)handle_h, COLOR_ACCENT);
     }
 
-    const char* back_label = i18n_get(MSG_CTRL_BACK);
-    char hint_o[64];
-
-    snprintf(hint_o, sizeof(hint_o), "|%s| %s", UI_SYM_CIRCLE_OPEN, back_label);
-
-    const char* select_label = i18n_get(MSG_CTRL_SELECT);
-    char hint_select[64];
-    snprintf(hint_select, sizeof(hint_select), "%s |X|", select_label);
-
-    ui_draw_hint_footer(hint_o, 10, COLOR_SUBTEXT);
-
-    float rw = font_get_width(hint_select, 0.8f);
-    ui_draw_hint_footer(hint_select, 480 - 10 - (int)rw, COLOR_SUBTEXT);
+    ui_draw_standard_hints();
 }
 
 Screen g_screen_language_select = {

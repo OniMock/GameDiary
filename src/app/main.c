@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
     data_load_all();
 
     /* 4. State Manager */
-    screen_manager_set(&g_screen_dashboard);
+    screen_manager_set(&g_screen_main_menu);
 
     /* 5. Main Loop */
     while (1) {

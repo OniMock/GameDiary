@@ -251,16 +251,11 @@ static void game_list_update(u32 buttons, u32 pressed) {
     }
 
     /* Navigate to game details using wrapped index */
-    if (mapped_pressed & PSP_CTRL_CROSS) {
+    if (mapped_pressed & (PSP_CTRL_CROSS | PSP_CTRL_CIRCLE)) {
         GameStats *games = data_get_games();
         s_last_selected_uid = games[wrap_idx].entry.uid;
         game_details_set_idx(wrap_idx);
-        screen_manager_set(&g_screen_game_details);
-    }
-
-    if (mapped_pressed & PSP_CTRL_CIRCLE) {
-        s_last_selected_uid = 0; // Clear on return to dashboard
-        screen_manager_set(&g_screen_dashboard);
+        screen_manager_push(&g_screen_game_details);
     }
 }
 
@@ -283,6 +278,7 @@ static void game_list_draw(void) {
         ui_draw_text(i18n_get(MSG_ERROR_NO_GAMES),
                      (Rect){0, 136, 480, 20}, COLOR_SUBTEXT, 1.0f,
                      ALIGN_CENTER);
+        ui_draw_standard_hints();
         return;
     }
 
@@ -412,16 +408,7 @@ static void game_list_draw(void) {
     /* ----------------------------------------------------------------
      * Control hints
      * ---------------------------------------------------------------- */
-    const char *back_label   = i18n_get(MSG_CTRL_BACK);
-    const char *select_label = i18n_get(MSG_CTRL_SELECT);
-    char hint_back[64], hint_sel[64];
-    snprintf(hint_back, sizeof(hint_back), "|%s| %s",
-             UI_SYM_CIRCLE_OPEN, back_label);
-    snprintf(hint_sel,  sizeof(hint_sel),  "%s |X|", select_label);
-
-    ui_draw_hint_footer(hint_back, 10, COLOR_SUBTEXT);
-    float rw = font_get_width(hint_sel, 0.8f);
-    ui_draw_hint_footer(hint_sel, 480 - 10 - (int)rw, COLOR_SUBTEXT);
+    ui_draw_standard_hints();
 }
 
 static void game_list_destroy(void) {

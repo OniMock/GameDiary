@@ -65,6 +65,27 @@ void ui_draw_hint_footer(const char *text, int x, u32 color) {
   font_draw_string(x, 267, text, color, 0.8f);
 }
 
+void ui_draw_standard_hints(void) {
+    // We will space them out across the 480 pixel width.
+    // To make it fit, we use concise labels.
+    // Triangle is 0x25B3 (△).
+    const char* h1 = "[<- ->] Nav";
+    const char* h2 = "[X/O] Abrir";
+    const char* h3 = "[\xE2\x96\xB3] Voltar";
+    const char* h4 = "[START] Menu";
+    const char* h5 = "[SELECT] Config";
+
+    int y = 267;
+    u32 col = COLOR_SUBTEXT;
+    float sz = 0.7f; // Smaller font to fit everything
+
+    font_draw_string(5, y, h1, col, sz);
+    font_draw_string(90, y, h2, col, sz);
+    font_draw_string(180, y, h3, col, sz);
+    font_draw_string(270, y, h4, col, sz);
+    font_draw_string(365, y, h5, col, sz);
+}
+
 void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
                    int custom_icon_size) {
   int text_x = r.x;

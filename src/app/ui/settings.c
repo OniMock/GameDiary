@@ -40,14 +40,10 @@ static void settings_update(u32 buttons, u32 pressed) {
         g_selection = (g_selection + 1) % SETTINGS_MENU_COUNT;
     }
 
-    if (pressed & PSP_CTRL_CROSS) {
+    if (pressed & (PSP_CTRL_CROSS | PSP_CTRL_CIRCLE)) {
         if (g_selection == 0) {
-            screen_manager_set(&g_screen_language_select);
+            screen_manager_push(&g_screen_language_select);
         }
-    }
-
-    if (pressed & PSP_CTRL_CIRCLE) {
-        screen_manager_set(&g_screen_dashboard);
     }
 }
 
@@ -78,18 +74,7 @@ static void settings_draw(void) {
                          label, (i == g_selection), left_icon, right_icon);
     }
 
-    const char* back_label = i18n_get(MSG_CTRL_BACK);
-    char hint_o[64];
-    snprintf(hint_o, sizeof(hint_o), "|%s| %s", UI_SYM_CIRCLE_OPEN, back_label);
-
-    const char* select_label = i18n_get(MSG_CTRL_SELECT);
-    char hint_select[64];
-    snprintf(hint_select, sizeof(hint_select), "%s |X|", select_label);
-
-    ui_draw_hint_footer(hint_o, 10, COLOR_SUBTEXT);
-
-    float rw = font_get_width(hint_select, 0.8f);
-    ui_draw_hint_footer(hint_select, 480 - 10 - (int)rw, COLOR_SUBTEXT);
+    ui_draw_standard_hints();
 }
 
 Screen g_screen_settings = {

@@ -51,6 +51,11 @@ void ui_draw_hint(const char *text, int x, int y, u32 color);
 void ui_draw_hint_footer(const char *text, int x, u32 color);
 
 /**
+ * Draws the standard suite of common navigation hints.
+ */
+void ui_draw_standard_hints(void);
+
+/**
  * Draws a section title with underline.
  */
 void ui_draw_title(const char *text, Rect r, const ImageResource *icon, int custom_icon_size);

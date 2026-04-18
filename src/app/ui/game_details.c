@@ -43,7 +43,8 @@ static void game_details_init(void) {
 
 static void game_details_update(u32 buttons, u32 pressed) {
     (void)buttons;
-    if (pressed & PSP_CTRL_CIRCLE) screen_manager_set(&g_screen_game_list);
+    (void)pressed;
+    // inputs like Triangle, Start, Select are handled globally by screen_manager
 }
 
 static void game_details_draw(void) {
@@ -93,11 +94,8 @@ static void game_details_draw(void) {
     ui_draw_text(i18n_get(MSG_STATS_SESSIONS), row2, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
     snprintf(buf, sizeof(buf), "%lu", (unsigned long)g->session_count);
     ui_draw_text(buf, row2, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
-    const char* back_label = i18n_get(MSG_CTRL_BACK);
-    char hint_o[64];
 
-    snprintf(hint_o, sizeof(hint_o), "[%s] %s", UI_SYM_CIRCLE_OPEN, back_label);
-    ui_draw_hint_footer(hint_o, 10, COLOR_SUBTEXT);
+    ui_draw_standard_hints();
 }
 
 static void game_details_destroy(void) {
