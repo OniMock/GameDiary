@@ -44,7 +44,7 @@ static void dashboard_draw(void) {
     Rect safe_rect = rect_padding(screen_rect, 20);
 
     // Header
-    ui_draw_title_auto(i18n_get(MSG_APP_TITLE), safe_rect, NULL);
+    ui_draw_title_auto(i18n_get(MSG_MENU_STATS), safe_rect, &GD_IMG_ICON_STATS_32_PNG);
 
     // Weekly Graph (Center area)
     ui_draw_weekly_graph(data_get_sessions(), data_get_session_count());

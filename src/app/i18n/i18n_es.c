@@ -16,6 +16,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_MENU_STATS]           = "Estadísticas",
     [MSG_MENU_GAMES]           = "Juegos",
     [MSG_MENU_SETTINGS]        = "Configuración",
+    [MSG_MENU_ACTIVITY]        = "Actividad",
     [MSG_STATS_TOTAL_PLAYTIME] = "Tiempo Total",
     [MSG_STATS_SESSIONS]       = "Sesiones",
     [MSG_STATS_LAST_PLAYED]    = "Último Juego",

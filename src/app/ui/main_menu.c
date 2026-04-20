@@ -38,8 +38,8 @@ typedef struct {
 
 static const MainMenuItem g_menu_items[MENU_ITEM_COUNT] = {
     { MSG_MENU_GAMES, &GD_IMG_ICON_GAME_128_PNG, &g_screen_game_list },
-    { MSG_MENU_DASHBOARD, &GD_IMG_ICON_NOT_FOUND_PNG, &g_screen_dashboard }, // Fallback to not-found icon if no dashboard icon exists
-    { MSG_MENU_STATS, &GD_IMG_ICON_STATS_128_PNG, &g_screen_stats },
+    { MSG_MENU_STATS, &GD_IMG_ICON_STATS_128_PNG, &g_screen_dashboard },
+    { MSG_MENU_ACTIVITY, &GD_IMG_ICON_ACTIVITY_128_PNG, &g_screen_stats },
     { MSG_MENU_SETTINGS, &GD_IMG_ICON_SETTINGS_128_PNG, &g_screen_settings }
 };
 
