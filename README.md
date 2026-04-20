@@ -13,6 +13,10 @@
 
 A complete playtime tracking and game management suite for the PlayStation Portable.
 
+<p align="center">
+  <img src="./assets-src/logo.png" width="380" />
+</p>
+
 ---
 
 ## Table of Contents
