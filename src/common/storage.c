@@ -340,7 +340,7 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
 #if defined(GDIARY_PLUGIN) && !defined(GDIARY_APP)
       /* Capture icon using the stored base dir (no sctrl needed here). */
       char source_dir[160];
-      snprintf(source_dir, sizeof(source_dir), "%s/source", g_base_dir);
+      snprintf(source_dir, sizeof(source_dir), "%s/icons", g_base_dir);
       utils_capture_icon(new_game.game_id, new_game.category, source_dir, meta->file_path);
 #endif
 

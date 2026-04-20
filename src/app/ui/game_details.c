@@ -53,7 +53,8 @@ static void game_details_init(void) {
     GameStats* g = &games[g_game_idx];
 
     char icon_path[256];
-    snprintf(icon_path, sizeof(icon_path), "ms0:/PSP/COMMON/GameDiary/source/%s.png", g->entry.game_id);
+    snprintf(icon_path, sizeof(icon_path), "%s/PSP/COMMON/GameDiary/icons/%s.png",
+             utils_get_device_prefix(), g->entry.game_id);
     g_game_icon = texture_load_png(icon_path);
 
     /* Delegate period calculations to data layer (uses PSP RTC correctly). */

@@ -168,7 +168,7 @@ GameDiary data is stored inside the `ms0:/PSP/COMMON/GameDiary/` directory to ke
 
 * `games.dat`: Master database mapping game IDs to playtime statistics.
 * `config.ini`: User-defined preferences. You can override system language strings or toggle UI features here.
-* `source/`: Cloned icons representing your played games, automatically managed by the plugin.
+* `icons/`: Cloned icons representing your played games, automatically managed by the plugin.
 
 ---
 

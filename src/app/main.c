@@ -61,7 +61,9 @@ int main(int argc, char *argv[]) {
     if (argc > 0 && argv[0]) {
         config_init(argv[0]);
     } else {
-        config_init("ms0:/PSP/GAME/GameDiary/EBOOT.PBP"); // Fallback
+        char fallback_path[128];
+        snprintf(fallback_path, sizeof(fallback_path), "%s/PSP/GAME/GameDiary/EBOOT.PBP", utils_get_device_prefix());
+        config_init(fallback_path);
     }
 
     config_load();
