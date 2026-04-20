@@ -88,7 +88,7 @@ void screen_manager_update(void) {
             }
             return;
         }
-        if (pressed & PSP_CTRL_TRIANGLE) {
+        if (pressed & PSP_CTRL_CIRCLE) {
             if (g_stack_top >= 0) {
                 screen_manager_pop();
                 return;

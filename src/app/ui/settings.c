@@ -40,7 +40,7 @@ static void settings_update(u32 buttons, u32 pressed) {
         g_selection = (g_selection + 1) % SETTINGS_MENU_COUNT;
     }
 
-    if (pressed & (PSP_CTRL_CROSS | PSP_CTRL_CIRCLE)) {
+    if (pressed & PSP_CTRL_CROSS) {
         if (g_selection == 0) {
             screen_manager_push(&g_screen_language_select);
         }

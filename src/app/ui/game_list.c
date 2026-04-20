@@ -219,7 +219,7 @@ static void game_list_update(u32 buttons, u32 pressed) {
     u32 count = data_get_game_count();
 
     if (count == 0) {
-        if (pressed & PSP_CTRL_CIRCLE)
+        if (pressed & PSP_CTRL_CROSS)
             screen_manager_set(&g_screen_dashboard);
         return;
     }
@@ -251,7 +251,7 @@ static void game_list_update(u32 buttons, u32 pressed) {
     }
 
     /* Navigate to game details using wrapped index */
-    if (mapped_pressed & (PSP_CTRL_CROSS | PSP_CTRL_CIRCLE)) {
+    if (mapped_pressed & PSP_CTRL_CROSS) {
         GameStats *games = data_get_games();
         s_last_selected_uid = games[wrap_idx].entry.uid;
         game_details_set_idx(wrap_idx);

@@ -80,8 +80,8 @@ void ui_draw_standard_hints(void) {
 
     const char* icons[] = {
         "[← →]",
-        "[X/O]",
-        "[△]",
+        "[X]",
+        "[O]",
         "[START]",
         "[SELECT]"
     };

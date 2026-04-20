@@ -85,7 +85,7 @@ static void main_menu_update(u32 buttons, u32 pressed) {
     g_current_index += (g_target_index - g_current_index) * 0.15f;
 
     // Selection
-    if (pressed & (PSP_CTRL_CROSS | PSP_CTRL_CIRCLE)) {
+    if (pressed & PSP_CTRL_CROSS) {
         int idx = (int)(g_target_index + 0.5f);
         if (idx >= 0 && idx < MENU_ITEM_COUNT) {
             screen_manager_push(g_menu_items[idx].target_screen);

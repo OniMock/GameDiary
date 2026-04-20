@@ -69,7 +69,7 @@ static void language_select_update(u32 buttons, u32 pressed) {
         }
     }
 
-    if (pressed & (PSP_CTRL_CROSS | PSP_CTRL_CIRCLE)) {
+    if (pressed & PSP_CTRL_CROSS) {
         int target_lang = (g_selection == 0) ? LANG_AUTO : g_selection - 1;
         i18n_init(target_lang);
         config_get()->language = target_lang;
