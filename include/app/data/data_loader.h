@@ -46,6 +46,25 @@ u32 data_get_session_count(void);
 SessionEntry* data_get_sessions(void);
 
 /**
+ * @brief Per-game period statistics computed by data_compute_game_details().
+ */
+typedef struct {
+    u32 playtime_week;   /**< Total seconds played during the last 7 days.      */
+    u32 playtime_month;  /**< Total seconds this month (includes week).          */
+    u32 playtime_year;   /**< Total seconds this year  (includes month + week).  */
+    u32 first_played;    /**< UNIX ts of the earliest session, or 0 if none.     */
+    u32 last_played;     /**< UNIX ts of the most recent session, or 0 if none.  */
+} GameDetailStats;
+
+/**
+ * @brief Computes per-period playtime and date bookmarks for one game.
+ * Uses the PSP RTC (utils_get_timestamp) for correct time boundaries.
+ * @param game_uid  UID of the target game.
+ * @param out       Output; zeroed and filled by this function.
+ */
+void data_compute_game_details(u32 game_uid, GameDetailStats *out);
+
+/**
  * @brief Frees loaded data resources.
  */
 void data_free(void);

@@ -16,10 +16,12 @@
 #include "app/data/data_loader.h"
 #include "common/utils.h"
 #include <pspkernel.h>
+#include <psprtc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include <time.h>
 
 static GameStats *g_games = NULL;
 static u32 g_game_count = 0;
@@ -100,3 +102,73 @@ void data_free(void) {
     g_games = NULL;
     g_sessions = NULL;
 }
+
+/**
+ * @brief Computes detailed per-period statistics for a single game.
+ *
+ * Uses utils_get_timestamp() (PSP RTC via sceRtcGetCurrentTick) for all
+ * time boundaries instead of time()/mktime(), which may be unreliable on
+ * PSP hardware. All timestamp arithmetic is done in u32 UNIX seconds,
+ * consistent with SessionEntry.timestamp in the database schema.
+ *
+ * Period accounting:
+ *  - playtime_week  = sessions in the last 7 calendar days
+ *  - playtime_month = sessions from start of current month (cumulative, includes week)
+ *  - playtime_year  = sessions from start of current year  (cumulative, includes month)
+ *
+ * @param game_uid  UID of the game to compute stats for.
+ * @param out       Output struct; zeroed by this function before filling.
+ */
+void data_compute_game_details(u32 game_uid, GameDetailStats *out) {
+    memset(out, 0, sizeof(*out));
+
+    /* Get current time from the PSP RTC — same approach as compute_weekly_data. */
+    u32 now = utils_get_timestamp();
+    time_t now_t = (time_t)now;
+
+    /* Strip the time-of-day to get start-of-today. */
+    struct tm today_tm = *localtime(&now_t);
+    today_tm.tm_hour = 0; today_tm.tm_min = 0; today_tm.tm_sec = 0;
+    u32 today_start = (u32)mktime(&today_tm);
+
+    /* Week boundary: 7 days back from today_start (same as weekly graph: 6 days ago). */
+    u32 week_start = (today_start > 6 * 86400u) ? (today_start - 6 * 86400u) : 0u;
+
+    /* Month boundary: 1st of current month at 00:00. */
+    struct tm month_tm = today_tm;
+    month_tm.tm_mday = 1;
+    u32 month_start = (u32)mktime(&month_tm);
+
+    /* Year boundary: January 1st of current year at 00:00. */
+    struct tm year_tm = today_tm;
+    year_tm.tm_mday = 1; year_tm.tm_mon = 0;
+    u32 year_start = (u32)mktime(&year_tm);
+
+    /* Accumulate non-overlapping buckets first, then roll up. */
+    u32 bucket_week = 0, bucket_month = 0, bucket_year = 0;
+
+    for (u32 i = 0; i < g_session_count; i++) {
+        const SessionEntry *s = &g_sessions[i];
+        if (s->game_uid != game_uid || s->duration == 0) continue;
+
+        u32 ts = s->timestamp;
+
+        /* Chronological bookmarks. */
+        if (out->first_played == 0 || ts < out->first_played) out->first_played = ts;
+        if (ts > out->last_played) out->last_played = ts;
+
+        /* Place each session into its tightest non-overlapping bucket. */
+        if (ts >= week_start)
+            bucket_week += s->duration;
+        else if (ts >= month_start)
+            bucket_month += s->duration;
+        else if (ts >= year_start)
+            bucket_year += s->duration;
+    }
+
+    /* Roll up: month includes this week; year includes this month (+ week). */
+    out->playtime_week  = bucket_week;
+    out->playtime_month = bucket_month + bucket_week;
+    out->playtime_year  = bucket_year  + bucket_month + bucket_week;
+}
+

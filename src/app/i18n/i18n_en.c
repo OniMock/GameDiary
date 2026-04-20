@@ -26,7 +26,13 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_SETTINGS_LANGUAGE]    = "Language",
     [MSG_TOP_WEEK]             = "Week",
     [MSG_TOP_MONTH]            = "Month",
+    [MSG_TOP_YEAR]             = "Year",
     [MSG_TOP_ALL]              = "All Time",
+    [MSG_DETAILS_FIRST_PLAYED] = "First Played",
+    [MSG_CAT_PSP]              = "PlayStation Portable",
+    [MSG_CAT_PSX]              = "PlayStation (PSX)",
+    [MSG_CAT_MINIS]            = "PlayStation Minis",
+    [MSG_CAT_HOMEBREW]         = "Homebrew",
     [MSG_ERROR_NO_GAMES]       = "No games found",
     [MSG_CTRL_NAVIGATE]        = "Navigate",
 

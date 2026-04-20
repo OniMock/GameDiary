@@ -27,7 +27,13 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SETTINGS_LANGUAGE]    = "Язык",
     [MSG_TOP_WEEK]             = "Неделя",
     [MSG_TOP_MONTH]            = "Месяц",
+    [MSG_TOP_YEAR]             = "Год",
     [MSG_TOP_ALL]              = "Все время",
+    [MSG_DETAILS_FIRST_PLAYED] = "Первая игра",
+    [MSG_CAT_PSP]              = "PlayStation Portable",
+    [MSG_CAT_PSX]              = "PlayStation (PSX)",
+    [MSG_CAT_MINIS]            = "PlayStation Minis",
+    [MSG_CAT_HOMEBREW]         = "Homebrew",
     [MSG_ERROR_NO_GAMES]       = "Игры не найдены",
     [MSG_CTRL_NAVIGATE]        = "Навигация",
 
