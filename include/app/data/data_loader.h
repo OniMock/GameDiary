@@ -46,6 +46,12 @@ u32 data_get_session_count(void);
 SessionEntry* data_get_sessions(void);
 
 /**
+ * @brief Rebuilds the O(1) mapping of UID to game index.
+ * MUST be called immediately after reordering the games array (e.g. qsort).
+ */
+void data_rebuild_uid_map(void);
+
+/**
  * @brief Per-game period statistics computed by data_compute_game_details().
  */
 typedef struct {

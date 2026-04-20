@@ -28,6 +28,9 @@ static u32 g_game_count = 0;
 static SessionEntry *g_sessions = NULL;
 static u32 g_session_count = 0;
 
+static u16 *g_uid_map = NULL;
+static u32 g_uid_map_size = 0;
+
 int data_load_all(void) {
     const char *prefix = utils_get_device_prefix();
     utils_ensure_storage_dirs(prefix);
@@ -49,6 +52,23 @@ int data_load_all(void) {
     }
     sceIoClose(fd);
 
+    /* Build O(1) mapping table for UID -> array index.
+     * UIDs are generally sequential, so max_uid is close to g_game_count. */
+    if (g_game_count > 0) {
+        u32 max_uid = 0;
+        for (u32 i = 0; i < g_game_count; i++) {
+            if (g_games[i].entry.uid > max_uid) max_uid = g_games[i].entry.uid;
+        }
+        g_uid_map_size = max_uid + 1;
+        g_uid_map = (u16*)malloc(g_uid_map_size * sizeof(u16));
+        if (g_uid_map) {
+            memset(g_uid_map, 0xFF, g_uid_map_size * sizeof(u16)); /* 0xFFFF means empty */
+            for (u32 i = 0; i < g_game_count; i++) {
+                g_uid_map[g_games[i].entry.uid] = (u16)i;
+            }
+        }
+    }
+
     // 2. Load sessions.dat
     snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/db/sessions.dat", prefix);
     fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
@@ -64,6 +84,15 @@ int data_load_all(void) {
     return 0;
 }
 
+void data_rebuild_uid_map(void) {
+    if (!g_uid_map || !g_games) return;
+    /* Map each UID to its CURRENT index in the array */
+    memset(g_uid_map, 0xFF, g_uid_map_size * sizeof(u16));
+    for (u32 i = 0; i < g_game_count; i++) {
+        g_uid_map[g_games[i].entry.uid] = (u16)i;
+    }
+}
+
 void data_calculate_stats(u32 start_ts, u32 end_ts) {
     for (u32 i = 0; i < g_game_count; i++) {
         g_games[i].total_playtime = 0;
@@ -73,18 +102,19 @@ void data_calculate_stats(u32 start_ts, u32 end_ts) {
     }
 
     for (u32 i = 0; i < g_session_count; i++) {
-        for (u32 j = 0; j < g_game_count; j++) {
-            if (g_games[j].entry.uid == g_sessions[i].game_uid) {
-                g_games[j].total_playtime += g_sessions[i].duration;
-                g_games[j].session_count++;
-                if (g_sessions[i].timestamp > g_games[j].last_played_ts) {
-                    g_games[j].last_played_ts = g_sessions[i].timestamp;
+        u32 uid = g_sessions[i].game_uid;
+        if (g_uid_map && uid < g_uid_map_size) {
+            u16 idx = g_uid_map[uid];
+            if (idx != 0xFFFF && idx < g_game_count) {
+                g_games[idx].total_playtime += g_sessions[i].duration;
+                g_games[idx].session_count++;
+                if (g_sessions[i].timestamp > g_games[idx].last_played_ts) {
+                    g_games[idx].last_played_ts = g_sessions[i].timestamp;
                 }
 
                 if (g_sessions[i].timestamp >= start_ts && g_sessions[i].timestamp <= end_ts) {
-                    g_games[j].period_playtime += g_sessions[i].duration;
+                    g_games[idx].period_playtime += g_sessions[i].duration;
                 }
-                break;
             }
         }
     }
@@ -99,8 +129,11 @@ SessionEntry* data_get_sessions(void) { return g_sessions; }
 void data_free(void) {
     if (g_games) free(g_games);
     if (g_sessions) free(g_sessions);
+    if (g_uid_map) free(g_uid_map);
     g_games = NULL;
     g_sessions = NULL;
+    g_uid_map = NULL;
+    g_uid_map_size = 0;
 }
 
 /**

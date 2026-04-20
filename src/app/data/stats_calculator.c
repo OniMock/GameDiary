@@ -14,6 +14,7 @@
   */
 
 #include "app/data/stats_calculator.h"
+#include "app/data/data_loader.h"
 #include <stdlib.h>
 
 static int compare_period(const void* a, const void* b) {
@@ -37,6 +38,7 @@ void stats_sort_by_period(void) {
     GameStats* games = data_get_games();
     if (count > 0 && games) {
         qsort(games, count, sizeof(GameStats), compare_period);
+        data_rebuild_uid_map();
     }
 }
 
@@ -45,5 +47,6 @@ void stats_sort_by_total(void) {
     GameStats* games = data_get_games();
     if (count > 0 && games) {
         qsort(games, count, sizeof(GameStats), compare_total);
+        data_rebuild_uid_map();
     }
 }
