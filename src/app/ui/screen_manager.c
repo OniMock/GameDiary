@@ -78,13 +78,13 @@ void screen_manager_update(void) {
     if (g_fade_state == 0) {
         if (pressed & PSP_CTRL_START) {
             if (g_current_screen != &g_screen_main_menu) {
-                screen_manager_set(&g_screen_main_menu);
+                screen_manager_push(&g_screen_main_menu);
             }
             return;
         }
         if (pressed & PSP_CTRL_SELECT) {
             if (g_current_screen != &g_screen_settings) {
-                screen_manager_set(&g_screen_settings);
+                screen_manager_push(&g_screen_settings);
             }
             return;
         }
