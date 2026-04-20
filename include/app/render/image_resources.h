@@ -34,20 +34,30 @@ typedef struct {
 #define GD_IMAGE_SIZE(img) ((img)->size)
 #define GD_IMAGE_BYTES(img) ((img)->size)
 
-extern const ImageResource GD_IMG_ABOUT_ICON_PNG;
-extern const ImageResource GD_IMG_ACTIVITY_ICON_PNG;
-extern const ImageResource GD_IMG_CONFIG_ICON_PNG;
-extern const ImageResource GD_IMG_CONTROLLER_ICON_PNG;
-extern const ImageResource GD_IMG_FILTER_ICON_PNG;
 extern const ImageResource GD_IMG_FLAG_EN_PNG;
 extern const ImageResource GD_IMG_FLAG_ES_PNG;
 extern const ImageResource GD_IMG_FLAG_PT_PNG;
 extern const ImageResource GD_IMG_FLAG_RU_PNG;
-extern const ImageResource GD_IMG_GAME_ICON_PNG;
+extern const ImageResource GD_IMG_ICON_ABOUT_128_PNG;
+extern const ImageResource GD_IMG_ICON_ABOUT_32_PNG;
+extern const ImageResource GD_IMG_ICON_ACTIVITY_128_PNG;
+extern const ImageResource GD_IMG_ICON_ACTIVITY_32_PNG;
+extern const ImageResource GD_IMG_ICON_CONFIG_128_PNG;
+extern const ImageResource GD_IMG_ICON_CONFIG_32_PNG;
+extern const ImageResource GD_IMG_ICON_CONTROLLER_128_PNG;
+extern const ImageResource GD_IMG_ICON_CONTROLLER_32_PNG;
+extern const ImageResource GD_IMG_ICON_FILTER_128_PNG;
+extern const ImageResource GD_IMG_ICON_FILTER_32_PNG;
+extern const ImageResource GD_IMG_ICON_GAMES_32_PNG;
+extern const ImageResource GD_IMG_ICON_GAME_128_PNG;
+extern const ImageResource GD_IMG_ICON_LANGUAGE_128_PNG;
+extern const ImageResource GD_IMG_ICON_LANGUAGE_32_PNG;
+extern const ImageResource GD_IMG_ICON_LOGO_128_PNG;
+extern const ImageResource GD_IMG_ICON_LOGO_32_PNG;
+extern const ImageResource GD_IMG_ICON_MENU_128_PNG;
+extern const ImageResource GD_IMG_ICON_MENU_32_PNG;
 extern const ImageResource GD_IMG_ICON_NOT_FOUND_PNG;
-extern const ImageResource GD_IMG_LANGUAGE_ICON_PNG;
-extern const ImageResource GD_IMG_LOGO_ICON_PNG;
-extern const ImageResource GD_IMG_MENU_ICON_PNG;
-extern const ImageResource GD_IMG_STATS_ICON_PNG;
+extern const ImageResource GD_IMG_ICON_STATS_128_PNG;
+extern const ImageResource GD_IMG_ICON_STATS_32_PNG;
 
 #endif // GAMEDIARY_IMAGE_RESOURCES_H

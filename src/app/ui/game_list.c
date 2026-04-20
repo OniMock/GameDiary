@@ -268,7 +268,7 @@ static void game_list_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect   = rect_padding(screen_rect, 20);
     ui_draw_title(i18n_get(MSG_MENU_GAMES), safe_rect,
-                  &GD_IMG_GAME_ICON_PNG, 24);
+                  &GD_IMG_ICON_GAMES_32_PNG, 24);
 
     /* ----------------------------------------------------------------
      * Empty state

@@ -37,10 +37,10 @@ typedef struct {
 } MainMenuItem;
 
 static const MainMenuItem g_menu_items[MENU_ITEM_COUNT] = {
-    { MSG_MENU_GAMES, &GD_IMG_GAME_ICON_PNG, &g_screen_game_list },
+    { MSG_MENU_GAMES, &GD_IMG_ICON_GAME_128_PNG, &g_screen_game_list },
     { MSG_MENU_DASHBOARD, &GD_IMG_ICON_NOT_FOUND_PNG, &g_screen_dashboard }, // Fallback to not-found icon if no dashboard icon exists
-    { MSG_MENU_STATS, &GD_IMG_STATS_ICON_PNG, &g_screen_stats },
-    { MSG_MENU_SETTINGS, &GD_IMG_MENU_ICON_PNG, &g_screen_settings }
+    { MSG_MENU_STATS, &GD_IMG_ICON_STATS_128_PNG, &g_screen_stats },
+    { MSG_MENU_SETTINGS, &GD_IMG_ICON_MENU_128_PNG, &g_screen_settings }
 };
 
 static void main_menu_init(void) {
@@ -54,14 +54,14 @@ static void main_menu_update(u32 buttons, u32 pressed) {
 
     SceCtrlData pad;
     sceCtrlPeekBufferPositive(&pad, 1);
-    
+
     // Analog to discrete steps
     float ax = (pad.Lx - 128.0f) / 128.0f;
     int dir = 0;
 
     if (pressed & PSP_CTRL_RIGHT) dir = 1;
     else if (pressed & PSP_CTRL_LEFT) dir = -1;
-    
+
     if (ax > 0.3f && s_analog_held_x != 1) {
         dir = 1;
         s_analog_held_x = 1;
@@ -106,11 +106,11 @@ static void main_menu_draw(void) {
 
     // Draw up to 5 items (center, left 2, right 2)
     // We sort them by absolute offset (depth) to render those furthest away first
-    
+
     int draw_order[5];
     float offsets[5];
     int count = 0;
-    
+
     for (int i = 0; i < MENU_ITEM_COUNT; i++) {
         float offset = (float)i - g_current_index;
         if (fabsf(offset) <= 2.5f) {
@@ -137,15 +137,15 @@ static void main_menu_draw(void) {
     for (int i = 0; i < count; i++) {
         int idx = draw_order[i];
         float offset = offsets[i];
-        
+
         float scale = 1.0f - fabsf(offset) * 0.2f;
         if (scale < 0.6f) scale = 0.6f;
 
         float alpha_f = 1.0f - fabsf(offset) * 0.3f;
         if (alpha_f < 0.2f) alpha_f = 0.2f;
-        
+
         int draw_x = center_x + (int)(offset * spacing);
-        
+
         // Base sizes for icons (e.g. 64x64)
         int base_w = 64, base_h = 64;
         if (g_menu_items[idx].icon != NULL) {

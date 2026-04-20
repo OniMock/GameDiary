@@ -484,8 +484,10 @@ void ui_draw_menu_item(int x, int y, int w, int h, const char *label,
     // Design choice: only tint if the caller handles it or if it's not a flag.
     // We'll trust sceGuColor state.
     sceGuColor(0xFFFFFFFF); // Default to white for flags/colored assets
-    if (right_icon == &GD_IMG_MENU_ICON_PNG ||
-        right_icon == &GD_IMG_LANGUAGE_ICON_PNG) {
+    if (right_icon == &GD_IMG_ICON_MENU_128_PNG ||
+        right_icon == &GD_IMG_ICON_MENU_32_PNG ||
+        right_icon == &GD_IMG_ICON_LANGUAGE_128_PNG ||
+        right_icon == &GD_IMG_ICON_LANGUAGE_32_PNG) {
       sceGuColor(icon_color);
     }
 

@@ -83,7 +83,7 @@ static void language_select_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
 
-    ui_draw_title_auto(i18n_get(MSG_SETTINGS_LANGUAGE), safe_rect, &GD_IMG_LANGUAGE_ICON_PNG);
+    ui_draw_title_auto(i18n_get(MSG_SETTINGS_LANGUAGE), safe_rect, &GD_IMG_ICON_LANGUAGE_32_PNG);
 
     int menu_count = LANG_COUNT + 1;
     Rect list_area = {60, 70, 360, 160}; // Height for 4 items (~40px each)
