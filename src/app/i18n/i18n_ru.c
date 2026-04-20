@@ -41,7 +41,7 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
 
     // Format Time
     [MSG_STATS_NO_ACTIVITY]    = "Нет недавней активности",
-    [MSG_STATS_DAYS_ACTIVE]    = "Активные дни: %d",
+    [MSG_STATS_DAYS_ACTIVE]    = "Активные дни",
     [MSG_STATS_NEVER]          = "Никогда",
     [MSG_DATE_FORMAT]          = "%d.%m.%Y",
     [MSG_DATE_FORMAT_SHORT]    = "%d.%m",

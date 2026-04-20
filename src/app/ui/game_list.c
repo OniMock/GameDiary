@@ -142,7 +142,6 @@ static void draw_carousel_icon(int inf_idx, int cx, int cy, float scale,
 static void draw_stats_block(const GameStats *g,
                              const SessionEntry *sessions, int sess_count) {
     char val_buf[64];
-    char text_buf[128];
 
     int start_x = 30;
     int start_y = 160;
@@ -154,9 +153,9 @@ static void draw_stats_block(const GameStats *g,
     Rect box1 = {start_x, start_y, box_w, box_h};
     ui_draw_card(box1, COLOR_CARD, COLOR_BORDER);
     ui_format_duration(g->total_playtime, val_buf, sizeof(val_buf));
-    snprintf(text_buf, sizeof(text_buf), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), val_buf);
-    ui_draw_text(text_buf, (Rect){start_x + 10, start_y + 7, box_w - 20, 10},
-                 COLOR_TEXT, 0.8f, ALIGN_LEFT);
+    Rect text_rect1 = {start_x + 10, start_y + 7, box_w - 20, 10};
+    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), text_rect1, COLOR_TEXT, 0.8f, ALIGN_LEFT);
+    ui_draw_text(val_buf, text_rect1, COLOR_TEXT, 0.8f, ALIGN_RIGHT);
 
     /* Last Played Date */
     time_t last_time = 0;
@@ -173,17 +172,18 @@ static void draw_stats_block(const GameStats *g,
     }
     Rect box2 = {start_x, start_y + line_gap, box_w, box_h};
     ui_draw_card(box2, COLOR_CARD, COLOR_BORDER);
-    snprintf(text_buf, sizeof(text_buf), "%s: %s", i18n_get(MSG_STATS_LAST_PLAYED), last_str);
-    ui_draw_text(text_buf, (Rect){start_x + 10, start_y + line_gap + 7, box_w - 20, 10},
-                 COLOR_TEXT, 0.8f, ALIGN_LEFT);
+    Rect text_rect2 = {start_x + 10, start_y + line_gap + 7, box_w - 20, 10};
+    ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), text_rect2, COLOR_TEXT, 0.8f, ALIGN_LEFT);
+    ui_draw_text(last_str, text_rect2, COLOR_TEXT, 0.8f, ALIGN_RIGHT);
 
     /* Days Active */
     Rect box3 = {start_x, start_y + line_gap * 2, box_w, box_h};
     ui_draw_card(box3, COLOR_CARD, COLOR_BORDER);
     int days = carousel_count_days_active(sessions, sess_count, g->entry.uid);
-    snprintf(text_buf, sizeof(text_buf), i18n_get(MSG_STATS_DAYS_ACTIVE), days);
-    ui_draw_text(text_buf, (Rect){start_x + 10, start_y + line_gap * 2 + 7, box_w - 20, 10},
-                 COLOR_TEXT, 0.8f, ALIGN_LEFT);
+    snprintf(val_buf, sizeof(val_buf), "%d", days);
+    Rect text_rect3 = {start_x + 10, start_y + line_gap * 2 + 7, box_w - 20, 10};
+    ui_draw_text(i18n_get(MSG_STATS_DAYS_ACTIVE), text_rect3, COLOR_TEXT, 0.8f, ALIGN_LEFT);
+    ui_draw_text(val_buf, text_rect3, COLOR_TEXT, 0.8f, ALIGN_RIGHT);
 }
 
 /* -----------------------------------------------------------------------
