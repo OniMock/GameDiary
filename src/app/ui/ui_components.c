@@ -14,6 +14,7 @@
  */
 
 #include "app/ui/ui_components.h"
+#include "app/ui/ui_text.h"
 #include "app/i18n/i18n.h"
 #include "app/render/font.h"
 #include "app/render/renderer.h"
@@ -466,7 +467,7 @@ void ui_draw_menu_item(int x, int y, int w, int h, const char *label,
 
   // 3. Label
   Rect text_rect = {current_x, y, w - (current_x - x) - 40, h};
-  ui_draw_text(label, text_rect, text_color, 0.9f, ALIGN_LEFT);
+  ui_draw_text_auto_fit(label, text_rect, text_color, 0.9f, ALIGN_LEFT);
 
   // 4. Right Icon (often used for flags or arrows)
   if (right_icon) {

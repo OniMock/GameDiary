@@ -32,6 +32,7 @@
 
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
+#include "app/ui/ui_text.h"
 #include "app/ui/ui_layout.h"
 #include "app/ui/carousel_state.h"
 #include "app/i18n/i18n.h"
@@ -378,8 +379,8 @@ static void game_list_draw(void) {
 
     /* Clamp long names to avoid overflowing the info strip. */
     Rect name_rect = {60, NAME_Y, 360, 14};
-    ui_draw_text(g->entry.game_name, name_rect, COLOR_TEXT, 0.9f,
-                 ALIGN_CENTER);
+    ui_draw_text_auto_fit(g->entry.game_name, name_rect, COLOR_TEXT, 0.9f,
+                          ALIGN_CENTER);
 
     /* ----------------------------------------------------------------
      * Thin separator between info and stats

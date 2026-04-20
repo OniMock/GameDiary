@@ -15,6 +15,7 @@
 
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
+#include "app/ui/ui_text.h"
 #include "app/ui/ui_layout.h"
 #include "app/i18n/i18n.h"
 #include "app/render/renderer.h"
@@ -110,11 +111,9 @@ static void game_details_draw(void) {
     int tw_max = 450 - tx;
     if (tw_max < 50) tw_max = 50; /* safety floor */
 
-    /* Game name — dynamic scale so long titles never clip */
-    float title_scale = 1.0f;
-    float title_w = font_get_width(g->entry.game_name, title_scale);
-    if (title_w > (float)tw_max) title_scale = (float)tw_max / title_w;
-    ui_draw_text(g->entry.game_name, (Rect){tx, 18, tw_max, 22}, COLOR_ACCENT, title_scale, ALIGN_LEFT);
+    /* Game name — use auto-fit (scale then ellipsis) for long titles */
+    ui_draw_text_auto_fit(g->entry.game_name, (Rect){tx, 18, tw_max, 22},
+                          COLOR_ACCENT, 1.0f, ALIGN_LEFT);
 
     /* ID + Category sub-line */
     const char* cat_str = get_game_category(g->entry.category);
