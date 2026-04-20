@@ -42,8 +42,6 @@ extern const ImageResource GD_IMG_ICON_ABOUT_128_PNG;
 extern const ImageResource GD_IMG_ICON_ABOUT_32_PNG;
 extern const ImageResource GD_IMG_ICON_ACTIVITY_128_PNG;
 extern const ImageResource GD_IMG_ICON_ACTIVITY_32_PNG;
-extern const ImageResource GD_IMG_ICON_CONFIG_128_PNG;
-extern const ImageResource GD_IMG_ICON_CONFIG_32_PNG;
 extern const ImageResource GD_IMG_ICON_CONTROLLER_128_PNG;
 extern const ImageResource GD_IMG_ICON_CONTROLLER_32_PNG;
 extern const ImageResource GD_IMG_ICON_FILTER_128_PNG;
@@ -57,6 +55,8 @@ extern const ImageResource GD_IMG_ICON_LOGO_32_PNG;
 extern const ImageResource GD_IMG_ICON_MENU_128_PNG;
 extern const ImageResource GD_IMG_ICON_MENU_32_PNG;
 extern const ImageResource GD_IMG_ICON_NOT_FOUND_PNG;
+extern const ImageResource GD_IMG_ICON_SETTINGS_128_PNG;
+extern const ImageResource GD_IMG_ICON_SETTINGS_32_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_128_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_32_PNG;
 

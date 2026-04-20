@@ -53,7 +53,7 @@ static void settings_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
 
-    ui_draw_title_auto(i18n_get(MSG_MENU_SETTINGS), safe_rect, &GD_IMG_ICON_MENU_32_PNG);
+    ui_draw_title_auto(i18n_get(MSG_MENU_SETTINGS), safe_rect, &GD_IMG_ICON_SETTINGS_32_PNG);
 
     Rect list_area = {60, 70, 360, 160};
 
