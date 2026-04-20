@@ -214,9 +214,9 @@ void carousel_init(CarouselState *cs, int total_games) {
     /* Spin up thread if not running */
     if (s_loader_thid < 0) {
         s_loader_run = 1;
-        /* Priority 0x18 is slightly lower than normal game loop, preventing complete starvation */
+        /* Priority 0x30 (48) is lower than the normal game loop (0x20 / 32), preventing UI starvation */
         s_loader_thid = sceKernelCreateThread("GameDiaryIconLoader", carousel_loader_thread,
-                                              0x18, 0x4000, 0, NULL);
+                                              0x30, 0x4000, 0, NULL);
         if (s_loader_thid >= 0) {
             sceKernelStartThread(s_loader_thid, 0, NULL);
         }
