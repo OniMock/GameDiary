@@ -20,6 +20,7 @@
 #include "app/ui/carousel_state.h"
 #include "app/data/data_loader.h"
 #include "app/render/texture.h"
+#include "common/utils.h"
 
 #include <pspctrl.h>
 #include <math.h>
@@ -54,7 +55,8 @@ static int slot_for(int game_idx) {
 static void build_icon_path(char *out, size_t size, int game_idx) {
     const GameStats *games = data_get_games();
     snprintf(out, size,
-             "ms0:/PSP/COMMON/GameDiary/source/%s.png",
+             "%s/PSP/COMMON/GameDiary/icons/%s.png",
+             utils_get_device_prefix(),
              games[game_idx].entry.game_id);
 }
 
@@ -80,7 +82,7 @@ static void cache_ensure(CarouselState *cs, int inf_idx) {
     /* Mark as pending deferred load safely. */
     cs->cache[s].inf_idx = -1000000;      /* Temporary invalidate */
     cs->cache[s].state   = CACHE_SLOT_EMPTY;
-    
+
     /* Commit new state */
     cs->cache[s].inf_idx = inf_idx;
     cs->cache[s].state   = CACHE_SLOT_PENDING;
@@ -102,24 +104,24 @@ static int carousel_loader_thread(SceSize args, void *argp) {
                 int target_idx = s_active_cs->current_idx + (dist * sign);
                 int s = slot_for(target_idx);
 
-                if (s_active_cs->cache[s].inf_idx == target_idx && 
+                if (s_active_cs->cache[s].inf_idx == target_idx &&
                     s_active_cs->cache[s].state == CACHE_SLOT_PENDING) {
-                    
+
                     int wrap_idx = (target_idx % s_active_cs->total + s_active_cs->total) % s_active_cs->total;
                     char path[256];
                     build_icon_path(path, sizeof(path), wrap_idx);
-                    
+
                     Texture *tex = texture_load_png(path);
-                    
+
                     /* Validate the slot hasn't been reassigned mid-load */
-                    if (s_active_cs->cache[s].inf_idx == target_idx && 
+                    if (s_active_cs->cache[s].inf_idx == target_idx &&
                         s_active_cs->cache[s].state == CACHE_SLOT_PENDING) {
                         s_active_cs->cache[s].tex = tex;
                         s_active_cs->cache[s].state = CACHE_SLOT_LOADED;
                     } else if (tex) {
                         texture_free(tex);
                     }
-                    
+
                     loaded_any = 1;
                     break;
                 }
@@ -210,7 +212,7 @@ void carousel_init(CarouselState *cs, int total_games) {
     }
 
     s_active_cs = cs;
-    
+
     /* Spin up thread if not running */
     if (s_loader_thid < 0) {
         s_loader_run = 1;
@@ -227,7 +229,7 @@ void carousel_init(CarouselState *cs, int total_games) {
 
 void carousel_destroy(CarouselState *cs) {
     s_active_cs = NULL; /* Pause loader operations immediately */
-    
+
     for (int s = 0; s < CAROUSEL_CACHE_SIZE; s++) {
         if (cs->cache[s].tex) {
             texture_free(cs->cache[s].tex);
