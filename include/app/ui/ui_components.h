@@ -12,6 +12,7 @@
 #define GAMEDIARY_UI_COMPONENTS_H
 
 #include "app/ui/ui_layout.h"
+#include "app/data/stats_calculator.h"
 #include "common/db_schema.h"
 #include <psptypes.h>
 
@@ -66,14 +67,15 @@ void ui_draw_title(const char *text, Rect r, const ImageResource *icon, int cust
 void ui_draw_title_auto(const char *text, Rect r, const ImageResource *icon);
 
 /**
- * Draws an animated weekly activity graph.
+ * @brief Draws an animated statistical graph supporting multiple time ranges.
+ * Uses smooth fade and slide transition logic.
  */
-void ui_draw_weekly_graph(SessionEntry *sessions, int count);
+void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_y, int total_w, int max_bar_h);
 
 /**
- * Resets the graph animation state so it plays again on next redraw.
+ * Resets the graph animation state so it slides in again on next redraw.
  */
-void ui_reset_graph_animation(void);
+void ui_reset_stats_graph_animation(void);
 
 /**
  * Draws a standard menu item with optional icons on left and right.

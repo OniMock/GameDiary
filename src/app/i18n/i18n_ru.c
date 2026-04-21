@@ -56,4 +56,23 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_DURATION_MINS]        = "%dм",
     [MSG_DURATION_H_M]         = "%dч %dм",
     [MSG_DURATION_D_H_M]       = "%dд %dч %dм",
+
+    [MSG_STATS_MODE_WEEKLY]    = "За неделю",
+    [MSG_STATS_MODE_MONTHLY]   = "За месяц",
+    [MSG_STATS_MODE_YEARLY]    = "За год",
+
+    [MSG_MONTH_JAN]            = "Январь",
+    [MSG_MONTH_FEB]            = "Февраль",
+    [MSG_MONTH_MAR]            = "Март",
+    [MSG_MONTH_APR]            = "Апрель",
+    [MSG_MONTH_MAY]            = "Май",
+    [MSG_MONTH_JUN]            = "Июнь",
+    [MSG_MONTH_JUL]            = "Июль",
+    [MSG_MONTH_AUG]            = "Август",
+    [MSG_MONTH_SEP]            = "Сентябрь",
+    [MSG_MONTH_OCT]            = "Октябрь",
+    [MSG_MONTH_NOV]            = "Ноябрь",
+    [MSG_MONTH_DEC]            = "Декабрь",
+
+    [MSG_HINT_CHANGE_MODE]     = "Используйте ← → для смены режима",
 };

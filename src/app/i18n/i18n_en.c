@@ -55,4 +55,23 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_DURATION_MINS]        = "%dm",
     [MSG_DURATION_H_M]         = "%dh %dm",
     [MSG_DURATION_D_H_M]       = "%dd %dh %dm",
+
+    [MSG_STATS_MODE_WEEKLY]    = "Weekly",
+    [MSG_STATS_MODE_MONTHLY]   = "Monthly",
+    [MSG_STATS_MODE_YEARLY]    = "Yearly",
+
+    [MSG_MONTH_JAN]            = "January",
+    [MSG_MONTH_FEB]            = "February",
+    [MSG_MONTH_MAR]            = "March",
+    [MSG_MONTH_APR]            = "April",
+    [MSG_MONTH_MAY]            = "May",
+    [MSG_MONTH_JUN]            = "June",
+    [MSG_MONTH_JUL]            = "July",
+    [MSG_MONTH_AUG]            = "August",
+    [MSG_MONTH_SEP]            = "September",
+    [MSG_MONTH_OCT]            = "October",
+    [MSG_MONTH_NOV]            = "November",
+    [MSG_MONTH_DEC]            = "December",
+
+    [MSG_HINT_CHANGE_MODE]     = "Use ← → to change modes",
 };

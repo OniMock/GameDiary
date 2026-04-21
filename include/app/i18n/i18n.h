@@ -24,6 +24,8 @@ typedef enum {
     LANG_PT,
     LANG_ES,
     LANG_RU,
+    LANG_JP,
+    LANG_ZH,
 
     LANG_COUNT,
     LANG_AUTO = -1
@@ -74,6 +76,25 @@ typedef enum {
     MSG_DURATION_MINS,
     MSG_DURATION_H_M,
     MSG_DURATION_D_H_M,
+
+    MSG_STATS_MODE_WEEKLY,
+    MSG_STATS_MODE_MONTHLY,
+    MSG_STATS_MODE_YEARLY,
+
+    MSG_MONTH_JAN,
+    MSG_MONTH_FEB,
+    MSG_MONTH_MAR,
+    MSG_MONTH_APR,
+    MSG_MONTH_MAY,
+    MSG_MONTH_JUN,
+    MSG_MONTH_JUL,
+    MSG_MONTH_AUG,
+    MSG_MONTH_SEP,
+    MSG_MONTH_OCT,
+    MSG_MONTH_NOV,
+    MSG_MONTH_DEC,
+
+    MSG_HINT_CHANGE_MODE,
 
     MSG_COUNT
 } MessageId;

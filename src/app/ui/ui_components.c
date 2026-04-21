@@ -27,7 +27,9 @@
 #include <string.h>
 #include <time.h>
 
-static float g_graph_anim[7] = {0.0f};
+static float g_graph_anim_h[MAX_GRAPH_COLS] = {0.0f};
+static float g_graph_anim_x[MAX_GRAPH_COLS] = {0.0f};
+static float g_graph_anim_a[MAX_GRAPH_COLS] = {0.0f};
 
 void ui_draw_card(Rect r, u32 bg_color, u32 border_color) {
   // Draw thin border (1px)
@@ -199,106 +201,113 @@ static void draw_bar_column(int x, int baseline_y, int bar_w, int h,
   }
 }
 
-static int compute_weekly_data(const SessionEntry *sessions, int count, u32 day_playtime[7], u32 *max_time_out, time_t *today_start_out) {
-  u32 now_ts = utils_get_timestamp();
-  time_t now_val = (time_t)now_ts;
+void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_y, int total_w, int max_bar_h) {
+  if (!data || data->column_count <= 0) return;
 
-  struct tm today_tm = *localtime(&now_val);
-  today_tm.tm_hour = 0;
-  today_tm.tm_min = 0;
-  today_tm.tm_sec = 0;
-  time_t today_start = mktime(&today_tm);
-  *today_start_out = today_start;
+  int count = data->column_count;
+  if (count > MAX_GRAPH_COLS) count = MAX_GRAPH_COLS;
 
-  memset(day_playtime, 0, 7 * sizeof(u32));
-  int found_any = 0;
-
-  for (int i = 0; i < count; i++) {
-    time_t s_time = (time_t)sessions[i].timestamp;
-    if (s_time >= (today_start - 6 * 86400) && s_time < (today_start + 86400)) {
-      int days_ago;
-      if (s_time >= today_start) {
-        days_ago = 0;
-      } else {
-        days_ago = (today_start - s_time) / 86400 + 1;
-      }
-
-      if (days_ago >= 0 && days_ago < 7) {
-        day_playtime[days_ago] += sessions[i].duration;
-        if (sessions[i].duration > 0)
-          found_any = 1;
-      }
-    }
+  int bar_w = 20;
+  if (count > 10) {
+      // Monthly view needs thinner bars
+      bar_w = total_w / count - 2;
+      if (bar_w < 4) bar_w = 4;
+  } else {
+      bar_w = 26; // Weekly/Yearly
   }
 
-  u32 max_time = 3600; // Min scale 1h
-  for (int i = 0; i < 7; i++) {
-    if (day_playtime[i] > max_time)
-      max_time = day_playtime[i];
-  }
-  *max_time_out = max_time;
-
-  return found_any;
-}
-
-void ui_draw_weekly_graph(SessionEntry *sessions, int count) {
-  u32 day_playtime[7];
-  u32 max_time;
-  time_t today_start;
-
-  int found_any = compute_weekly_data(sessions, count, day_playtime, &max_time, &today_start);
-
-  // Graph Layout
-  int gx = 60, gy = 170, gw = 360, gh = 80;
-  int bar_w = 30;
-  int spacing = (gw - (7 * bar_w)) / 6;
+  int spacing = (total_w - (count * bar_w)) / (count > 1 ? count - 1 : 1);
+  if (spacing < 1) spacing = 1;
+  
+  // Real total width based on calculation
+  int graph_w = (count * bar_w) + ((count - 1) * spacing);
+  int gx = center_x - (graph_w / 2);
+  int gy = baseline_y;
 
   // Draw Base Line
-  renderer_draw_rect(gx - 10, gy, gw + 20, 1, COLOR_BORDER);
+  renderer_draw_rect(gx - 10, gy, graph_w + 20, 1, COLOR_BORDER);
 
-  if (!found_any) {
-    Rect msg_rect = {gx, gy - 50, gw, 30};
-    ui_draw_text(i18n_get(MSG_STATS_NO_ACTIVITY), msg_rect, COLOR_SUBTEXT, 0.8f,
-                 ALIGN_CENTER);
+  // Check empty state
+  int found_any = 0;
+  for (int i = 0; i < count; i++) {
+      if (data->column_values[i] > 0) {
+          found_any = 1;
+          break;
+      }
   }
 
-  // Rendering
-  for (int i = 0; i < 7; i++) {
-    int idx = 6 - i; // idx 0 is today (rightmost), idx 6 is 6 days ago (leftmost)
-    float target_h = ui_graph_scale(day_playtime[idx], max_time, gh);
+  if (!found_any) {
+    Rect msg_rect = {gx, gy - 50, graph_w, 30};
+    ui_draw_text(i18n_get(MSG_STATS_NO_ACTIVITY), msg_rect, COLOR_SUBTEXT, 0.8f, ALIGN_CENTER);
+  }
 
-    // Simple animation state
-    g_graph_anim[idx] = ui_graph_lerp(g_graph_anim[idx], target_h, 0.07f);
+  // Draw Context String (e.g. "Apr 2026")
+  if (data->context_title[0] != '\0') {
+      Rect sub_rect = {gx, gy + 15, graph_w, 20};
+      ui_draw_text(data->context_title, sub_rect, COLOR_SUBTEXT, 0.7f, ALIGN_CENTER);
+  }
 
-    int x = gx + i * (bar_w + spacing);
-    int h = (int)g_graph_anim[idx];
-    if (h < 2 && day_playtime[idx] > 0)
-      h = 2;
+  // Rendering Columns
+  for (int i = 0; i < count; i++) {
+    float target_h = ui_graph_scale(data->column_values[i], data->max_value, max_bar_h);
 
-    // Visual highlights: Today (idx=0) is bright, others are dimmed
-    u32 bar_color = (idx == 0) ? COLOR_ACCENT : (COLOR_ACCENT & 0x44FFFFFF);
-    u32 label_color = (idx == 0) ? COLOR_ACCENT : COLOR_SUBTEXT;
-    u8 gloss_a = (idx == 0) ? 0x88 : 0x22;
+    g_graph_anim_h[i] = ui_graph_lerp(g_graph_anim_h[i], target_h, 0.08f);
+    g_graph_anim_x[i] = ui_graph_lerp(g_graph_anim_x[i], 0.0f, 0.12f);
+    g_graph_anim_a[i] = ui_graph_lerp(g_graph_anim_a[i], 255.0f, 0.08f);
+
+    int target_base_x = gx + i * (bar_w + spacing);
+    int x = target_base_x + (int)g_graph_anim_x[i];
+    int h = (int)g_graph_anim_h[i];
+    if (h < 2 && data->column_values[i] > 0) h = 2;
+
+    int alpha = (int)g_graph_anim_a[i];
+    if (alpha < 0) alpha = 0;
+    if (alpha > 255) alpha = 255;
+
+    u32 base_bar_color = (i == count - 1) ? COLOR_ACCENT : (COLOR_ACCENT & 0x44FFFFFF);
+    u32 label_color = (i == count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
+    u8 gloss_a = (i == count - 1) ? 0x88 : 0x22;
+
+    u32 bar_color = (base_bar_color & 0x00FFFFFF) | ((((base_bar_color >> 24) * alpha) / 255) << 24);
+    u32 fade_label = (label_color & 0x00FFFFFF) | ((u32)alpha << 24);
+    u8 fade_gloss = (u8)(((int)gloss_a * alpha) / 255);
 
     // Value text
     char time_buf[16] = {0};
     if (h > 0) {
-      ui_format_duration(day_playtime[idx], time_buf, sizeof(time_buf));
+        if (count <= 10 || (i == 0 || i == count / 2 || i == count - 1)) {
+            ui_format_duration(data->column_values[i], time_buf, sizeof(time_buf));
+        }
     }
 
     // Label text
-    time_t bar_day_time = today_start - (idx * 86400);
-    struct tm bar_tm = *localtime(&bar_day_time);
-    const char *day_name = i18n_get(MSG_DAY_SUN + bar_tm.tm_wday);
+    char label_buf[16] = {0};
+    if (data->query.period == STATS_PERIOD_WEEKLY) {
+        struct tm bar_tm = *localtime(&data->column_dates[i]);
+        snprintf(label_buf, sizeof(label_buf), "%s", i18n_get(MSG_DAY_SUN + bar_tm.tm_wday));
+    } else if (data->query.period == STATS_PERIOD_MONTHLY) {
+        struct tm bar_tm = *localtime(&data->column_dates[i]);
+        if (i == 0 || bar_tm.tm_mday % 5 == 0 || i == count - 1) {
+            snprintf(label_buf, sizeof(label_buf), "%d", bar_tm.tm_mday);
+        }
+    } else if (data->query.period == STATS_PERIOD_YEARLY) {
+        struct tm bar_tm = *localtime(&data->column_dates[i]);
+        int y = bar_tm.tm_year + 1900;
+        snprintf(label_buf, sizeof(label_buf), "'%02d", y % 100);
+    }
 
-    draw_bar_column(x, gy, bar_w, h, bar_color, gloss_a,
-                    h > 0 ? time_buf : NULL, 0.6f, label_color,
-                    day_name, 0.7f, label_color);
+    draw_bar_column(x, gy, bar_w, h, bar_color, fade_gloss,
+                    time_buf[0] != '\0' ? time_buf : NULL, 0.6f, fade_label,
+                    label_buf[0] != '\0' ? label_buf : NULL, 0.7f, fade_label);
   }
 }
 
-void ui_reset_graph_animation(void) {
-  memset(g_graph_anim, 0, sizeof(g_graph_anim));
+void ui_reset_stats_graph_animation(void) {
+  memset(g_graph_anim_h, 0, sizeof(g_graph_anim_h));
+  for (int i = 0; i < MAX_GRAPH_COLS; i++) {
+     g_graph_anim_x[i] = -15.0f; 
+     g_graph_anim_a[i] = 0.0f;
+  }
 }
 
 /* -----------------------------------------------------------------------
