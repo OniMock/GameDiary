@@ -51,6 +51,12 @@ BUILD_PRX = 0
 PSP_EBOOT_TITLE = Game Diary
 PSP_FW_VERSION = 661
 
+# EBOOT Metadata Assets
+PSP_EBOOT_ICON = assets-src/ICON0.PNG
+PSP_EBOOT_PIC0 = assets-src/PIC0.PNG
+PSP_EBOOT_PIC1 = assets-src/PIC1.PNG
+PSP_EBOOT_SND0 = assets-src/SND0.AT3
+
 # -----------------------------------------------------------------------
 # Libraries
 # -----------------------------------------------------------------------
