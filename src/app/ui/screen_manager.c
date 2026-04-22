@@ -17,6 +17,7 @@
 #include <pspctrl.h>
 #include <psprtc.h>
 #include "app/ui/screen.h"
+#include "app/ui/ui_popup.h"
 #include "app/render/renderer.h"
 
 #define MAX_STACK 8
@@ -73,6 +74,14 @@ void screen_manager_update(void) {
     sceCtrlPeekBufferPositive(&pad, 1);
     u32 pressed = pad.Buttons & ~g_last_buttons;
     g_last_buttons = pad.Buttons;
+
+    // --- POPUP INTERCEPT ---
+    if (popup_is_open()) {
+        popup_update(pad.Buttons, pressed);
+        // Clear input safely so that underlying screens and shortcuts do not act
+        pad.Buttons = 0;
+        pressed = 0;
+    }
 
     // Global Shortcuts
     if (g_fade_state == 0) {
@@ -132,5 +141,9 @@ void screen_manager_draw(void) {
         u32 alpha = (u32)(g_fade_alpha * 255.0f);
         if (alpha > 255) alpha = 255;
         renderer_draw_rect(0, 0, 480, 272, (alpha << 24)); // Black with fade alpha
+    }
+
+    if (popup_is_open()) {
+        popup_render();
     }
 }
