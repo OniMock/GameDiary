@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 static float g_graph_anim_h[MAX_GRAPH_COLS] = {0.0f};
 static float g_graph_anim_x[MAX_GRAPH_COLS] = {0.0f};
@@ -43,8 +44,7 @@ void ui_draw_text(const char *text, Rect r, u32 color, float size,
   if (!text)
     return;
 
-  float y_pos = r.y + (r.h / 2.0f) +
-                (size * 6.0f); // Simple vertical centering approximation
+  float y_pos = floorf(r.y + (r.h / 2.0f) + (size * 6.0f) + 0.5f);
 
   switch (align) {
   case ALIGN_LEFT:

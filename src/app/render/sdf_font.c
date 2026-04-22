@@ -35,6 +35,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <png.h>
+#include <math.h>
 
 /* -----------------------------------------------------------------------
  * Binary file structures – must match exactly what font_generator.py writes
@@ -371,10 +372,10 @@ static SDFGlyph *get_glyph(uint32_t cp, SDFAtlas **out) {
 /* -----------------------------------------------------------------------
  * Core string renderer
  *
- * px_size = desired glyph height on screen in pixels (matches the -size 32
- *           passed to msdf-atlas-gen, so px_size == 32 → 1:1 scale).
+ * px_size = desired glyph height on screen in pixels (matches the -size 24
+ *           passed to msdf-atlas-gen, so px_size == 24 → 1:1 scale).
  *
- * Glyph metrics (xoff, yoff, xadv) are in EM units normalised to 32 px.
+ * Glyph metrics (xoff, yoff, xadv) are in EM units normalised to 24 px.
  * UV are 0..1 normalised; sceGu with GU_TEXTURE_32BITF expects pixel coords,
  * so we multiply by atlas pixel dimensions.
  * ----------------------------------------------------------------------- */
@@ -407,7 +408,8 @@ static void draw_string_internal(float x, float y, const char *str,
     }
 
     /* --- Draw pass ------------------------------------------------------- */
-    float    cx           = start_x;
+    float    cx           = floorf(start_x + 0.5f);
+    float    cy           = floorf(y + 0.5f);
     void    *last_tex_ptr = NULL;
     const char *s         = str;
 
@@ -442,13 +444,21 @@ static void draw_string_internal(float x, float y, const char *str,
              *   sy = baseline + vertical bearing  (planeBounds.top,  em units)
              *   sw/sh: glyph UV fraction × atlas pixel size × scale factor
              *
-             * The scale factor (px_size / 32.0f) converts from the 32-px em
+             * The scale factor (px_size / 24.0f) converts from the 24-px em
              * coordinate system used by msdf-atlas-gen to screen pixels.
+             *
+             * Pixel Snapping: Use the consistent snapped baseline (cy) and 
+             * cursor (cx) to calculate position. 
+             * 
+             * Fix: We STOPPED rounding sy per-glyph. Rounding sy independently
+             * caused 1px vertical jitter (stair-stepping) because metrics (yoff)
+             * vary slightly. By using the shared snapped baseline (cy), all 
+             * characters align perfectly while remaining sharp.
              */
-            float sx = cx + g->xoff * px_size;
-            float sy = y  + g->yoff * px_size;
-            float sw = (g->w * (float)at->header.width)  * (px_size / 32.0f);
-            float sh = (g->h * (float)at->header.height) * (px_size / 32.0f);
+            float sx = floorf(cx + g->xoff * px_size + 0.5f);
+            float sy = cy + (g->yoff * px_size);
+            float sw = floorf((g->w * (float)at->header.width)  * (px_size / 24.0f) + 0.5f);
+            float sh = floorf((g->h * (float)at->header.height) * (px_size / 24.0f) + 0.5f);
 
             VertexSDF *v = (VertexSDF *)sceGuGetMemory(2 * sizeof(VertexSDF));
             v[0].u = u0;  v[0].v = v0;  v[0].color = color;

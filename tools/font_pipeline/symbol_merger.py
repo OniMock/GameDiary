@@ -66,7 +66,7 @@ def write_charset_file(codepoints, path):
         f.write(", ".join(hex_list))
 
 
-def run_msdf_gen(msdf_exe, charset_file, font_path, out_png, out_json, pxrange="3",
+def run_msdf_gen(msdf_exe, charset_file, font_path, out_png, out_json, pxrange="2",
                  dimensions=None):
     """Run msdf-atlas-gen for a single font/charset pair.
 
@@ -83,6 +83,7 @@ def run_msdf_gen(msdf_exe, charset_file, font_path, out_png, out_json, pxrange="
         "-imageout", out_png,
         "-json", out_json,
         "-pxrange", str(pxrange),
+        "-size", "24",
         "-yorigin", "top",
     ]
     if dimensions:
@@ -187,8 +188,8 @@ def merge_atlases(partial_results, final_png, final_json, max_width=512):
             "type": "sdf",
             "width": max_width,
             "height": final_height,
-            "size": base_json["atlas"].get("size", 32.0),
-            "pxRange": 3,
+            "size": base_json["atlas"].get("size", 24.0),
+            "pxRange": 2,
             "yOrigin": "top"
         },
         "metrics": base_json["metrics"],
@@ -209,7 +210,7 @@ def convert_merged_json_to_bin(merged_json, bin_file):
     atlas_data = merged_json["atlas"]
     width      = atlas_data["width"]
     height     = atlas_data["height"]
-    base_size  = float(atlas_data.get("size", 32.0))
+    base_size  = float(atlas_data.get("size", 24.0))
     metrics    = merged_json["metrics"]
     line_height = metrics["lineHeight"]
     glyphs_data = merged_json.get("glyphs", [])
@@ -253,7 +254,7 @@ def generate_symbols_with_fallback(
     msdf_exe, fonts_dir, forced_symbols,
     tmp_dir, out_dir,
     font_priority=None,
-    pxrange="3"
+    pxrange="2"
 ):
     """
     Generates a single unified symbols atlas from multiple fonts in priority order.

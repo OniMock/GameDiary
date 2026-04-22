@@ -37,7 +37,7 @@ SYMBOLS_FONT_PRIORITY = [
     "arial.ttf"                      # Tertiary: final fallback
 ]
 
-def run_msdf_gen(charset_file, font_file, out_png, out_json, pxrange="3", dimensions=None):
+def run_msdf_gen(charset_file, font_file, out_png, out_json, pxrange="1", dimensions=None):
     """
     Calls msdf-atlas-gen to generate SDF atlas and JSON metadata.
     Uses -yorigin top to match standard PSP GU UV coordinates (0,0 at top-left).
@@ -51,7 +51,7 @@ def run_msdf_gen(charset_file, font_file, out_png, out_json, pxrange="3", dimens
         "-imageout", out_png,
         "-json", out_json,
         "-pxrange", str(pxrange),
-        "-size", "32",        # High resolution target
+        "-size", "24",        # High resolution target
         "-yorigin", "top"
     ]
     if dimensions:
@@ -168,7 +168,7 @@ def generate_fonts(manifest, tmp_dir, out_dir, forced_symbols=None):
                 tmp_dir       = tmp_dir,
                 out_dir       = out_dir,
                 font_priority = SYMBOLS_FONT_PRIORITY,
-                pxrange       = "3"
+                pxrange       = "2"
             )
             if png:
                 print(f"Successfully built {bin_} and {png}")

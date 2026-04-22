@@ -5,7 +5,7 @@ REM Get project root (one folder up from /tools)
 set ROOT_DIR=%~dp0..
 set SOURCE=%ROOT_DIR%\EBOOT.PBP
 
-set DEST_PATH=\PSP\GAME\CAT_Ports\Gamediary\EBOOT.PBP
+set DEST_PATH=\PSP\GAME\CAT_App\Gamediary\EBOOT.PBP
 
 if not exist "%SOURCE%" (
     echo [ERROR] EBOOT.PBP not found in project root.
