@@ -37,7 +37,7 @@ SYMBOLS_FONT_PRIORITY = [
     "arial.ttf"                      # Tertiary: final fallback
 ]
 
-def run_msdf_gen(charset_file, font_file, out_png, out_json, pxrange="1", dimensions=None):
+def run_msdf_gen(charset_file, font_file, out_png, out_json, pxrange="2", dimensions=None):
     """
     Calls msdf-atlas-gen to generate SDF atlas and JSON metadata.
     Uses -yorigin top to match standard PSP GU UV coordinates (0,0 at top-left).
