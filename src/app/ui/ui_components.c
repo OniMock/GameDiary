@@ -175,13 +175,13 @@ void ui_draw_app_header(Rect r) {
   int icon_y = (int)(text_center_y - (icon_size / 2.0f));
 
   // 1. Draw Logo
-  sceGuColor(COLOR_ACCENT);
+  sceGuColor(COLOR_TEXT);
   texture_draw_resource(&GD_IMG_ICON_LOGO_32_PNG, r.x, icon_y, icon_size, icon_size);
 
   // 2. Draw Title (Bipartide)
   int cur_x = r.x + icon_size + spacing;
   font_draw_string(cur_x, baseline_y, part1, COLOR_TEXT, text_size);
-  
+
   if (part2[0] != '\0') {
     cur_x += (int)w1;
     font_draw_string(cur_x, baseline_y, part2, COLOR_ACCENT, text_size);

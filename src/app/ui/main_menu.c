@@ -51,31 +51,39 @@ static void main_menu_init(void) {
 
 static void main_menu_update(u32 buttons, u32 pressed) {
     (void)buttons;
+    static int repeat_timer = 0;
+    static int last_dir = 0;
 
     SceCtrlData pad;
     sceCtrlPeekBufferPositive(&pad, 1);
 
-    // Analog to discrete steps
+    // 1. Detect Direction (Discrete & Analog)
     float ax = (pad.Lx - 128.0f) / 128.0f;
-    int dir = 0;
+    int current_dir = 0;
+    if ((buttons & PSP_CTRL_RIGHT) || (ax > 0.5f)) current_dir = 1;
+    else if ((buttons & PSP_CTRL_LEFT) || (ax < -0.5f)) current_dir = -1;
 
-    if (pressed & PSP_CTRL_RIGHT) dir = 1;
-    else if (pressed & PSP_CTRL_LEFT) dir = -1;
-
-    if (ax > 0.3f && s_analog_held_x != 1) {
-        dir = 1;
-        s_analog_held_x = 1;
-    } else if (ax < -0.3f && s_analog_held_x != -1) {
-        dir = -1;
-        s_analog_held_x = -1;
+    int move = 0;
+    if (current_dir != 0) {
+        if (current_dir != last_dir) {
+            // New direction or initial press: move immediately
+            move = current_dir;
+            repeat_timer = 25; // Initial delay before repeating (approx 400ms)
+        } else {
+            // Holding same direction: handle repetition
+            repeat_timer--;
+            if (repeat_timer <= 0) {
+                move = current_dir;
+                repeat_timer = 6; // Fast repeat delay (approx 100ms)
+            }
+        }
+    } else {
+        repeat_timer = 0;
     }
+    last_dir = current_dir;
 
-    if (fabsf(ax) < 0.2f) {
-        s_analog_held_x = 0;
-    }
-
-    if (dir != 0) {
-        g_target_index += dir;
+    if (move != 0) {
+        g_target_index += move;
         // Clamp to valid range
         if (g_target_index < 0) g_target_index = 0;
         if (g_target_index >= MENU_ITEM_COUNT) g_target_index = MENU_ITEM_COUNT - 1;
