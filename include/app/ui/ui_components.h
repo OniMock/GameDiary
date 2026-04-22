@@ -16,15 +16,21 @@
 #include "common/db_schema.h"
 #include <psptypes.h>
 
-// Theme Colors (ARGB)
-#define COLOR_BG 0xFF0F0F0F
-#define COLOR_CARD 0xFF1E1E1E
-#define COLOR_BORDER 0xFF2A2A2A
-#define COLOR_TEXT 0xFFFFFFFF
-#define COLOR_SUBTEXT 0xFFAAAAAA
-#define COLOR_ACCENT 0xFFFFB020 // Soft Orange
-#define COLOR_HIGHLIGHT 0xFF3A3A3A
-#define COLOR_SUCCESS 0xFF20B020 // Green for active items
+// Theme Colors (ABGR - 0xAABBGGRR)
+
+// --- Base ---
+#define COLOR_BG        0xFF0F0F0F // Background - #0F0F0F
+#define COLOR_CARD      0xFF1E1E1E // Card surface - #1E1E1E
+#define COLOR_BORDER    0xFF252525 // Subtle border - #252525 (less harsh)
+#define COLOR_HIGHLIGHT 0xAA444444 // Hover/selection - #444444 (more visible)
+
+// --- Text ---
+#define COLOR_TEXT      0xFFFFFFFF // Primary text - #FFFFFF
+#define COLOR_SUBTEXT   0xFFBBBBBB // Secondary text - #BBBBBB (better readability)
+
+// --- Accent & Feedback ---
+#define COLOR_ACCENT 0xFFFFC040 // #40C0FF
+#define COLOR_SUCCESS   0xFF20B020 // Success (green) - #20B020
 
 typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } UIAlign;
 
@@ -65,6 +71,12 @@ void ui_draw_title(const char *text, Rect r, const ImageResource *icon, int cust
  * Draws a section title with underline.
  */
 void ui_draw_title_auto(const char *text, Rect r, const ImageResource *icon);
+
+/**
+ * Draws the specialized bipartide application header (Logo + Split Title).
+ * Used exclusively on the home/main menu.
+ */
+void ui_draw_app_header(Rect r);
 
 /**
  * @brief Draws an animated statistical graph supporting multiple time ranges.

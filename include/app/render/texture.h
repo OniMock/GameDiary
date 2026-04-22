@@ -63,7 +63,13 @@ void texture_free(Texture* tex);
  * @param tex   Pointer to the texture.
  * @param x,y   Top-left screen position.
  * @param w,h   Draw dimensions.
- * @param color ARGB tint color (0xAARRGGBB). 0xFFFFFFFF = no tint.
+ * @param color ABGR color (0xAABBGGRR) used as texture tint/alpha.
+ *              The color is multiplied with the texture.
+ *
+ *              Examples:
+ *              0xFFFFFFFF = no tint (original colors)
+ *              0xFF0000FF = red tint
+ *              0x80FFFFFF = 50% transparency
  */
 void texture_draw_tinted(Texture* tex, int x, int y, int w, int h, u32 color);
 

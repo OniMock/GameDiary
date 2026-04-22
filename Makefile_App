@@ -1,5 +1,7 @@
 TARGET = GameDiaryApp
 
+APP_NAME := GameDiary
+
 
 PROJECT_VERSION = 0.0.1
 
@@ -34,6 +36,7 @@ INCDIR = include
 
 CFLAGS = -O2 -Os -G0 -Wall -Wextra \
          -D_PSP_FW_VERSION=661 -DGDIARY_APP \
+         -DAPP_TITLE=\"$(APP_NAME)\" \
          -Iinclude \
          -Iinclude/app \
          -Ilib
@@ -48,7 +51,7 @@ CXX = psp-g++
 # Build type (APP ONLY)
 # -----------------------------------------------------------------------
 BUILD_PRX = 0
-PSP_EBOOT_TITLE = Game Diary
+PSP_EBOOT_TITLE = GameDiary
 PSP_FW_VERSION = 661
 
 # EBOOT Metadata Assets

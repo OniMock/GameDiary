@@ -10,8 +10,6 @@
 
 #include "app/i18n/i18n.h"
 const char* g_lang_en_entries[MSG_COUNT] = {
-    [MSG_APP_TITLE]            = "Game Diary",
-    [MSG_MENU_DASHBOARD]       = "Home",
     [MSG_MENU_STATS]           = "Statistics",
     [MSG_MENU_GAMES]           = "Games",
     [MSG_MENU_SETTINGS]        = "Settings",

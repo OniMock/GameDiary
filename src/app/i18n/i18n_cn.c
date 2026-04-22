@@ -12,8 +12,6 @@
 
 // Simplified Chinese
 const char* g_lang_cn_entries[MSG_COUNT] = {
-    [MSG_APP_TITLE]            = "游戏日记",
-    [MSG_MENU_DASHBOARD]       = "首页",
     [MSG_MENU_STATS]           = "统计",
     [MSG_MENU_GAMES]           = "游戏",
     [MSG_MENU_SETTINGS]        = "设置",

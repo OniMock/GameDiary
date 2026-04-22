@@ -43,4 +43,20 @@ void ui_text_ellipsis(const char *src, char *dst, size_t dst_size, float scale,
 void ui_draw_text_auto_fit(const char *text, Rect r, u32 color, float size,
                            UIAlign align);
 
+/**
+ * @brief Splits a UTF-8 string into two parts, attempting to balance visual width
+ *        while prioritizing semantic breakpoints (spaces or CamelCase transitions).
+ *
+ * @param src       Source string (null-terminated).
+ * @param out1      Buffer for the first part.
+ * @param out2      Buffer for the second part.
+ * @param out1_size Size of out1 buffer.
+ * @param out2_size Size of out2 buffer.
+ * @param text_size Font scale used for measurement.
+ */
+void ui_text_utf8_split_smart(const char *src,
+                              char *out1, char *out2,
+                              size_t out1_size, size_t out2_size,
+                              float text_size);
+
 #endif // GAMEDIARY_UI_TEXT_H

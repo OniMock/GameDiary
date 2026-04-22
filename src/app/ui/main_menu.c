@@ -98,7 +98,7 @@ static void main_menu_draw(void) {
 
     // Header Title
     Rect safe_rect = {20, 20, 440, 232};
-    ui_draw_title(i18n_get(MSG_APP_TITLE), safe_rect, NULL, 0);
+    ui_draw_app_header(safe_rect);
 
     int center_x = 240;
     int center_y = 136;

@@ -32,9 +32,7 @@ typedef enum {
 } LanguageId;
 
 typedef enum {
-    MSG_APP_TITLE = 0,
-    MSG_MENU_DASHBOARD,
-    MSG_MENU_STATS,
+    MSG_MENU_STATS = 0,
     MSG_MENU_GAMES,
     MSG_MENU_SETTINGS,
     MSG_MENU_ACTIVITY,

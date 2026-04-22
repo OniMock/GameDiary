@@ -112,7 +112,7 @@ static int           s_analog_held_x = 0;     /* Analog held state (-1 left, 1 r
  * @param y         Top edge of draw area.
  * @param w         Draw width.
  * @param h         Draw height.
- * @param tint      ARGB tint/alpha.  0xFFFFFFFF = full color, no tint.
+ * @param tint      ABGR color (0xAABBGGRR) tint/alpha. 0xFFFFFFFF = fully opaque white (no tint, original texture colors).
  */
 static void draw_carousel_icon(int inf_idx, int cx, int cy, float scale,
                                 u32 tint) {

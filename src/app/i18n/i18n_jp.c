@@ -11,8 +11,6 @@
 #include "app/i18n/i18n.h"
 
 const char* g_lang_jp_entries[MSG_COUNT] = {
-    [MSG_APP_TITLE]            = "ゲームダイアリー",
-    [MSG_MENU_DASHBOARD]       = "ホーム",
     [MSG_MENU_STATS]           = "統計",
     [MSG_MENU_GAMES]           = "ゲーム",
     [MSG_MENU_SETTINGS]        = "設定",

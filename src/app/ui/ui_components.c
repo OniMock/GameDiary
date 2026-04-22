@@ -154,6 +154,43 @@ void ui_draw_title_auto(const char *text, Rect r, const ImageResource *icon) {
   ui_draw_title(text, r, icon, -1);
 }
 
+void ui_draw_app_header(Rect r) {
+  const char *title = APP_TITLE;
+  float text_size = 1.3f;
+  int spacing = 12;
+  int icon_size = 32;
+
+  char part1[64];
+  char part2[64];
+
+  ui_text_utf8_split_smart(title, part1, part2, sizeof(part1), sizeof(part2), text_size);
+
+  float w1 = font_get_width(part1, text_size);
+  float w2 = font_get_width(part2, text_size);
+  float total_text_w = w1 + (part2[0] != '\0' ? w2 : 0);
+  int total_w = icon_size + spacing + (int)total_text_w;
+
+  int baseline_y = r.y + 8;
+  float text_center_y = baseline_y - (text_size * 6.0f);
+  int icon_y = (int)(text_center_y - (icon_size / 2.0f));
+
+  // 1. Draw Logo
+  sceGuColor(COLOR_ACCENT);
+  texture_draw_resource(&GD_IMG_ICON_LOGO_32_PNG, r.x, icon_y, icon_size, icon_size);
+
+  // 2. Draw Title (Bipartide)
+  int cur_x = r.x + icon_size + spacing;
+  font_draw_string(cur_x, baseline_y, part1, COLOR_TEXT, text_size);
+  
+  if (part2[0] != '\0') {
+    cur_x += (int)w1;
+    font_draw_string(cur_x, baseline_y, part2, COLOR_ACCENT, text_size);
+  }
+
+  // 3. Line below
+  renderer_draw_rect(r.x, baseline_y + 10, total_w, 2, COLOR_ACCENT);
+}
+
 /* -----------------------------------------------------------------------
  * Graph Drawing Utilities (Layer 1)
  * Reusable, lightweight functions to prevent duplication in graph rendering
@@ -218,7 +255,7 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
 
   int spacing = (total_w - (count * bar_w)) / (count > 1 ? count - 1 : 1);
   if (spacing < 1) spacing = 1;
-  
+
   // Real total width based on calculation
   int graph_w = (count * bar_w) + ((count - 1) * spacing);
   int gx = center_x - (graph_w / 2);
@@ -327,7 +364,7 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
 void ui_reset_stats_graph_animation(void) {
   memset(g_graph_anim_h, 0, sizeof(g_graph_anim_h));
   for (int i = 0; i < MAX_GRAPH_COLS; i++) {
-     g_graph_anim_x[i] = -15.0f; 
+     g_graph_anim_x[i] = -15.0f;
      g_graph_anim_a[i] = 0.0f;
   }
 }
