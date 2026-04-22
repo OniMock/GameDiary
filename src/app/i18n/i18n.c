@@ -22,6 +22,7 @@ extern const char *g_lang_en_entries[MSG_COUNT];
 extern const char *g_lang_pt_entries[MSG_COUNT];
 extern const char *g_lang_es_entries[MSG_COUNT];
 extern const char *g_lang_ru_entries[MSG_COUNT];
+extern const char *g_lang_jp_entries[MSG_COUNT];
 
 /* --- Global Pointer --- */
 const char **g_i18n_msg = NULL;
@@ -40,7 +41,8 @@ static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
     [LANG_EN] = {"English", g_lang_en_entries, &GD_IMG_FLAG_EN_PNG},
     [LANG_PT] = {"Português", g_lang_pt_entries, &GD_IMG_FLAG_PT_PNG},
     [LANG_ES] = {"Español", g_lang_es_entries, &GD_IMG_FLAG_ES_PNG},
-    [LANG_RU] = {"Русский", g_lang_ru_entries, &GD_IMG_FLAG_RU_PNG}};
+    [LANG_RU] = {"Русский", g_lang_ru_entries, &GD_IMG_FLAG_RU_PNG},
+    [LANG_JP] = {"日本語", g_lang_jp_entries, &GD_IMG_FLAG_JP_PNG}};
 
 static int g_current_lang_idx = LANG_EN;
 
@@ -68,6 +70,8 @@ static int i18n_detect_system_lang(void) {
     return LANG_ES;
   case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
     return LANG_RU;
+  case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
+    return LANG_JP;
   case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
   default:
     return LANG_EN;
