@@ -25,7 +25,7 @@ typedef enum {
     LANG_ES,
     LANG_RU,
     LANG_JP,
-    LANG_ZH,
+    LANG_CN,
 
     LANG_COUNT,
     LANG_AUTO = -1
