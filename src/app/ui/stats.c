@@ -91,8 +91,8 @@ static void stats_draw(void) {
   }
 
   // 2. LAYOUT - TOP SECTION (Summary & Focus)
-  int top_y = 55;
-  int card_h = 85;
+  int top_y = 50;
+  int card_h = 80;
 
   // Left: Focus Card (Last Game)
   if (recent_indices[0] != -1) {
@@ -124,34 +124,37 @@ static void stats_draw(void) {
 
   // Right: Global Stats
   int right_x = 280;
-  int sub_card_h = (card_h - 10) / 2;
+  int sub_card_h = (card_h - 8) / 2;
 
   // Total Playtime Global
   Rect glob_play_rect = {right_x, top_y, 180, sub_card_h};
   ui_draw_card(glob_play_rect, COLOR_CARD, COLOR_BORDER);
   char glob_time[32];
   ui_format_duration(global_playtime, glob_time, sizeof(glob_time));
-  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){right_x + 8, top_y + 6, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
-  ui_draw_text(glob_time, (Rect){right_x + 8, top_y + 18, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
+  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){right_x + 8, top_y + 4, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
+  ui_draw_text(glob_time, (Rect){right_x + 8, top_y + 16, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
 
   // Total Sessions Global
-  Rect glob_sess_rect = {right_x, top_y + sub_card_h + 10, 180, sub_card_h};
+  Rect glob_sess_rect = {right_x, top_y + sub_card_h + 8, 180, sub_card_h};
   ui_draw_card(glob_sess_rect, COLOR_CARD, COLOR_BORDER);
   char sess_buf[32];
   snprintf(sess_buf, sizeof(sess_buf), "%lu", (unsigned long)global_sessions);
-  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){right_x + 8, top_y + sub_card_h + 16, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
-  ui_draw_text(sess_buf, (Rect){right_x + 8, top_y + sub_card_h + 28, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
+  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){right_x + 8, top_y + sub_card_h + 12, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
+  ui_draw_text(sess_buf, (Rect){right_x + 8, top_y + sub_card_h + 24, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
 
-  // 3. LAYOUT - BOTTOM SECTION (Recent History)
+  // 3. LAYOUT - BOTTOM SECTION (Recent Activity Card)
   int list_y = top_y + card_h + 8;
-  ui_draw_text(i18n_get(MSG_MENU_ACTIVITY), (Rect){20, list_y, 440, 15}, COLOR_ACCENT, 0.75f, ALIGN_LEFT);
-  renderer_draw_rect(20, list_y + 16, 440, 1, COLOR_BORDER);
+  Rect history_card_rect = {20, list_y, 440, 105};
+  ui_draw_card(history_card_rect, COLOR_CARD, COLOR_BORDER);
+
+  ui_draw_text(i18n_get(MSG_MENU_ACTIVITY), (Rect){30, list_y + 8, 420, 15}, COLOR_ACCENT, 0.75f, ALIGN_LEFT);
+  renderer_draw_rect(30, list_y + 24, 420, 1, COLOR_BORDER & 0x66FFFFFF);
 
   for (int i = 1; i < (int)recent_counts; i++) { // Skip the first one which is prominent above
       int idx = recent_indices[i];
       if (idx == -1) break;
 
-      int row_y = list_y + 20 + (i - 1) * 22;
+      int row_y = list_y + 28 + (i - 1) * 18;
       GameStats *g = &games[idx];
 
       // Category Badge
@@ -160,23 +163,18 @@ static void stats_draw(void) {
       else if (g->entry.category == 1) snprintf(cat_tag, sizeof(cat_tag), "[PSX]");
       else snprintf(cat_tag, sizeof(cat_tag), "[HB]");
 
-      float tag_w = font_get_width(cat_tag, 0.7f);
-      ui_draw_text(cat_tag, (Rect){25, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
+      float tag_w = font_get_width(cat_tag, 0.65f);
+      ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
 
       // Game Name
-      ui_draw_text(g->entry.game_name, (Rect){25 + (int)tag_w + 5, row_y, 250, 20}, COLOR_TEXT, 0.85f, ALIGN_LEFT);
+      ui_draw_text(g->entry.game_name, (Rect){30 + (int)tag_w + 5, row_y, 240, 20}, COLOR_TEXT, 0.8f, ALIGN_LEFT);
 
       // Last Played Date (Full)
       time_t item_ts = (time_t)g->last_played_ts;
       struct tm *lt = localtime(&item_ts);
       char date_buf[32];
       strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT), lt);
-      ui_draw_text(date_buf, (Rect){340, row_y, 110, 20}, COLOR_SUBTEXT, 0.8f, ALIGN_RIGHT);
-
-      // Mini divider
-      if (i < (int)recent_counts - 1) {
-          renderer_draw_rect(25, row_y + 18, 425, 1, COLOR_BORDER & 0x44FFFFFF);
-      }
+      ui_draw_text(date_buf, (Rect){330, row_y, 120, 20}, COLOR_SUBTEXT, 0.75f, ALIGN_RIGHT);
   }
 
   ui_draw_standard_hints();
