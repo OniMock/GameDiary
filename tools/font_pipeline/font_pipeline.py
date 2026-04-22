@@ -14,7 +14,7 @@ import sys
 from scan_i18n import scan_all_i18n
 from charset_builder import build_charsets
 from font_cache import FontCache
-from font_generator import generate_fonts
+from font_generator import generate_fonts, FONT_MAP
 from embed_generator import generate_embeds
 
 EXTRA_CHARS = set(
@@ -45,44 +45,60 @@ def main():
 
     # 2. Build Charsets
     print("2. Grouping characters...")
-    groups = build_charsets(all_chars, tmp_fonts_dir)
-    for g, chars in groups.items():
-        print(f"   [{g}] -> {len(chars)} chars")
+    manifest = build_charsets(all_chars, tmp_fonts_dir, forced_symbols=EXTRA_CHARS)
+    for g, files in manifest.items():
+        print(f"   [{g}] -> {len(files)} pages")
 
     # 3. Cache & Generate
     print("3. Generating missing/updated atlases...")
     cache_path = os.path.join(tmp_fonts_dir, "cache.json")
     cache = FontCache(cache_path)
 
-    atlases_changed = False
-    groups_to_generate = {}
-    for g, chars in groups.items():
-        if not chars:
+    manifest_to_generate = {}
+    for g, files in manifest.items():
+        if g not in FONT_MAP:
             continue
+            
+        group_changed = False
+        for charset_filename in files:
+            charset_path = os.path.join(tmp_fonts_dir, charset_filename)
+            with open(charset_path, "r", encoding="utf-8") as f:
+                charset_text = f.read()
 
-        charset_text = "".join(sorted(list(chars)))
-        if cache.has_changed(g, charset_text):
-            print(f"   [!] '{g}' has changed. Will generate.")
-            groups_to_generate[g] = chars
-            atlases_changed = True
+            for atlas_id_base, font_file in FONT_MAP[g]:
+                hash_input = charset_text + font_file
+                if cache.has_changed(atlas_id_base, hash_input):
+                    group_changed = True
+                    break
+            if group_changed:
+                break
+
+        if group_changed:
+            print(f"   [!] '{g}' has changed or is new. Will generate.")
+            manifest_to_generate[g] = files
         else:
             print(f"   [v] '{g}' is unchanged. Skipping generation.")
 
-    if groups_to_generate:
-        generate_fonts(groups_to_generate, tmp_fonts_dir, assets_dir)
+    if manifest_to_generate:
+        generate_fonts(manifest_to_generate, tmp_fonts_dir, assets_dir, forced_symbols=EXTRA_CHARS)
 
         # Update cache on success
-        for g, chars in groups_to_generate.items():
-            cache.update(g, "".join(sorted(list(chars))))
+        for g, files in manifest_to_generate.items():
+            for charset_filename in files:
+                charset_path = os.path.join(tmp_fonts_dir, charset_filename)
+                with open(charset_path, "r", encoding="utf-8") as f:
+                    charset_text = f.read()
+
+                for atlas_id_base, font_file in FONT_MAP[g]:
+                    hash_input = charset_text + font_file
+                    cache.update(atlas_id_base, hash_input)
         cache.save()
     else:
         print("   Atlases are up to date.")
 
     # 4. Embed — always regenerate C arrays so the build is always fresh.
-    # Even if atlases didn't change, the .c files might be missing (e.g. clean checkout).
     print("4. Embedding font data as C arrays...")
-    atlas_names = ["latin_cyrillic", "cjk", "symbols"]
-    generate_embeds(assets_dir, src_render_dir, inc_dir, atlas_names)
+    generate_embeds(assets_dir, src_render_dir, inc_dir)
 
     print("--- Font Pipeline Complete ---")
     print(f"   Assets: {assets_dir}")

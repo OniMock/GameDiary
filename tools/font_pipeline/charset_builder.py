@@ -10,6 +10,13 @@
 
 import os
 
+def load_extra_chars(filepath):
+    if not os.path.exists(filepath):
+        return set()
+    with open(filepath, "r", encoding="utf-8") as f:
+        return set(f.read().strip())
+
+
 # Define unicode blocks for our 3 target atlases
 RANGES = {
     "latin_cyrillic": [
@@ -31,6 +38,13 @@ RANGES = {
     ]
 }
 
+# For 32px quality, each glyph box is roughly 44x44px (including 6px SDF range and padding).
+# 512 / 44 ~ 11 per row. 11x11 = 121 glyphs per 512x512 page.
+# We'll cap at 120 chars per page to be safe.
+MAX_CHARS_PER_PAGE = 120
+
+
+
 def get_group_for_char(char):
     codepoint = ord(char)
     for group, ranges in RANGES.items():
@@ -40,10 +54,15 @@ def get_group_for_char(char):
     # Default fallback
     return "symbols"
 
-def build_charsets(characters, out_dir):
+def build_charsets(characters, out_dir, forced_symbols=None):
     """
     Groups characters and writes a .txt charset per group.
     Returns a dictionary of group_name -> set_of_characters
+
+    forced_symbols: an optional set of characters that should always go into
+    the 'symbols' atlas, bypassing the Unicode range classifier. This is
+    needed for chars like (R), (C), degree, euro that live in the Latin-1
+    block but belong visually/semantically to the symbols font.
     """
     os.makedirs(out_dir, exist_ok=True)
 
@@ -63,24 +82,61 @@ def build_charsets(characters, out_dir):
     for g in groups.values():
         g.add('?')
 
+    # Always include Hiragana + Katakana (core Japanese support)
+    for cp in range(0x3040, 0x3100): # 0x30FF is the last Katakana, so range to 0x3100
+        groups["cjk"].add(chr(cp))
+
+    # Include curated Kanji list (Jōyō Kanji)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    kanji_file = os.path.join(script_dir, "joyo_kanji.txt")
+    extra_chars = load_extra_chars(kanji_file)
+    groups["cjk"].update(extra_chars)
+    if extra_chars:
+        print(f"[JP] Loaded {len(extra_chars)} Kanji from file")
+
+    # Pin explicit symbols directly into the symbols group regardless of their
+    # Unicode block. Characters like (R) (0x00AE) or degree (0x00B0) live in
+    # Latin-1 Supplement so the range classifier would put them in latin_cyrillic.
+    if forced_symbols:
+        groups["symbols"].update(forced_symbols)
+        # Also remove them from latin_cyrillic so they don't duplicate there
+        groups["latin_cyrillic"] -= forced_symbols
+
     for c in characters:
+        # Skip chars already pinned to symbols so they stay in the right atlas
+        if forced_symbols and c in forced_symbols:
+            continue
         group = get_group_for_char(c)
         groups[group].add(c)
 
-    # Write to files
+    # Write to files (handle multi-page splitting)
+    final_group_manifest = {} # group_name -> list of charset files
+ 
     for group_name, chars in groups.items():
         if not chars:
             continue
-
-        filepath = os.path.join(out_dir, f"{group_name}.txt")
-        # msdf-atlas-gen expects comma-separated list of hex values, or strings, etc.
-        # Safest is comma-separated hex (e.g. 0x0041, 0x0042)
-        with open(filepath, "w", encoding="utf-8") as f:
-            sorted_chars = sorted(list(chars))
-            hex_list = [f"0x{ord(c):X}" for c in sorted_chars]
-            f.write(", ".join(hex_list))
-
-    return groups
+ 
+        sorted_chars = sorted(list(chars))
+        
+        # Split into chunks if necessary
+        chunks = [sorted_chars[i:i + MAX_CHARS_PER_PAGE] for i in range(0, len(sorted_chars), MAX_CHARS_PER_PAGE)]
+        manifest_files = []
+ 
+        for i, chunk in enumerate(chunks):
+            # If multiple pages, add suffix, otherwise keep original name
+            page_suffix = f"_{i}" if len(chunks) > 1 else ""
+            filename = f"{group_name}{page_suffix}.txt"
+            filepath = os.path.join(out_dir, filename)
+            
+            with open(filepath, "w", encoding="utf-8") as f:
+                hex_list = [f"0x{ord(c):X}" for c in chunk]
+                f.write(", ".join(hex_list))
+            
+            manifest_files.append(filename)
+        
+        final_group_manifest[group_name] = manifest_files
+ 
+    return final_group_manifest
 
 if __name__ == '__main__':
     # Test stub

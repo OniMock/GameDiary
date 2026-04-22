@@ -14,27 +14,51 @@ import json
 import struct
 import subprocess
 
-MSDF_EXE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "msdf-atlas-gen.exe")
-FONT_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "NotoSansCJK-Regular.ttc")
+from symbol_merger import generate_symbols_with_fallback
 
-def run_msdf_gen(charset_file, out_png, out_json):
+MSDF_EXE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "msdf-atlas-gen.exe")
+FONTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fonts")
+
+FONT_MAP = {
+    "latin_cyrillic": [("latin_cyrillic", "NotoSans-Medium.ttf")],
+    # symbols uses multi-font fallback: see SYMBOLS_FONT_PRIORITY
+    "symbols":        [("symbols", "NotoSansSymbols2-Regular.ttf")],
+    "cjk": [
+        ("cjk_jp", "NotoSansCJKjp-Medium.otf"),
+        ("cjk_sc", "NotoSansCJKsc-Medium.otf")
+    ]
+}
+
+# Fonts tried in order for the symbols atlas.
+# Chars are distributed: primary first, then remaining go to secondary, then tertiary.
+SYMBOLS_FONT_PRIORITY = [
+    "NotoSansSymbols2-Regular.ttf",  # Primary: broad symbol coverage
+    "NotoSansCJK-Regular.ttc",       # Secondary: CJK + some extra symbols
+    "arial.ttf"                      # Tertiary: final fallback
+]
+
+def run_msdf_gen(charset_file, font_file, out_png, out_json, pxrange="3", dimensions=None):
     """
     Calls msdf-atlas-gen to generate SDF atlas and JSON metadata.
     Uses -yorigin top to match standard PSP GU UV coordinates (0,0 at top-left).
     """
     cmd = [
         MSDF_EXE,
-        "-font", FONT_FILE,
+        "-font", font_file,
         "-charset", charset_file,
         "-type", "sdf",       # Standard SDF
         "-format", "png",
         "-imageout", out_png,
         "-json", out_json,
-        "-size", "32",        # Base size 32
-        "-pxrange", "2",      # Distance field radius in pixels
-        "-yorigin", "top",    # Matches standard 3D library UVs
-        "-dimensions", "512", "512" # Enforce dimensions
+        "-pxrange", str(pxrange),
+        "-size", "32",        # High resolution target
+        "-yorigin", "top"
     ]
+    if dimensions:
+        cmd += ["-dimensions", str(dimensions[0]), str(dimensions[1])]
+    else:
+        # Default to PSP max texture size
+        cmd += ["-dimensions", "512", "512"]
 
     print(f"Running msdf-atlas-gen for {os.path.basename(charset_file)}...")
     try:
@@ -71,9 +95,9 @@ def convert_json_to_bin(json_file, bin_file):
     atlas_data = data.get("atlas", data)
     width = atlas_data["width"]
     height = atlas_data["height"]
+    base_size = float(atlas_data.get("size", 32.0))
     metrics = data["metrics"]
     line_height = metrics["lineHeight"]
-    base_size = metrics["emSize"]
 
     glyphs_data = data.get("glyphs", [])
     glyph_count = len(glyphs_data)
@@ -124,19 +148,54 @@ def convert_json_to_bin(json_file, bin_file):
                 # Empty glyph (like space)
                 f.write(struct.pack("<I7f", utf32, 0, 0, 0, 0, 0, 0, adv))
 
-def generate_fonts(groups, tmp_dir, out_dir):
+def generate_fonts(manifest, tmp_dir, out_dir, forced_symbols=None):
+    """
+    Generates fonts based on the manifest (group_name -> list of charset filenames).
+    """
     os.makedirs(out_dir, exist_ok=True)
 
-    for group_name in groups.keys():
-        charset_file = os.path.join(tmp_dir, f"{group_name}.txt")
-        if not os.path.exists(charset_file):
+    for group_name, charset_files in manifest.items():
+        if group_name not in FONT_MAP:
             continue
 
-        out_png = os.path.join(out_dir, f"font_{group_name}.png")
-        out_json = os.path.join(tmp_dir, f"font_{group_name}.json")
-        out_bin = os.path.join(out_dir, f"font_{group_name}.bin")
+        # Special treatment for symbols merger
+        if group_name == "symbols" and forced_symbols:
+            # For now, icons merger still produces one unified atlas
+            png, bin_ = generate_symbols_with_fallback(
+                msdf_exe      = MSDF_EXE,
+                fonts_dir     = FONTS_DIR,
+                forced_symbols = forced_symbols,
+                tmp_dir       = tmp_dir,
+                out_dir       = out_dir,
+                font_priority = SYMBOLS_FONT_PRIORITY,
+                pxrange       = "3"
+            )
+            if png:
+                print(f"Successfully built {bin_} and {png}")
+            continue
 
-        success = run_msdf_gen(charset_file, out_png, out_json)
-        if success:
-            convert_json_to_bin(out_json, out_bin)
-            print(f"Successfully built {out_bin} and {out_png}")
+        # Handle pages for the group
+        for font_alias, font_filename in FONT_MAP[group_name]:
+            font_path = os.path.join(FONTS_DIR, font_filename)
+
+            for charset_filename in charset_files:
+                # charset_filename is e.g. "cjk_0.txt" or "latin_cyrillic.txt"
+                atlas_base_name = os.path.splitext(charset_filename)[0] # "cjk_0"
+
+                # We need to distinguish between languages if they use same group (like CJK SC vs JP)
+                # If alias is "cjk_jp", and file is "cjk_0.txt", output as "cjk_jp_0"
+                page_suffix = ""
+                if "_" in atlas_base_name:
+                    page_suffix = "_" + atlas_base_name.split("_")[-1]
+
+                atlas_id = f"{font_alias}{page_suffix}" # "cjk_jp_0"
+
+                charset_path = os.path.join(tmp_dir, charset_filename)
+                out_png   = os.path.join(out_dir, f"font_{atlas_id}.png")
+                out_json  = os.path.join(tmp_dir, f"font_{atlas_id}.json")
+                out_bin   = os.path.join(out_dir, f"font_{atlas_id}.bin")
+
+                success = run_msdf_gen(charset_path, font_path, out_png, out_json)
+                if success:
+                    convert_json_to_bin(out_json, out_bin)
+                    print(f"Successfully built {out_bin} and {out_png}")

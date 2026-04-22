@@ -4,7 +4,7 @@
  *  Playtime Tracking System for the PlayStation Portable (PSP)
  *
  *  Developed by OniMock
- *  Copyright (c) 2026 OniMock. All rights reserved.
+ *  (c) 2026 OniMock. All rights reserved.
  * -------------------------------------------------------------
 */
 
@@ -12,33 +12,32 @@
 #ifndef FONT_EMBED_H
 #define FONT_EMBED_H
 
+typedef struct {
+    const unsigned char* png_data;
+    unsigned int png_size;
+    const unsigned char* bin_data;
+    unsigned int bin_size;
+} EmbeddedAtlas;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* latin_cyrillic PNG texture data */
-extern const unsigned char font_latin_cyrillic_png[];
-extern const unsigned int  font_latin_cyrillic_png_size;
+/* cjk_jp pages */
+extern const EmbeddedAtlas g_font_cjk_jp_pages[];
+extern const int           g_font_cjk_jp_page_count;
 
-/* latin_cyrillic BIN metadata */
-extern const unsigned char font_latin_cyrillic_bin[];
-extern const unsigned int  font_latin_cyrillic_bin_size;
+/* cjk_sc pages */
+extern const EmbeddedAtlas g_font_cjk_sc_pages[];
+extern const int           g_font_cjk_sc_page_count;
 
-/* cjk PNG texture data */
-extern const unsigned char font_cjk_png[];
-extern const unsigned int  font_cjk_png_size;
+/* latin_cyrillic pages */
+extern const EmbeddedAtlas g_font_latin_cyrillic_pages[];
+extern const int           g_font_latin_cyrillic_page_count;
 
-/* cjk BIN metadata */
-extern const unsigned char font_cjk_bin[];
-extern const unsigned int  font_cjk_bin_size;
-
-/* symbols PNG texture data */
-extern const unsigned char font_symbols_png[];
-extern const unsigned int  font_symbols_png_size;
-
-/* symbols BIN metadata */
-extern const unsigned char font_symbols_bin[];
-extern const unsigned int  font_symbols_bin_size;
+/* symbols pages */
+extern const EmbeddedAtlas g_font_symbols_pages[];
+extern const int           g_font_symbols_page_count;
 
 #ifdef __cplusplus
 }
