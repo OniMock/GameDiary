@@ -27,6 +27,7 @@
 // --- Text ---
 #define COLOR_TEXT      0xFFFFFFFF // Primary text - #FFFFFF
 #define COLOR_SUBTEXT   0xFFBBBBBB // Secondary text - #BBBBBB (better readability)
+#define COLOR_SUBTEXT2   0xAA6A6F75 // #6A6F75 (light cool gray, well balanced)
 
 // --- Accent & Feedback ---
 #define COLOR_ACCENT 0xFFFFC040 // #40C0FF

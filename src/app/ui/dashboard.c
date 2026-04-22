@@ -79,7 +79,7 @@ static void dashboard_draw(void) {
 
     // Minor hint below graph indicating mode change
     Rect mode_hint_rect = {0, 230, 480, 20};
-    ui_draw_text(i18n_get(MSG_HINT_CHANGE_MODE), mode_hint_rect, COLOR_HIGHLIGHT, 0.8f, ALIGN_CENTER);
+    ui_draw_text(i18n_get(MSG_HINT_CHANGE_MODE), mode_hint_rect, COLOR_SUBTEXT2, 0.8f, ALIGN_CENTER);
 
     ui_draw_standard_hints();
 }
