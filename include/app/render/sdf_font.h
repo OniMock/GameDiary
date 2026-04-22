@@ -52,6 +52,12 @@ float sdf_font_get_width(const char *str, float size);
  */
 void sdf_font_cleanup(void);
 
+/**
+ * Rebuild the glyph mapping table based on current language priority.
+ * Called automatically by i18n_set_language().
+ */
+void sdf_font_rebuild_glyph_map(void);
+
 
 #ifdef __cplusplus
 }

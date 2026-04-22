@@ -14,6 +14,7 @@
   */
 
 #include "app/i18n/i18n.h"
+#include "app/render/sdf_font.h"
 #include <psputility.h>
 #include <stddef.h>
 
@@ -106,6 +107,9 @@ void i18n_set_language(int lang_index) {
 
   g_current_lang_idx = lang_index;
   g_i18n_msg = g_lang_registry[lang_index].entries;
+
+  /* Refresh font priorities to match new language (Han Unification) */
+  sdf_font_rebuild_glyph_map();
 }
 
 const char *i18n_get(MessageId id) {

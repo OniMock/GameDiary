@@ -27,6 +27,7 @@
 
 #include "app/render/sdf_font.h"
 #include "app/render/font_embed.h"
+#include "app/i18n/i18n.h"
 #include <pspkernel.h>
 #include <pspgu.h>
 #include <stdio.h>
@@ -73,6 +74,7 @@ typedef struct {
     int       tex_h;        /* POT height */
     int       img_w;        /* actual image width  (informational) */
     int       img_h;        /* actual image height (informational) */
+    int       group_id;     /* 0: Latin, 1: Symbols, 2: JP, 3: SC */
     int       loaded;
 } SDFAtlas;
 
@@ -110,6 +112,9 @@ static GroupDesc g_group_descs[] = {
 #define MAX_ATLASES 32
 static SDFAtlas g_atlases[MAX_ATLASES];
 static int      g_atlas_count = 0;
+
+/* Global O(1) lookup table: codepoint -> atlas_index (0xFF = missing) */
+static uint8_t g_glyph_map[65536];
 
 /* -----------------------------------------------------------------------
  * PNG memory reader (libpng callback to read from an in-memory buffer)
@@ -206,9 +211,10 @@ static void *decode_png(const unsigned char *png_data, unsigned int png_size,
 /* -----------------------------------------------------------------------
  * Load one atlas page from an EmbeddedAtlas record into the registry.
  * ----------------------------------------------------------------------- */
-static int load_atlas_from_embed(int slot, const EmbeddedAtlas *embed) {
+static int load_atlas_from_embed(int slot, const EmbeddedAtlas *embed, int group_id) {
     SDFAtlas *a = &g_atlases[slot];
     memset(a, 0, sizeof(SDFAtlas));
+    a->group_id = group_id;
 
     /* --- PNG → RGBA buffer --- */
     a->tex_data = decode_png(
@@ -295,7 +301,7 @@ int sdf_font_init(void) {
                 break;
             }
             int slot = g_atlas_count;
-            if (load_atlas_from_embed(slot, &grp->pages[p]) == 0) {
+            if (load_atlas_from_embed(slot, &grp->pages[p], g) == 0) {
                 printf("sdf_font: loaded group %d page %d -> slot %d\n", g, p, slot);
                 g_atlas_count++;
             } else {
@@ -304,8 +310,83 @@ int sdf_font_init(void) {
         }
     }
 
+    sdf_font_rebuild_glyph_map();
+
     /* Return 0 even if some pages failed — fallback chain still works */
     return 0;
+}
+
+/* --- Language-Aware Glyph Mapping Table Rebuild --- */
+
+static int is_cjk_block(uint32_t cp) {
+    return (
+        (cp >= 0x4E00 && cp <= 0x9FFF) ||   /* Unified Ideographs */
+        (cp >= 0x3400 && cp <= 0x4DBF) ||   /* Extension A */
+        (cp >= 0x3000 && cp <= 0x303F) ||   /* CJK Symbols/Punctuation */
+        (cp >= 0xFF00 && cp <= 0xFFEF)      /* Fullwidth Forms */
+    );
+}
+
+static int is_kana_block(uint32_t cp) {
+    return (cp >= 0x3040 && cp <= 0x30FF); /* Hiragana & Katakana */
+}
+
+void sdf_font_rebuild_glyph_map(void) {
+    memset(g_glyph_map, 0xFF, sizeof(g_glyph_map));
+    int lang = i18n_current_lang();
+
+    /* Priority Groups based on language */
+    int primary_cjk   = (lang == LANG_CN) ? 3 : 2;
+    int secondary_cjk = (lang == LANG_CN) ? 2 : 3;
+
+    /* Single pass over all codepoints (BMP) to find best fit */
+    for (uint32_t cp = 0; cp < 65536; cp++) {
+        int best_slot = -1;
+
+        if (is_kana_block(cp)) {
+            /* Kanas ALWAYS prefer JP */
+            for (int i = 0; i < g_atlas_count; i++) {
+                if (g_atlases[i].group_id == 2 && g_atlases[i].lookup[cp] > 0) {
+                    best_slot = i; break;
+                }
+            }
+        } 
+        else if (is_cjk_block(cp)) {
+            /* CJK priority chain: Primary -> Secondary -> Universal */
+            for (int i = 0; i < g_atlas_count; i++) {
+                if (g_atlases[i].group_id == primary_cjk && g_atlases[i].lookup[cp] > 0) {
+                    best_slot = i; break;
+                }
+            }
+            if (best_slot == -1) {
+                for (int i = 0; i < g_atlas_count; i++) {
+                    if (g_atlases[i].group_id == secondary_cjk && g_atlases[i].lookup[cp] > 0) {
+                        best_slot = i; break;
+                    }
+                }
+            }
+        }
+
+        /* If not found yet (or not CJK/Kana), search Universal (Latin/Symbols), then fallback to CJK */
+        if (best_slot == -1) {
+            /* Pass A: Latin (0) & Symbols (1) */
+            for (int i = 0; i < g_atlas_count; i++) {
+                if (g_atlases[i].group_id <= 1 && g_atlases[i].lookup[cp] > 0) {
+                    best_slot = i; break;
+                }
+            }
+            /* Pass B: Any script as desperate fallback */
+            if (best_slot == -1) {
+                for (int i = 0; i < g_atlas_count; i++) {
+                    if (g_atlases[i].lookup[cp] > 0) {
+                        best_slot = i; break;
+                    }
+                }
+            }
+        }
+
+        if (best_slot != -1) g_glyph_map[cp] = (uint8_t)best_slot;
+    }
 }
 
 void sdf_font_cleanup(void) {
@@ -344,26 +425,22 @@ static uint32_t utf8_decode_next(const char **s) {
  * page 0 first within each group) until the codepoint is found.
  * ----------------------------------------------------------------------- */
 static SDFGlyph *get_glyph(uint32_t cp, SDFAtlas **out) {
-    /* Clamp SMP codepoints — our lookup table only covers BMP (< 65536) */
     if (cp >= 65536) cp = '?';
 
-    for (int i = 0; i < g_atlas_count; i++) {
-        if (!g_atlases[i].loaded) continue;
-        uint16_t slot = g_atlases[i].lookup[cp];
-        if (slot > 0) {
-            *out = &g_atlases[i];
-            return &g_atlases[i].glyphs[slot - 1];
-        }
+    uint8_t slot = g_glyph_map[cp];
+    if (slot != 0xFF) {
+        *out = &g_atlases[slot];
+        uint16_t g_idx = g_atlases[slot].lookup[cp];
+        return &g_atlases[slot].glyphs[g_idx - 1];
     }
 
-    /* Last-resort: '?' from the first loaded atlas */
-    for (int i = 0; i < g_atlas_count; i++) {
-        if (!g_atlases[i].loaded) continue;
-        uint16_t slot = g_atlases[i].lookup[(int)'?'];
-        if (slot > 0) {
-            *out = &g_atlases[i];
-            return &g_atlases[i].glyphs[slot - 1];
-        }
+    /* Last-resort fallback to '?' glyph */
+    cp = '?';
+    slot = g_glyph_map[cp];
+    if (slot != 0xFF) {
+        *out = &g_atlases[slot];
+        uint16_t g_idx = g_atlases[slot].lookup[cp];
+        return &g_atlases[slot].glyphs[g_idx - 1];
     }
 
     return NULL;
