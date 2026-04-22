@@ -20,6 +20,7 @@
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
+#include "app/render/font.h"
 #include "common/utils.h"
 #include <pspctrl.h>
 #include <stdio.h>
@@ -45,40 +46,139 @@ static void stats_draw(void) {
 
   ui_draw_title_auto(i18n_get(MSG_MENU_ACTIVITY), safe_rect, &GD_IMG_ICON_ACTIVITY_32_PNG);
 
-  u32 total_play = 0;
-  u32 total_sessions = 0;
   GameStats *games = data_get_games();
-  u32 count = data_get_game_count();
+  u32 total_games = data_get_game_count();
 
-  for (u32 i = 0; i < count; i++) {
-    total_play += games[i].total_playtime;
-    total_sessions += games[i].session_count;
+  if (total_games == 0) {
+      Rect msg_rect = {20, 100, 440, 40};
+      ui_draw_text(i18n_get(MSG_ERROR_NO_GAMES), msg_rect, COLOR_SUBTEXT, 1.0f, ALIGN_CENTER);
+      ui_draw_standard_hints();
+      return;
   }
 
-  // Stats Grid
-  Rect grid_area = {20, 80, 440, 160};
-  Rect play_rect = rect_column(grid_area, 0, 2, 10);
-  Rect session_rect = rect_column(grid_area, 1, 2, 10);
+  // 1. Find the top 5 most recently played games
+  int recent_indices[5] = {-1, -1, -1, -1, -1};
+  u32 recent_counts = 0;
 
-  // Playtime Card
-  ui_draw_card(play_rect, COLOR_CARD, COLOR_BORDER);
-  Rect p_cont = rect_padding(play_rect, 10);
-  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), rect_column(p_cont, 0, 2, 0),
-               COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
-  char time_str[32];
-  ui_format_duration(total_play, time_str, sizeof(time_str));
-  ui_draw_text(time_str, rect_column(p_cont, 1, 2, 0), COLOR_TEXT, 1.2f,
-               ALIGN_LEFT);
+  // We'll do a simple selection sort for the top 5
+  u32 last_ts_found[5] = {0};
 
-  // Sessions Card
-  ui_draw_card(session_rect, COLOR_CARD, COLOR_BORDER);
-  Rect s_cont = rect_padding(session_rect, 10);
-  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), rect_column(s_cont, 0, 2, 0),
-               COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
-  char sess_str[16];
-  snprintf(sess_str, sizeof(sess_str), "%lu", (unsigned long)total_sessions);
-  ui_draw_text(sess_str, rect_column(s_cont, 1, 2, 0), COLOR_TEXT, 1.2f,
-               ALIGN_LEFT);
+  for (u32 i = 0; i < total_games; i++) {
+      u32 ts = games[i].last_played_ts;
+      if (ts == 0) continue;
+
+      for (int j = 0; j < 5; j++) {
+          if (ts > last_ts_found[j]) {
+              // Shift others down
+              for (int k = 4; k > j; k--) {
+                  last_ts_found[k] = last_ts_found[k - 1];
+                  recent_indices[k] = recent_indices[k - 1];
+              }
+              last_ts_found[j] = ts;
+              recent_indices[j] = i;
+              if (recent_counts < 5) recent_counts++;
+              break;
+          }
+      }
+  }
+
+  // Global totals
+  u32 global_playtime = 0;
+  u32 global_sessions = 0;
+  for (u32 i = 0; i < total_games; i++) {
+      global_playtime += games[i].total_playtime;
+      global_sessions += games[i].session_count;
+  }
+
+  // 2. LAYOUT - TOP SECTION (Summary & Focus)
+  int top_y = 55;
+  int card_h = 85;
+
+  // Left: Focus Card (Last Game)
+  if (recent_indices[0] != -1) {
+      GameStats *last_g = &games[recent_indices[0]];
+      Rect focus_rect = {20, top_y, 250, card_h};
+      ui_draw_card(focus_rect, COLOR_CARD, COLOR_BORDER);
+      Rect focus_padded = rect_padding(focus_rect, 10);
+
+      // Label "Último Jogo"
+      ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), (Rect){focus_padded.x, focus_padded.y, focus_padded.w, 15}, COLOR_ACCENT, 0.7f, ALIGN_LEFT);
+
+      // Title
+      ui_draw_text(last_g->entry.game_name, (Rect){focus_padded.x, focus_padded.y + 18, focus_padded.w, 20}, COLOR_TEXT, 0.95f, ALIGN_LEFT);
+
+      // Detailed Playtime
+      char dur_buf[32];
+      ui_format_duration(last_g->total_playtime, dur_buf, sizeof(dur_buf));
+      char final_dur[64];
+      snprintf(final_dur, sizeof(final_dur), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), dur_buf);
+      ui_draw_text(final_dur, (Rect){focus_padded.x, focus_padded.y + 40, focus_padded.w, 15}, COLOR_SUBTEXT, 0.75f, ALIGN_LEFT);
+
+      // Date
+      time_t lplayed = (time_t)last_g->last_played_ts;
+      struct tm *lt = localtime(&lplayed);
+      char date_buf[32];
+      strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT), lt);
+      ui_draw_text(date_buf, (Rect){focus_padded.x, focus_padded.y + 55, focus_padded.w, 15}, COLOR_SUBTEXT, 0.75f, ALIGN_LEFT);
+  }
+
+  // Right: Global Stats
+  int right_x = 280;
+  int sub_card_h = (card_h - 10) / 2;
+
+  // Total Playtime Global
+  Rect glob_play_rect = {right_x, top_y, 180, sub_card_h};
+  ui_draw_card(glob_play_rect, COLOR_CARD, COLOR_BORDER);
+  char glob_time[32];
+  ui_format_duration(global_playtime, glob_time, sizeof(glob_time));
+  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){right_x + 8, top_y + 6, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
+  ui_draw_text(glob_time, (Rect){right_x + 8, top_y + 18, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
+
+  // Total Sessions Global
+  Rect glob_sess_rect = {right_x, top_y + sub_card_h + 10, 180, sub_card_h};
+  ui_draw_card(glob_sess_rect, COLOR_CARD, COLOR_BORDER);
+  char sess_buf[32];
+  snprintf(sess_buf, sizeof(sess_buf), "%lu", (unsigned long)global_sessions);
+  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){right_x + 8, top_y + sub_card_h + 16, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
+  ui_draw_text(sess_buf, (Rect){right_x + 8, top_y + sub_card_h + 28, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
+
+  // 3. LAYOUT - BOTTOM SECTION (Recent History)
+  int list_y = top_y + card_h + 8;
+  ui_draw_text(i18n_get(MSG_MENU_ACTIVITY), (Rect){20, list_y, 440, 15}, COLOR_ACCENT, 0.75f, ALIGN_LEFT);
+  renderer_draw_rect(20, list_y + 16, 440, 1, COLOR_BORDER);
+
+  for (int i = 1; i < (int)recent_counts; i++) { // Skip the first one which is prominent above
+      int idx = recent_indices[i];
+      if (idx == -1) break;
+
+      int row_y = list_y + 20 + (i - 1) * 22;
+      GameStats *g = &games[idx];
+
+      // Category Badge
+      char cat_tag[16] = {0};
+      if (g->entry.category == 0) snprintf(cat_tag, sizeof(cat_tag), "[PSP]");
+      else if (g->entry.category == 1) snprintf(cat_tag, sizeof(cat_tag), "[PSX]");
+      else snprintf(cat_tag, sizeof(cat_tag), "[HB]");
+
+      float tag_w = font_get_width(cat_tag, 0.7f);
+      ui_draw_text(cat_tag, (Rect){25, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, 0.7f, ALIGN_LEFT);
+
+      // Game Name
+      ui_draw_text(g->entry.game_name, (Rect){25 + (int)tag_w + 5, row_y, 250, 20}, COLOR_TEXT, 0.85f, ALIGN_LEFT);
+
+      // Last Played Date (Full)
+      time_t item_ts = (time_t)g->last_played_ts;
+      struct tm *lt = localtime(&item_ts);
+      char date_buf[32];
+      strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT), lt);
+      ui_draw_text(date_buf, (Rect){340, row_y, 110, 20}, COLOR_SUBTEXT, 0.8f, ALIGN_RIGHT);
+
+      // Mini divider
+      if (i < (int)recent_counts - 1) {
+          renderer_draw_rect(25, row_y + 18, 425, 1, COLOR_BORDER & 0x44FFFFFF);
+      }
+  }
+
   ui_draw_standard_hints();
 }
 
