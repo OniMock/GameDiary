@@ -45,13 +45,23 @@ static void dashboard_init(void) {
 
 static void dashboard_update(u32 buttons, u32 pressed) {
     (void)buttons;
+    static int joystick_cooldown = 0;
+    if (joystick_cooldown > 0) joystick_cooldown--;
 
-    if (pressed & PSP_CTRL_LEFT) {
+    SceCtrlData pad;
+    sceCtrlPeekBufferPositive(&pad, 1);
+
+    int analog_left = (pad.Lx < 64);
+    int analog_right = (pad.Lx > 192);
+
+    if ((pressed & PSP_CTRL_LEFT) || (analog_left && joystick_cooldown == 0)) {
         StatsPeriod next = (g_current_query.period + STATS_PERIOD_COUNT - 1) % STATS_PERIOD_COUNT;
         dashboard_set_mode(next);
-    } else if (pressed & PSP_CTRL_RIGHT) {
+        joystick_cooldown = 20; // ~333ms at 60fps
+    } else if ((pressed & PSP_CTRL_RIGHT) || (analog_right && joystick_cooldown == 0)) {
         StatsPeriod next = (g_current_query.period + 1) % STATS_PERIOD_COUNT;
         dashboard_set_mode(next);
+        joystick_cooldown = 20;
     }
 }
 
@@ -61,23 +71,42 @@ static void dashboard_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect = rect_padding(screen_rect, 20);
 
-    // Dynamic Title combining base feature string with mode string
-    char title_buf[64];
+    // 1. Header: Primary Title "Statistics"
+    ui_draw_title_auto(i18n_get(MSG_MENU_STATS), safe_rect, &GD_IMG_ICON_STATS_32_PNG);
+
+    // 2. Header: Filter Indicator (Right Aligned)
     const char *mode_str = "";
     if (g_current_query.period == STATS_PERIOD_WEEKLY) mode_str = i18n_get(MSG_STATS_MODE_WEEKLY);
     else if (g_current_query.period == STATS_PERIOD_MONTHLY) mode_str = i18n_get(MSG_STATS_MODE_MONTHLY);
     else if (g_current_query.period == STATS_PERIOD_YEARLY) mode_str = i18n_get(MSG_STATS_MODE_YEARLY);
 
-    // Mode title with arrows for indication
-    snprintf(title_buf, sizeof(title_buf), "%s: %s", i18n_get(MSG_MENU_STATS), mode_str);
+    char filter_buf[64];
+    snprintf(filter_buf, sizeof(filter_buf), "%s: %s", i18n_get(MSG_FILTER), mode_str);
 
-    // Header
-    ui_draw_title_auto(title_buf, safe_rect, &GD_IMG_ICON_STATS_32_PNG);
+    float filter_text_size = 1.0f;
+    int filter_spacing = 8;
+    int icon_size = 24; // slightly smaller for filter
+    float text_w = font_get_width(filter_buf, filter_text_size);
+    int total_filter_w = icon_size + filter_spacing + (int)text_w;
 
-    // Cached Graph Area
+    int filter_x = safe_rect.x + safe_rect.w - total_filter_w;
+    int filter_y = safe_rect.y + 8; // Exactly same baseline as main title
+    
+    // Perfect vertical alignment logic
+    float filter_center_y = filter_y - (filter_text_size * 6.0f);
+    int icon_y = (int)(filter_center_y - (icon_size / 2.0f));
+    
+    // Draw filter icon in white
+    sceGuColor(COLOR_TEXT);
+    texture_draw_resource(&GD_IMG_ICON_FILTER_32_PNG, filter_x, icon_y, icon_size, icon_size);
+    
+    // Draw filter text
+    font_draw_string(filter_x + icon_size + filter_spacing, filter_y, filter_buf, COLOR_TEXT, filter_text_size);
+
+    // 3. Main Content: Cached Graph Area
     ui_draw_stats_graph(&g_cached_graph_data, 240, 190, 360, 80);
 
-    // Minor hint below graph indicating mode change
+    // 4. Minor hint below graph indicating mode change
     Rect mode_hint_rect = {0, 230, 480, 20};
     ui_draw_text(i18n_get(MSG_HINT_CHANGE_MODE), mode_hint_rect, COLOR_SUBTEXT2, 0.8f, ALIGN_CENTER);
 

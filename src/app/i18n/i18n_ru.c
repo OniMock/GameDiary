@@ -72,5 +72,6 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "Ноябрь",
     [MSG_MONTH_DEC]            = "Декабрь",
 
-    [MSG_HINT_CHANGE_MODE]     = "Используйте ← → для смены режима",
+    [MSG_HINT_CHANGE_MODE]     = "Используйте ← → или Стик для смены",
+    [MSG_FILTER]               = "Фильтр",
 };

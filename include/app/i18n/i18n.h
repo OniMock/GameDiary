@@ -93,6 +93,7 @@ typedef enum {
     MSG_MONTH_DEC,
 
     MSG_HINT_CHANGE_MODE,
+    MSG_FILTER,
 
     MSG_COUNT
 } MessageId;

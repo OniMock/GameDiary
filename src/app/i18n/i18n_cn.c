@@ -76,5 +76,6 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "11月",
     [MSG_MONTH_DEC]            = "12月",
 
-    [MSG_HINT_CHANGE_MODE]     = "← →切换",
+    [MSG_HINT_CHANGE_MODE]     = "使用 ← → 或 摇杆切换",
+    [MSG_FILTER]               = "筛选",
 };

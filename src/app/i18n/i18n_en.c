@@ -71,5 +71,6 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "November",
     [MSG_MONTH_DEC]            = "December",
 
-    [MSG_HINT_CHANGE_MODE]     = "Use ← → to change modes",
+    [MSG_HINT_CHANGE_MODE]     = "Use ← → or Analog to change",
+    [MSG_FILTER]               = "Filter",
 };

@@ -75,5 +75,6 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "11月",
     [MSG_MONTH_DEC]            = "12月",
 
-    [MSG_HINT_CHANGE_MODE]     = "← →で切替",
+    [MSG_HINT_CHANGE_MODE]     = "← → または アナログで変更",
+    [MSG_FILTER]               = "フィルター",
 };
