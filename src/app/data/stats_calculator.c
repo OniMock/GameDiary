@@ -86,8 +86,10 @@ static void calc_weekly(const SessionEntry *sessions, int count, StatsQuery quer
         }
     }
     
+    u32 total_time = 0;
     u32 max_time = 3600; // Min scale 1h
     for (int i = 0; i < 7; i++) {
+        total_time += out_data->column_values[i];
         if (out_data->column_values[i] > max_time) max_time = out_data->column_values[i];
     }
     out_data->max_value = max_time;
@@ -98,7 +100,14 @@ static void calc_weekly(const SessionEntry *sessions, int count, StatsQuery quer
     strftime(b1, sizeof(b1), i18n_get(MSG_DATE_FORMAT_SHORT), &start_d);
     strftime(b2, sizeof(b2), i18n_get(MSG_DATE_FORMAT_SHORT), &end_d);
     snprintf(out_data->context_title, sizeof(out_data->context_title), "%s - %s %d", b1, b2, end_d.tm_year + 1900);
-    snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", i18n_get(MSG_STATS_MODE_WEEKLY));
+
+    char dur_buf[32];
+    u32 h = total_time / 3600;
+    u32 m = (total_time % 3600) / 60;
+    if (h > 0) snprintf(dur_buf, sizeof(dur_buf), "%s: %uh %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)h, (unsigned int)m);
+    else snprintf(dur_buf, sizeof(dur_buf), "%s: %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)m);
+
+    snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", dur_buf);
 }
 
 static void calc_monthly(const SessionEntry *sessions, int count, StatsQuery query, StatsGraphData *out_data) {
@@ -147,8 +156,10 @@ static void calc_monthly(const SessionEntry *sessions, int count, StatsQuery que
         }
     }
     
+    u32 total_time = 0;
     u32 max_time = 3600; 
     for (int i = 0; i < days_in_month; i++) {
+        total_time += out_data->column_values[i];
         if (out_data->column_values[i] > max_time) max_time = out_data->column_values[i];
     }
     out_data->max_value = max_time;
@@ -156,7 +167,14 @@ static void calc_monthly(const SessionEntry *sessions, int count, StatsQuery que
     snprintf(out_data->context_title, sizeof(out_data->context_title), "%s %d",
              i18n_get(MSG_MONTH_JAN + tm_info.tm_mon),
              tm_info.tm_year + 1900);
-    snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", i18n_get(MSG_STATS_MODE_MONTHLY));
+    
+    char dur_buf[32];
+    u32 h = total_time / 3600;
+    u32 m = (total_time % 3600) / 60;
+    if (h > 0) snprintf(dur_buf, sizeof(dur_buf), "%s: %uh %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)h, (unsigned int)m);
+    else snprintf(dur_buf, sizeof(dur_buf), "%s: %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)m);
+
+    snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", dur_buf);
 }
 
 static void calc_yearly(const SessionEntry *sessions, int count, StatsQuery query, StatsGraphData *out_data) {
@@ -187,14 +205,23 @@ static void calc_yearly(const SessionEntry *sessions, int count, StatsQuery quer
         }
     }
     
+    u32 total_time = 0;
     u32 max_time = 3600 * 10; // 10 hour min scale
     for (int i = 0; i < 10; i++) {
+        total_time += out_data->column_values[i];
         if (out_data->column_values[i] > max_time) max_time = out_data->column_values[i];
     }
     out_data->max_value = max_time;
 
     snprintf(out_data->context_title, sizeof(out_data->context_title), "%d - %d", start_year, current_year);
-    snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", i18n_get(MSG_STATS_MODE_YEARLY));
+
+    char dur_buf[32];
+    u32 h = total_time / 3600;
+    u32 m = (total_time % 3600) / 60;
+    if (h > 0) snprintf(dur_buf, sizeof(dur_buf), "%s: %uh %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)h, (unsigned int)m);
+    else snprintf(dur_buf, sizeof(dur_buf), "%s: %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)m);
+
+    snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", dur_buf);
 }
 
 void stats_calc_query(const SessionEntry *sessions, int count, StatsQuery query, StatsGraphData *out_data) {

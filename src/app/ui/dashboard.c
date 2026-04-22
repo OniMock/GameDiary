@@ -69,7 +69,7 @@ static void dashboard_draw(void) {
     else if (g_current_query.period == STATS_PERIOD_YEARLY) mode_str = i18n_get(MSG_STATS_MODE_YEARLY);
 
     // Mode title with arrows for indication
-    snprintf(title_buf, sizeof(title_buf), "%s  < %s >", i18n_get(MSG_MENU_STATS), mode_str);
+    snprintf(title_buf, sizeof(title_buf), "%s: %s", i18n_get(MSG_MENU_STATS), mode_str);
 
     // Header
     ui_draw_title_auto(title_buf, safe_rect, &GD_IMG_ICON_STATS_32_PNG);

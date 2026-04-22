@@ -241,10 +241,26 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     ui_draw_text(i18n_get(MSG_STATS_NO_ACTIVITY), msg_rect, COLOR_SUBTEXT, 0.8f, ALIGN_CENTER);
   }
 
+  // Draw Total Playtime (above graph, near title)
+  if (data->context_subtitle[0] != '\0') {
+      Rect total_rect = {gx, gy - max_bar_h - 40, graph_w, 20};
+      ui_draw_text(data->context_subtitle, total_rect, COLOR_ACCENT, 0.85f, ALIGN_CENTER);
+  }
+
   // Draw Context String (e.g. "Apr 2026")
   if (data->context_title[0] != '\0') {
       Rect sub_rect = {gx, gy + 15, graph_w, 20};
       ui_draw_text(data->context_title, sub_rect, COLOR_SUBTEXT, 0.7f, ALIGN_CENTER);
+  }
+
+  // Find Peak Index
+  int peak_idx = -1;
+  u32 max_v = 0;
+  for (int j = 0; j < count; j++) {
+    if (data->column_values[j] >= max_v && data->column_values[j] > 0) {
+      max_v = data->column_values[j];
+      peak_idx = j;
+    }
   }
 
   // Rendering Columns
@@ -261,8 +277,10 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     if (h < 2 && data->column_values[i] > 0) h = 2;
 
     int alpha = (int)g_graph_anim_a[i];
-    if (alpha < 0) alpha = 0;
-    if (alpha > 255) alpha = 255;
+    if (alpha) {
+        if (alpha < 0) alpha = 0;
+        if (alpha > 255) alpha = 255;
+    }
 
     u32 base_bar_color = (i == count - 1) ? COLOR_ACCENT : (COLOR_ACCENT & 0x44FFFFFF);
     u32 label_color = (i == count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
@@ -275,7 +293,11 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     // Value text
     char time_buf[16] = {0};
     if (h > 0) {
-        if (count <= 10 || (i == 0 || i == count / 2 || i == count - 1)) {
+        bool show_v = false;
+        if (count <= 10) show_v = true;
+        else if (i == peak_idx || i == count - 1) show_v = true;
+
+        if (show_v) {
             ui_format_duration(data->column_values[i], time_buf, sizeof(time_buf));
         }
     }
