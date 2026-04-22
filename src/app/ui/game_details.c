@@ -24,6 +24,7 @@
 #include "app/data/data_loader.h"
 #include "common/utils.h"
 #include "common/models.h"
+#include "app/data/game_category.h"
 #include <pspctrl.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,15 +38,6 @@ void game_details_set_idx(int idx) {
     g_game_idx = idx;
 }
 
-static const char* get_game_category(u8 category) {
-    switch (category) {
-        case 0: return i18n_get(MSG_CAT_PSP);
-        case 1: return i18n_get(MSG_CAT_PSX);
-        case 2: return i18n_get(MSG_CAT_HOMEBREW);
-        case 3: return i18n_get(MSG_CAT_PSP);  /* VSH — runs on PSP XMB */
-        default: return i18n_get(MSG_CAT_HOMEBREW);
-    }
-}
 
 static void game_details_init(void) {
     if (g_game_icon) texture_free(g_game_icon);
@@ -116,7 +108,7 @@ static void game_details_draw(void) {
                           COLOR_ACCENT, 1.0f, ALIGN_LEFT);
 
     /* ID + Category sub-line */
-    const char* cat_str = get_game_category(g->entry.category);
+    const char* cat_str = game_category_get_name(g->entry.category);
     char sub_buf[80];
     snprintf(sub_buf, sizeof(sub_buf), "%s  ·  %s", g->entry.game_id, cat_str);
     ui_draw_text(sub_buf, (Rect){tx, 50, tw_max, 14}, COLOR_SUBTEXT, 0.72f, ALIGN_LEFT);

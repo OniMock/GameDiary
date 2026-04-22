@@ -88,6 +88,9 @@ typedef struct {
 
     /* --- Icon cache --- */
     IconCacheSlot cache[CAROUSEL_CACHE_SIZE];
+
+    /* --- Optional index mapping --- */
+    const int *index_map; /**< Maps logical carousel index to physical game index. If NULL, 1:1 mapping is assumed. */
 } CarouselState;
 
 /* -----------------------------------------------------------------------
@@ -103,8 +106,9 @@ void carousel_set_index(CarouselState *cs, int index);
  * Initialises the carousel and pre-loads the icon window.
  * @param cs          State to initialise (caller owns storage).
  * @param total_games Number of games available.
+ * @param index_map   Optional array mapping 0..total_games-1 to real indices.
  */
-void carousel_init(CarouselState *cs, int total_games);
+void carousel_init(CarouselState *cs, int total_games, const int *index_map);
 
 /**
  * Frees all cached icon textures and resets the state.

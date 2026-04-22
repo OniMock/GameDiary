@@ -21,7 +21,7 @@
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
 #include "app/render/font.h"
-#include "common/utils.h"
+#include "app/data/game_category.h"
 #include <pspctrl.h>
 #include <stdio.h>
 
@@ -158,10 +158,8 @@ static void stats_draw(void) {
       GameStats *g = &games[idx];
 
       // Category Badge
-      char cat_tag[16] = {0};
-      if (g->entry.category == 0) snprintf(cat_tag, sizeof(cat_tag), "[PSP]");
-      else if (g->entry.category == 1) snprintf(cat_tag, sizeof(cat_tag), "[PSX]");
-      else snprintf(cat_tag, sizeof(cat_tag), "[HB]");
+      char cat_tag[32] = {0};
+      snprintf(cat_tag, sizeof(cat_tag), "[%s]", game_category_get_name(g->entry.category));
 
       float tag_w = font_get_width(cat_tag, 0.65f);
       ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);

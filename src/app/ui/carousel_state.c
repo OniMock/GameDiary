@@ -108,8 +108,15 @@ static int carousel_loader_thread(SceSize args, void *argp) {
                     s_active_cs->cache[s].state == CACHE_SLOT_PENDING) {
 
                     int wrap_idx = (target_idx % s_active_cs->total + s_active_cs->total) % s_active_cs->total;
+                    
+                    /* Resolve logical index to physical game index using the map */
+                    int physical_game_idx = wrap_idx;
+                    if (s_active_cs->index_map) {
+                        physical_game_idx = s_active_cs->index_map[wrap_idx];
+                    }
+
                     char path[256];
-                    build_icon_path(path, sizeof(path), wrap_idx);
+                    build_icon_path(path, sizeof(path), physical_game_idx);
 
                     Texture *tex = texture_load_png(path);
 
@@ -196,9 +203,10 @@ static void carousel_navigate(CarouselState *cs, int delta) {
  * Public API
  * ----------------------------------------------------------------------- */
 
-void carousel_init(CarouselState *cs, int total_games) {
+void carousel_init(CarouselState *cs, int total_games, const int *index_map) {
     memset(cs, 0, sizeof(*cs));
     cs->total       = total_games;
+    cs->index_map   = index_map;
     cs->current_idx = 0;
     cs->anim_offset  = 0.0f;
     cs->hold_dir     = 0;

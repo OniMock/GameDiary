@@ -28,7 +28,6 @@
 
 static float g_current_index = 0.0f;
 static float g_target_index = 0.0f;
-static int s_analog_held_x = 0;
 
 typedef struct {
     MessageId label_msg;

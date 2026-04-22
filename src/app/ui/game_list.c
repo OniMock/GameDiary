@@ -41,6 +41,7 @@
 #include "app/render/texture.h"
 #include "app/data/data_loader.h"
 #include "app/data/stats_calculator.h"
+#include "app/data/game_category.h"
 #include "common/utils.h"
 #include <pspctrl.h>
 #include <pspgu.h>
@@ -98,21 +99,36 @@ static int           g_prev_idx = -1; /* Tracks game changes for graph reset */
 static u32           s_last_selected_uid = 0; /* Save selection on screen transitions */
 static int           s_analog_held_x = 0;     /* Analog held state (-1 left, 1 right, 0 neutral) */
 
+/* Filtering state */
+static u8  s_available_filters[CAT_UNKNOWN];
+static int s_available_count = 0;
+static int s_filter_pos = -1; // -1 = All, 0..count-1 = active filter index
+static int s_current_filter = FILTER_ALL;
+
+static int s_filtered_indices[512]; // Static buffer for games in the current filter
+static int s_filtered_count = 0;
+
 /* -----------------------------------------------------------------------
  * Internal helpers
  * ----------------------------------------------------------------------- */
 
+static void update_filtered_list(void) {
+    u32 total = data_get_game_count();
+    GameStats *all_games = data_get_games();
+    s_filtered_count = 0;
+
+    for (u32 i = 0; i < total; i++) {
+        if (s_current_filter == FILTER_ALL || 
+            game_category_normalize(all_games[i].entry.category) == s_current_filter) {
+            if (s_filtered_count < 512) {
+                s_filtered_indices[s_filtered_count++] = i;
+            }
+        }
+    }
+}
+
 /**
  * Draws one icon from the carousel at the given position.
- * Falls back to the embedded "icon not found" resource when the texture
- * is not cached (e.g. game has no icon0).
- *
- * @param game_idx  Logical game index (used for cache lookup).
- * @param x         Left edge of draw area.
- * @param y         Top edge of draw area.
- * @param w         Draw width.
- * @param h         Draw height.
- * @param tint      ABGR color (0xAABBGGRR) tint/alpha. 0xFFFFFFFF = fully opaque white (no tint, original texture colors).
  */
 static void draw_carousel_icon(int inf_idx, int cx, int cy, float scale,
                                 u32 tint) {
@@ -199,16 +215,30 @@ static void game_list_init(void) {
     data_calculate_stats(0, 0xFFFFFFFF);
     stats_sort_by_total();
 
-    u32 count = data_get_game_count();
-    carousel_init(&g_cs, (int)count);
+    /* Identify available categories for filtering */
+    s_available_count = game_category_get_available(s_available_filters);
+    
+    /* Ensure the current filter is still valid if data changed */
+    if (s_current_filter != FILTER_ALL) {
+        int found = 0;
+        for (int i = 0; i < s_available_count; i++) {
+            if (s_available_filters[i] == s_current_filter) { found = 1; s_filter_pos = i; break; }
+        }
+        if (!found) { s_current_filter = FILTER_ALL; s_filter_pos = -1; }
+    }
+
+    update_filtered_list();
+
+    carousel_init(&g_cs, s_filtered_count, s_filtered_indices);
     g_prev_idx = -1;
     ui_reset_game_daily_graph_animation();
 
-    /* Restore selection if transitioning back from game_details */
+    /* Restore selection */
     if (s_last_selected_uid != 0) {
         GameStats *games = data_get_games();
-        for (u32 i = 0; i < count; i++) {
-            if (games[i].entry.uid == s_last_selected_uid) {
+        for (int i = 0; i < s_filtered_count; i++) {
+            int real_idx = s_filtered_indices[i];
+            if (games[real_idx].entry.uid == s_last_selected_uid) {
                 carousel_set_index(&g_cs, i);
                 break;
             }
@@ -217,12 +247,26 @@ static void game_list_init(void) {
 }
 
 static void game_list_update(u32 buttons, u32 pressed) {
-    u32 count = data_get_game_count();
-
-    if (count == 0) {
+    if (s_filtered_count == 0 && s_current_filter == FILTER_ALL) {
         if (pressed & PSP_CTRL_CROSS)
             screen_manager_set(&g_screen_dashboard);
         return;
+    }
+
+    /* Handle Toggle Filter (Square) */
+    if (pressed & PSP_CTRL_SQUARE) {
+        s_filter_pos++;
+        if (s_filter_pos >= s_available_count) {
+            s_filter_pos = -1;
+            s_current_filter = FILTER_ALL;
+        } else {
+            s_current_filter = s_available_filters[s_filter_pos];
+        }
+        update_filtered_list();
+        carousel_init(&g_cs, s_filtered_count, s_filtered_indices);
+        g_prev_idx = -1;
+        ui_reset_game_daily_graph_animation();
+        return; // Skip update for this frame to avoid double-triggering logic
     }
 
     /* Process Analog Joystick */
@@ -244,7 +288,7 @@ static void game_list_update(u32 buttons, u32 pressed) {
     carousel_update(&g_cs, mapped_buttons, mapped_pressed);
 
     /* Infinite wrapping logic for getting the active game */
-    int wrap_idx = ((g_cs.current_idx % (int)count) + (int)count) % (int)count;
+    int wrap_idx = ((g_cs.current_idx % s_filtered_count) + s_filtered_count) % s_filtered_count;
 
     if (wrap_idx != g_prev_idx) {
         ui_reset_game_daily_graph_animation();
@@ -254,8 +298,9 @@ static void game_list_update(u32 buttons, u32 pressed) {
     /* Navigate to game details using wrapped index */
     if (mapped_pressed & PSP_CTRL_CROSS) {
         GameStats *games = data_get_games();
-        s_last_selected_uid = games[wrap_idx].entry.uid;
-        game_details_set_idx(wrap_idx);
+        int real_idx = s_filtered_indices[wrap_idx];
+        s_last_selected_uid = games[real_idx].entry.uid;
+        game_details_set_idx(real_idx);
         screen_manager_push(&g_screen_game_details);
     }
 }
@@ -271,11 +316,31 @@ static void game_list_draw(void) {
     ui_draw_title(i18n_get(MSG_MENU_GAMES), safe_rect,
                   &GD_IMG_ICON_GAMES_32_PNG, 24);
 
+    /* Header: Filter Indicator (Right Aligned) */
+    const char *filter_name = (s_current_filter == FILTER_ALL) ? i18n_get(MSG_TOP_ALL) : game_category_get_name(s_current_filter);
+    
+    char filter_buf[64];
+    snprintf(filter_buf, sizeof(filter_buf), "%s: %s", i18n_get(MSG_FILTER), filter_name);
+
+    float filter_text_size = 1.0f;
+    int icon_size = 24;
+    int spacing = 8;
+    float text_w = font_get_width(filter_buf, filter_text_size);
+    int total_w = icon_size + spacing + (int)text_w;
+
+    int filter_x = safe_rect.x + safe_rect.w - total_w;
+    int filter_y = safe_rect.y + 8;
+    float filter_center_y = filter_y - (filter_text_size * 6.0f);
+    int icon_y = (int)(filter_center_y - (icon_size / 2.0f));
+
+    sceGuColor(COLOR_TEXT);
+    texture_draw_resource(&GD_IMG_ICON_FILTER_32_PNG, filter_x, icon_y, icon_size, icon_size);
+    font_draw_string(filter_x + icon_size + spacing, filter_y, filter_buf, COLOR_TEXT, filter_text_size);
+
     /* ----------------------------------------------------------------
      * Empty state
      * ---------------------------------------------------------------- */
-    u32 count = data_get_game_count();
-    if (count == 0) {
+    if (s_filtered_count == 0) {
         ui_draw_text(i18n_get(MSG_ERROR_NO_GAMES),
                      (Rect){0, 136, 480, 20}, COLOR_SUBTEXT, 1.0f,
                      ALIGN_CENTER);
@@ -374,8 +439,9 @@ static void game_list_draw(void) {
      * Game info strip (name)
      * ---------------------------------------------------------------- */
     GameStats *games = data_get_games();
-    int wrap_idx = ((g_cs.current_idx % (int)count) + (int)count) % (int)count;
-    GameStats *g     = &games[wrap_idx];
+    int wrap_idx = ((g_cs.current_idx % s_filtered_count) + s_filtered_count) % s_filtered_count;
+    int real_idx = s_filtered_indices[wrap_idx];
+    GameStats *g     = &games[real_idx];
 
     /* Clamp long names to avoid overflowing the info strip. */
     Rect name_rect = {60, NAME_Y, 360, 14};
