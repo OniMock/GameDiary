@@ -73,11 +73,10 @@ static void main_menu_update(u32 buttons, u32 pressed) {
     static int repeat_timer = 0;
     static int last_dir = 0;
 
-    SceCtrlData pad;
-    sceCtrlPeekBufferPositive(&pad, 1);
+    const SceCtrlData* pad_ptr = ui_get_pad();
 
     // 1. Detect Direction (Discrete & Analog)
-    float ax = (pad.Lx - 128.0f) / 128.0f;
+    float ax = (pad_ptr->Lx - 128.0f) / 128.0f;
     int current_dir = 0;
     if ((buttons & PSP_CTRL_RIGHT) || (ax > 0.5f)) current_dir = 1;
     else if ((buttons & PSP_CTRL_LEFT) || (ax < -0.5f)) current_dir = -1;

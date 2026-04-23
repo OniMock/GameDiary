@@ -68,11 +68,10 @@ static void stats_update(u32 buttons, u32 pressed) {
     static int joystick_cooldown = 0;
     if (joystick_cooldown > 0) joystick_cooldown--;
 
-    SceCtrlData pad;
-    sceCtrlPeekBufferPositive(&pad, 1);
+    const SceCtrlData* pad_ptr = ui_get_pad();
 
-    int analog_left = (pad.Lx < 64);
-    int analog_right = (pad.Lx > 192);
+    int analog_left = (pad_ptr->Lx < 64);
+    int analog_right = (pad_ptr->Lx > 192);
 
     if ((pressed & PSP_CTRL_LEFT) || (analog_left && joystick_cooldown == 0)) {
         StatsPeriod next = (g_current_query.period + STATS_PERIOD_COUNT - 1) % STATS_PERIOD_COUNT;

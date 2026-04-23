@@ -27,6 +27,9 @@ static Screen* g_next_screen = NULL;
 static Screen* g_screen_stack[MAX_STACK];
 static int g_stack_top = -1;
 
+static SceCtrlData s_current_pad;
+static uint32_t s_current_pressed;
+
 static u32 g_last_buttons = 0;
 
 static float g_fade_alpha = 0.0f; // 0: fully visible, 1: fully black
@@ -81,7 +84,13 @@ void screen_manager_update(void) {
         // Clear input safely so that underlying screens and shortcuts do not act
         pad.Buttons = 0;
         pressed = 0;
+        // Neutralize analog stick
+        pad.Lx = 128;
+        pad.Ly = 128;
     }
+
+    s_current_pad = pad;
+    s_current_pressed = pressed;
 
     // Global Shortcuts
     if (g_fade_state == 0) {
@@ -146,4 +155,12 @@ void screen_manager_draw(void) {
     if (popup_is_open()) {
         popup_render();
     }
+}
+
+const SceCtrlData* ui_get_pad(void) {
+    return &s_current_pad;
+}
+
+uint32_t ui_get_pressed(void) {
+    return s_current_pressed;
 }

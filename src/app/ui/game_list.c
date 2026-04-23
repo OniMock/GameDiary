@@ -291,15 +291,14 @@ static void game_list_update(u32 buttons, u32 pressed) {
     }
 
     /* Process Analog Joystick */
-    SceCtrlData pad;
-    sceCtrlPeekBufferPositive(&pad, 1);
+    const SceCtrlData* pad_ptr = ui_get_pad();
     u32 mapped_buttons = buttons;
     u32 mapped_pressed = pressed;
 
-    if (pad.Lx < 60) {
+    if (pad_ptr->Lx < 60) {
         if (s_analog_held_x != -1) { mapped_pressed |= PSP_CTRL_LEFT; s_analog_held_x = -1; }
         mapped_buttons |= PSP_CTRL_LEFT;
-    } else if (pad.Lx > 190) {
+    } else if (pad_ptr->Lx > 190) {
         if (s_analog_held_x != 1) { mapped_pressed |= PSP_CTRL_RIGHT; s_analog_held_x = 1; }
         mapped_buttons |= PSP_CTRL_RIGHT;
     } else {

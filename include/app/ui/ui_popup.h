@@ -65,4 +65,15 @@ void popup_update(uint32_t buttons, uint32_t pressed);
  */
 void popup_render(void);
 
+/**
+ * @brief Gets the current frame's sanitized pad data.
+ * Used to ensure screens don't poll hardware directly while modal is active.
+ */
+const struct SceCtrlData* ui_get_pad(void);
+
+/**
+ * @brief Gets the current frame's sanitized pressed buttons.
+ */
+uint32_t ui_get_pressed(void);
+
 #endif /* GAMEDIARY_UI_POPUP_H */
