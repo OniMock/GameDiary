@@ -135,13 +135,14 @@ static void game_details_draw(void) {
     const char* cat_str = game_category_get_name(g->entry.category);
     char sub_buf[80];
     snprintf(sub_buf, sizeof(sub_buf), "%s  ·  %s", g->entry.game_id, cat_str);
-    ui_draw_text(sub_buf, (Rect){tx, 50, tw_max, 14}, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
+    ui_draw_text(sub_buf, (Rect){tx, 50, tw_max, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
 
     /* Sessions count */
     char vbuf[32];
     snprintf(vbuf, sizeof(vbuf), "%lu", (unsigned long)g->session_count);
-    ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){tx, 80, tw_max, 14}, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
-    ui_draw_text(vbuf,                         (Rect){tx, 80, tw_max, 14}, COLOR_TEXT,    UI_FONT_SIZE_SMALL, ALIGN_RIGHT);
+    ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){tx, 80, tw_max, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
+    float label_w = font_get_width(i18n_get(MSG_STATS_SESSIONS), UI_FONT_SIZE_SMALL);
+    ui_draw_text(vbuf, (Rect){tx + (int)label_w + 6, 80, tw_max, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
 
     /* ----------------------------------------------------------------
      * SECTION 2 — History card (left)
