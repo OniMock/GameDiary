@@ -56,6 +56,7 @@ static void game_details_init(void) {
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
     s_helper_data.line_count = 7;
+    s_helper_data.show_close_hint = true;
 
     if (g_game_icon) texture_free(g_game_icon);
 

@@ -96,4 +96,5 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "Подробная информация об игре и история сессий.",
     [MSG_HELP_DESC_MAIN_MENU]      = "Главное меню для доступа к играм, статистике и настройкам.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Выбор языка интерфейса. Применяется сразу.",
+    [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Закрыть",
 };

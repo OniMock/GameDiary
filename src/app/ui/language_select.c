@@ -46,6 +46,7 @@ static void language_select_init(void) {
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
     s_helper_data.line_count = 7;
+    s_helper_data.show_close_hint = true;
 
     int current = config_get()->language;
     if (current == LANG_AUTO) g_selection = 0;

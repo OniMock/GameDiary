@@ -96,4 +96,5 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "Información detallada del juego y su historial.",
     [MSG_HELP_DESC_MAIN_MENU]      = "Menú principal para acceder a juegos, estadísticas y ajustes.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Elige el idioma de la interfaz. Se aplica al instante.",
+    [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Cerrar",
 };

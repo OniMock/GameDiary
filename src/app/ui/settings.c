@@ -44,6 +44,7 @@ static void settings_init(void) {
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
     s_helper_data.line_count = 8;
+    s_helper_data.show_close_hint = true;
 }
 
 static void settings_update(u32 buttons, u32 pressed) {

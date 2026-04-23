@@ -227,6 +227,7 @@ static void game_list_init(void) {
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
     s_helper_data.line_count = 10;
+    s_helper_data.show_close_hint = true;
 
     /* Enable analog sampling for joystick navigation */
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);

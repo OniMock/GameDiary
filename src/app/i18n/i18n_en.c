@@ -95,4 +95,5 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "Detailed information about a game. View session history, first and last played dates, and total time.",
     [MSG_HELP_DESC_MAIN_MENU]      = "Main navigation menu. Quickly access games, stats, activity, or settings.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Choose the interface language. Changes are applied instantly.",
+    [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Close",
 };

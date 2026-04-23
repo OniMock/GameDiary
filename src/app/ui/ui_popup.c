@@ -27,6 +27,11 @@
 // Body text font size
 #define UI_FONT_SIZE_BODY UI_FONT_SIZE_MEDIUM
 
+#define POPUP_WIDTH 450
+#define POPUP_HEIGHT 242
+#define POPUP_X_ORIGIN 15
+#define POPUP_Y_ORIGIN 15
+
 typedef enum {
     POPUP_STATE_CLOSED = 0,
     POPUP_STATE_OPENING,
@@ -190,7 +195,11 @@ void popup_update(uint32_t buttons, uint32_t pressed) {
         }
 
         // Scroll Logic
-        int text_area_h = 160;
+        int text_area_h = POPUP_HEIGHT - 50 - 10 - 20;
+        if (s_current_data && s_current_data->show_close_hint) {
+            text_area_h -= 30; // Reserve space for the close hint
+        }
+
         int max_visible = text_area_h / (int)s_line_height;
         int max_scroll = s_wrapped_count - max_visible;
         if (max_scroll < 0) max_scroll = 0;
@@ -232,10 +241,10 @@ void popup_render(void) {
 
     // --- Box Geometry ---
     // Centralized popup dimensions
-    int popup_w = 450;
-    int popup_h = 242;
-    int x_origin = 15;
-    int y_origin = 15;
+    int popup_w = POPUP_WIDTH;
+    int popup_h = POPUP_HEIGHT;
+    int x_origin = POPUP_X_ORIGIN;
+    int y_origin = POPUP_Y_ORIGIN;
 
     uint32_t element_alpha = (uint32_t)(255.0f * s_alpha);
     uint32_t card_alpha    = (uint32_t)(153.0f * s_alpha); // 0x99 (60% opacity)
@@ -273,12 +282,17 @@ void popup_render(void) {
 
     // --- Text Area (Scrollable body) ---
     int text_area_y = sep_y + 10;
-    int text_area_h = popup_h - 50 - 10 - 20; // 50(hdr) + 10(ptop) + 20(pbot) = 162
+    int text_area_h = popup_h - 50 - 10 - 20;
+
+    if (s_current_data && s_current_data->show_close_hint) {
+        text_area_h -= 30; // Take space from the bottom
+    }
 
     int max_visible = text_area_h / (int)s_line_height;
 
-    uint32_t body_alpha = (uint32_t)(170.0f * s_alpha); // 0xAA is 170
-    uint32_t body_color = (body_alpha << 24) | (COLOR_SUBTEXT & 0x00FFFFFF);
+    //uint32_t body_alpha = (uint32_t)(170.0f * s_alpha); // 0xAA is 170
+    //uint32_t body_color = (body_alpha << 24) | (COLOR_SUBTEXT & 0x00FFFFFF);
+    uint32_t body_color = (0xFF << 24) | (COLOR_SUBTEXT & 0x00FFFFFF);
 
     // Safety crop loop logic
     for (int i = 0; i < max_visible && (s_scroll_offset + i) < s_wrapped_count; i++) {
@@ -299,5 +313,12 @@ void popup_render(void) {
     if (max_scroll > 0 && s_scroll_offset < max_scroll) {
         Rect down_rect = { 0, text_area_y + text_area_h + 2, 480, 12 };
         ui_draw_text("▼", down_rect, text_color, UI_FONT_SIZE_MEDIUM, ALIGN_CENTER); // Basic downward indicator
+    }
+
+    // --- Footer Close Hint ---
+    if (s_current_data && s_current_data->show_close_hint) {
+        int footer_y = y_origin + popup_h - 22;
+        Rect hint_rect = { x_origin, footer_y, popup_w, 20 };
+        ui_draw_text(i18n_get(MSG_HELP_CLOSE_HINT), hint_rect, text_color, UI_FONT_SIZE_BODY, ALIGN_CENTER);
     }
 }

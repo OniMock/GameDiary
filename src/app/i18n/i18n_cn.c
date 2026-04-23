@@ -99,4 +99,5 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "查看游戏详细信息和完整记录。",
     [MSG_HELP_DESC_MAIN_MENU]      = "主菜单，可进入游戏、统计、记录或设置。",
     [MSG_HELP_DESC_LANG_SELECT]    = "选择界面语言，立即生效。",
+    [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: 关闭",
 };

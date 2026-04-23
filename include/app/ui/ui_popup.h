@@ -23,6 +23,7 @@
 
 #include "app/render/image_resources.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 /**
  * @brief Domain structure for a Popup.
@@ -32,6 +33,7 @@ typedef struct {
     const ImageResource* icon; // Left header icon (NULL for none)
     const char** lines;        // Array of input strings (can be long strings)
     int line_count;            // Number of input strings
+    bool show_close_hint;      // If true, shows the "[ X / O ]: Close" hint at the bottom
 } PopupData;
 
 /**

@@ -60,6 +60,7 @@ static void main_menu_init(void) {
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
     s_helper_data.line_count = 8;
+    s_helper_data.show_close_hint = true;
 
     // Preserve target_index between visits, snap current_index for visual entry
     g_current_index = g_target_index;

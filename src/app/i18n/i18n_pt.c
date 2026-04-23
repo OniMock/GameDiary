@@ -96,4 +96,5 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "Informações detalhadas sobre um jogo específico. Veja o histórico completo de sessões, data da primeira e última partida, e o total acumulado de horas.",
     [MSG_HELP_DESC_MAIN_MENU]      = "Menu principal de navegação. Acesse rapidamente sua lista de jogos, estatísticas detalhadas, registro de atividades ou configurações do sistema.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Escolha o idioma desejado para toda a interface do GameDiary. As alterações são aplicadas instantaneamente em todos os menus e telas.",
+    [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Fechar",
 };
