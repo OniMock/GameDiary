@@ -104,9 +104,9 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_ABOUT]          = "アプリの情報、バージョン、開発者について。",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: 閉じる",
 
-    [MSG_ABOUT_TITLE]              = "GameDiary について",
-    [MSG_ABOUT_DESC]               = "GameDiary は、PSP向けのプレイ時間追跡システムで、ライブラリやコレクションの管理をサポートします。",
-    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/GameDiary",
+    [MSG_ABOUT_TITLE]              = "%s について",
+    [MSG_ABOUT_DESC]               = "%s は、PSP向けのプレイ時間追跡システムで、ライブラリやコレクションの管理をサポートします。",
+    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/%s",
     [MSG_ABOUT_VERSION]            = "バージョン",
     [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
     [MSG_ABOUT_DATE]               = "日付",

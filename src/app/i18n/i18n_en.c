@@ -99,9 +99,9 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_ABOUT]          = "Information about the application, version, and development credits.",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Close",
 
-    [MSG_ABOUT_TITLE]              = "About GameDiary",
-    [MSG_ABOUT_DESC]               = "GameDiary is a playtime tracking system for the PSP, designed to help you manage your library and collections.",
-    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/GameDiary",
+    [MSG_ABOUT_TITLE]              = "About %s",
+    [MSG_ABOUT_DESC]               = "%s is a playtime tracking system for the PSP, designed to help you manage your library and collections.",
+    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/%s",
     [MSG_ABOUT_VERSION]            = "Version",
     [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
     [MSG_ABOUT_DATE]               = "Date",

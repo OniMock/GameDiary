@@ -94,24 +94,30 @@ static void about_draw(void) {
     int tw = card1_rect.w - 30;
 
     // App Name & Developer
-    ui_draw_text(i18n_get(MSG_ABOUT_TITLE), (Rect){tx, ty, tw, 20}, COLOR_ACCENT, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
+    char title_buf[64];
+    snprintf(title_buf, sizeof(title_buf), i18n_get(MSG_ABOUT_TITLE), APP_TITLE);
+    ui_draw_text(title_buf, (Rect){tx, ty, tw, 20}, COLOR_ACCENT, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
     ty += 22;
     ui_draw_text(i18n_get(MSG_ABOUT_DEVELOPER), (Rect){tx, ty, tw, 14}, COLOR_SUBTEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
     ty += 24;
 
-    // Description (Wrapped)
+    char desc_buf[512];
+    snprintf(desc_buf, sizeof(desc_buf), i18n_get(MSG_ABOUT_DESC), APP_TITLE);
+
     char wrapped[6][MAX_LINE_WIDTH];
     int line_count = 0;
-    ui_text_wrap(i18n_get(MSG_ABOUT_DESC), UI_FONT_SIZE_NORMAL, tw, wrapped, 6, &line_count);
+    ui_text_wrap(desc_buf, UI_FONT_SIZE_NORMAL, tw, wrapped, 6, &line_count);
 
     for (int i = 0; i < line_count; i++) {
         ui_draw_text(wrapped[i], (Rect){tx, ty, tw, 14}, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
-        ty += 15;
+        ty += 16;
     }
-    ty += 5;
+    ty += 8;
 
     // GitHub Link
-    ui_draw_text(i18n_get(MSG_ABOUT_GITHUB), (Rect){tx, ty, tw, 14}, COLOR_ACCENT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
+    char github_buf[128];
+    snprintf(github_buf, sizeof(github_buf), i18n_get(MSG_ABOUT_GITHUB), APP_TITLE);
+    ui_draw_text(github_buf, (Rect){tx, ty, tw, 14}, COLOR_ACCENT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
 
     // --- Card 2: Build Info (Right) ---
     Rect card2_rect = { content_x + card1_w + gap, content_y, card2_w, 145 };

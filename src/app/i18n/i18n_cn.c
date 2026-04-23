@@ -104,9 +104,9 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_ABOUT]          = "有关应用程序、版本和开发者信息的说明。",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: 关闭",
 
-    [MSG_ABOUT_TITLE]              = "关于 GameDiary",
-    [MSG_ABOUT_DESC]               = "GameDiary 是一个用于 PSP 的游戏时间追踪系统，旨在帮助您管理您的游戏库和收藏。",
-    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/GameDiary",
+    [MSG_ABOUT_TITLE]              = "关于 %s",
+    [MSG_ABOUT_DESC]               = "%s 是一个用于 PSP 的游戏时间追踪系统，旨在帮助您管理您的游戏库和收藏。",
+    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/%s",
     [MSG_ABOUT_VERSION]            = "版本",
     [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
     [MSG_ABOUT_DATE]               = "日期",
