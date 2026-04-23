@@ -50,15 +50,14 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_STATS_NEVER]          = "从未",
 
     // 🇨🇳 DATE FORMAT (important)
-    [MSG_DATE_FORMAT]          = "%Y年%m月%d日",
-    [MSG_DATE_FORMAT_SHORT]    = "%m月%d日",
+    [MSG_DATE_FORMAT]          = "%Y/%m/%d",
+    [MSG_DATE_FORMAT_SHORT]    = "%m/%d",
 
-    [MSG_DURATION_DAYS]        = "%d天",
-    [MSG_DURATION_HOURS]       = "%d小时",
-    [MSG_DURATION_MINS]        = "%d分钟",
-    [MSG_DURATION_H_M]         = "%d小时%d分钟",
-    [MSG_DURATION_D_H_M]       = "%d天%d小时%d分钟",
-
+    [MSG_DURATION_DAYS]        = "%d日",
+    [MSG_DURATION_HOURS]       = "%d時",
+    [MSG_DURATION_MINS]        = "%d分",
+    [MSG_DURATION_H_M]         = "%d時%d分",
+    [MSG_DURATION_D_H_M]       = "%d日%d時%d分",
     [MSG_STATS_MODE_WEEKLY]    = "周",
     [MSG_STATS_MODE_MONTHLY]   = "月",
     [MSG_STATS_MODE_YEARLY]    = "年",
@@ -91,4 +90,13 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] 或 [ ◉ ]: 更改过滤",
     [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: 过滤",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: 统计",
+    [MSG_HELP_CONTROLS]            = "操作:",
+    [MSG_HELP_INFO_LABEL]          = "信息:",
+    [MSG_HELP_DESC_GAMES]          = "可按类别筛选，查看总时间和最近游玩记录。",
+    [MSG_HELP_DESC_STATS]          = "通过图表分析游戏时间，可切换周、月、年。",
+    [MSG_HELP_DESC_ACTIVITY]       = "按时间顺序显示最近的游玩记录。",
+    [MSG_HELP_DESC_SETTINGS]       = "调整语言和其他设置。",
+    [MSG_HELP_DESC_DETAILS]        = "查看游戏详细信息和完整记录。",
+    [MSG_HELP_DESC_MAIN_MENU]      = "主菜单，可进入游戏、统计、记录或设置。",
+    [MSG_HELP_DESC_LANG_SELECT]    = "选择界面语言，立即生效。",
 };

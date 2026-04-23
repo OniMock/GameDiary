@@ -109,7 +109,7 @@ static int s_current_filter = FILTER_ALL;
 static int s_filtered_indices[512]; // Static buffer for games in the current filter
 static int s_filtered_count = 0;
 
-static const char* s_helper_lines[6];
+static const char* s_helper_lines[10];
 static PopupData s_helper_data;
 
 /* -----------------------------------------------------------------------
@@ -212,17 +212,21 @@ static void draw_stats_block(const GameStats *g,
  * ----------------------------------------------------------------------- */
 
 static void game_list_init(void) {
-    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_X_SELECT);
-    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_O_BACK);
-    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_ANALOG_NAVIGATE);
-    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_SQUARE_FILTER);
-    s_helper_lines[4] = i18n_get(MSG_HELP_BTN_START_MENU);
-    s_helper_lines[5] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+    s_helper_lines[0] = i18n_get(MSG_HELP_CONTROLS);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_X_SELECT);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_ANALOG_NAVIGATE);
+    s_helper_lines[4] = i18n_get(MSG_HELP_BTN_SQUARE_FILTER);
+    s_helper_lines[5] = i18n_get(MSG_HELP_BTN_START_MENU);
+    s_helper_lines[6] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+    s_helper_lines[7] = "";
+    s_helper_lines[8] = i18n_get(MSG_HELP_INFO_LABEL);
+    s_helper_lines[9] = i18n_get(MSG_HELP_DESC_GAMES);
 
     s_helper_data.title = i18n_get(MSG_HELP_TITLE);
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
-    s_helper_data.line_count = 6;
+    s_helper_data.line_count = 10;
 
     /* Enable analog sampling for joystick navigation */
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);

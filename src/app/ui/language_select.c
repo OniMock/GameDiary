@@ -30,18 +30,22 @@
 static int g_selection = 0;
 static int g_scroll_offset = 0;
 
-static const char* s_helper_lines[3];
+static const char* s_helper_lines[7];
 static PopupData s_helper_data;
 
 static void language_select_init(void) {
-    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_X_SELECT);
-    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_O_BACK);
-    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_ARROWS_NAVIGATE);
+    s_helper_lines[0] = i18n_get(MSG_HELP_CONTROLS);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_X_SELECT);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_ARROWS_NAVIGATE);
+    s_helper_lines[4] = "";
+    s_helper_lines[5] = i18n_get(MSG_HELP_INFO_LABEL);
+    s_helper_lines[6] = i18n_get(MSG_HELP_DESC_LANG_SELECT);
 
     s_helper_data.title = i18n_get(MSG_HELP_TITLE);
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
-    s_helper_data.line_count = 3;
+    s_helper_data.line_count = 7;
 
     int current = config_get()->language;
     if (current == LANG_AUTO) g_selection = 0;

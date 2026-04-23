@@ -49,8 +49,6 @@
 #define UI_ICON_SIZE_LOGO        32
 #define UI_ICON_SIZE_TITLE       24
 #define UI_ICON_SIZE_MENU        24
-#define UI_ICON_SIZE_SMALL       16
-#define UI_ICON_SIZE_TINY        12
 
 
 typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } UIAlign;

@@ -87,4 +87,13 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] o [ ◉ ]: Cambiar filtro",
     [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: Filtrar",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Estadísticas",
+    [MSG_HELP_CONTROLS]            = "Controles:",
+    [MSG_HELP_INFO_LABEL]          = "Info:",
+    [MSG_HELP_DESC_GAMES]          = "Filtra por categoría, consulta el tiempo total y las sesiones recientes.",
+    [MSG_HELP_DESC_STATS]          = "Analiza tu tiempo con gráficos. Cambia entre semanal, mensual y anual.",
+    [MSG_HELP_DESC_ACTIVITY]       = "Historial cronológico de tus sesiones recientes.",
+    [MSG_HELP_DESC_SETTINGS]       = "Ajusta el idioma y preferencias generales.",
+    [MSG_HELP_DESC_DETAILS]        = "Información detallada del juego y su historial.",
+    [MSG_HELP_DESC_MAIN_MENU]      = "Menú principal para acceder a juegos, estadísticas y ajustes.",
+    [MSG_HELP_DESC_LANG_SELECT]    = "Elige el idioma de la interfaz. Se aplica al instante.",
 };

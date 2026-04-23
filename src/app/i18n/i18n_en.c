@@ -86,4 +86,13 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] or [ ◉ ]: Change filter",
     [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: Filter",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Statistics",
+    [MSG_HELP_CONTROLS]            = "Controls:",
+    [MSG_HELP_INFO_LABEL]          = "Info:",
+    [MSG_HELP_DESC_GAMES]          = "Here you can filter by category, view total playtime, and track recent sessions for each game.",
+    [MSG_HELP_DESC_STATS]          = "Analyze your playtime with detailed charts. Switch between Weekly, Monthly, and Yearly modes to understand your habits and see which games dominate your time.",
+    [MSG_HELP_DESC_ACTIVITY]       = "Chronological history of your recent sessions. Track exactly when and how long you played each game.",
+    [MSG_HELP_DESC_SETTINGS]       = "Adjust interface language and other global preferences.",
+    [MSG_HELP_DESC_DETAILS]        = "Detailed information about a game. View session history, first and last played dates, and total time.",
+    [MSG_HELP_DESC_MAIN_MENU]      = "Main navigation menu. Quickly access games, stats, activity, or settings.",
+    [MSG_HELP_DESC_LANG_SELECT]    = "Choose the interface language. Changes are applied instantly.",
 };

@@ -35,7 +35,7 @@ static Texture* g_game_icon = NULL;
 
 static GameDetailStats s_stats;
 
-static const char* s_helper_lines[3];
+static const char* s_helper_lines[7];
 static PopupData s_helper_data;
 
 void game_details_set_idx(int idx) {
@@ -44,14 +44,18 @@ void game_details_set_idx(int idx) {
 
 
 static void game_details_init(void) {
-    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_O_BACK);
-    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_START_MENU);
-    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+    s_helper_lines[0] = i18n_get(MSG_HELP_CONTROLS);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_START_MENU);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+    s_helper_lines[4] = "";
+    s_helper_lines[5] = i18n_get(MSG_HELP_INFO_LABEL);
+    s_helper_lines[6] = i18n_get(MSG_HELP_DESC_DETAILS);
 
     s_helper_data.title = i18n_get(MSG_HELP_TITLE);
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
-    s_helper_data.line_count = 3;
+    s_helper_data.line_count = 7;
 
     if (g_game_icon) texture_free(g_game_icon);
 

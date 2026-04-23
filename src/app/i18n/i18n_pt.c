@@ -87,4 +87,13 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] ou [ ◉ ]: Alterar filtro",
     [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: Filtrar",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Estatísticas",
+    [MSG_HELP_CONTROLS]            = "Controle:",
+    [MSG_HELP_INFO_LABEL]          = "Informação:",
+    [MSG_HELP_DESC_GAMES]          = "Aqui você pode filtrar por categoria, ver seu tempo total de jogo e acompanhar as últimas sessões de cada título.",
+    [MSG_HELP_DESC_STATS]          = "Analise seu tempo de jogo com gráficos detalhados. Alterne entre os modos Semanal, Mensal e Anual para entender seus hábitos e ver quais jogos dominam seu tempo.",
+    [MSG_HELP_DESC_ACTIVITY]       = "Histórico cronológico de todas as suas sessões de jogo recentes. Acompanhe exatamente quando e por quanto tempo você jogou cada título da sua biblioteca.",
+    [MSG_HELP_DESC_SETTINGS]       = "Ajuste o idioma da interface e outras preferências globais do aplicativo.",
+    [MSG_HELP_DESC_DETAILS]        = "Informações detalhadas sobre um jogo específico. Veja o histórico completo de sessões, data da primeira e última partida, e o total acumulado de horas.",
+    [MSG_HELP_DESC_MAIN_MENU]      = "Menu principal de navegação. Acesse rapidamente sua lista de jogos, estatísticas detalhadas, registro de atividades ou configurações do sistema.",
+    [MSG_HELP_DESC_LANG_SELECT]    = "Escolha o idioma desejado para toda a interface do GameDiary. As alterações são aplicadas instantaneamente em todos os menus e telas.",
 };

@@ -27,19 +27,23 @@
 
 static int g_selection = 0;
 
-static const char* s_helper_lines[4];
+static const char* s_helper_lines[8];
 static PopupData s_helper_data;
 
 static void settings_init(void) {
-    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_X_SELECT);
-    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_O_BACK);
-    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_ARROWS_NAVIGATE);
-    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_START_MENU);
+    s_helper_lines[0] = i18n_get(MSG_HELP_CONTROLS);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_X_SELECT);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_ARROWS_NAVIGATE);
+    s_helper_lines[4] = i18n_get(MSG_HELP_BTN_START_MENU);
+    s_helper_lines[5] = "";
+    s_helper_lines[6] = i18n_get(MSG_HELP_INFO_LABEL);
+    s_helper_lines[7] = i18n_get(MSG_HELP_DESC_SETTINGS);
 
     s_helper_data.title = i18n_get(MSG_HELP_TITLE);
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
-    s_helper_data.line_count = 4;
+    s_helper_data.line_count = 8;
 }
 
 static void settings_update(u32 buttons, u32 pressed) {

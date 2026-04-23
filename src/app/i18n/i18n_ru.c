@@ -87,4 +87,13 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] или [ ◉ ]: Изменить фильтр",
     [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: Фильтр",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Статистика",
+    [MSG_HELP_CONTROLS]            = "Управление:",
+    [MSG_HELP_INFO_LABEL]          = "Инфо:",
+    [MSG_HELP_DESC_GAMES]          = "Фильтр по категориям, просмотр общего времени и последних сессий.",
+    [MSG_HELP_DESC_STATS]          = "Анализируйте время игры с графиками. Переключайтесь между неделей, месяцем и годом.",
+    [MSG_HELP_DESC_ACTIVITY]       = "Хронология последних игровых сессий.",
+    [MSG_HELP_DESC_SETTINGS]       = "Настройка языка и параметров интерфейса.",
+    [MSG_HELP_DESC_DETAILS]        = "Подробная информация об игре и история сессий.",
+    [MSG_HELP_DESC_MAIN_MENU]      = "Главное меню для доступа к играм, статистике и настройкам.",
+    [MSG_HELP_DESC_LANG_SELECT]    = "Выбор языка интерфейса. Применяется сразу.",
 };
