@@ -266,8 +266,9 @@ def generate_symbols_with_fallback(
     """
     if font_priority is None:
         font_priority = [
-          "NotoSansCJK-Regular.ttc",
+          "DejaVuSans-Bold.ttf",
           "NotoSansSymbols2-Regular.ttf",
+          "NotoSansCJK-Regular.ttc",
           "arial.ttf"
         ]
 

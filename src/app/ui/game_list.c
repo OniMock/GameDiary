@@ -334,7 +334,7 @@ static void game_list_draw(void) {
     Rect screen_rect = {0, 0, 480, 272};
     Rect safe_rect   = rect_padding(screen_rect, 20);
     ui_draw_title(i18n_get(MSG_MENU_GAMES), safe_rect,
-                  &GD_IMG_ICON_GAMES_32_PNG, 24);
+                  &GD_IMG_ICON_GAMES_32_PNG, UI_ICON_SIZE_TITLE);
 
     /* Header: Filter Indicator (Right Aligned) */
     const char *filter_name = (s_current_filter == FILTER_ALL) ? i18n_get(MSG_TOP_ALL) : game_category_get_name(s_current_filter);
@@ -350,7 +350,7 @@ static void game_list_draw(void) {
 
     int filter_x = safe_rect.x + safe_rect.w - total_w;
     int filter_y = safe_rect.y + 8;
-    float filter_center_y = filter_y - (filter_text_size * 6.0f);
+    float filter_center_y = filter_y - (filter_text_size * 0.35f);
     int icon_y = (int)(filter_center_y - (icon_size / 2.0f));
 
     sceGuColor(COLOR_TEXT);

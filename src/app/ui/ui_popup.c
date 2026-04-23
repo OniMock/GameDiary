@@ -23,6 +23,8 @@
 
 #define MAX_VISIBLE_LINES 128
 #define MAX_LINE_WIDTH 512
+// Body text font size
+#define UI_FONT_SIZE_BODY UI_FONT_SIZE_MEDIUM
 
 typedef enum {
     POPUP_STATE_CLOSED = 0,
@@ -115,7 +117,7 @@ void popup_open(const PopupData* data) {
     s_scroll_offset = 0;
 
     // Cache font metric
-    s_line_height = font_get_height(UI_FONT_SIZE_SMALL) + 4.0f; // Size logic plus 4px gap
+    s_line_height = font_get_height(UI_FONT_SIZE_BODY) + 4.0f; // Size logic plus 4px gap
 
     // Box constraints
     int text_box_w = 420; // 450 card - 30 padding
@@ -123,7 +125,7 @@ void popup_open(const PopupData* data) {
     for (int i = 0; i < data->line_count; i++) {
         const char* l = data->lines[i];
         if (!l) continue;
-        wrap_and_append_line(l, UI_FONT_SIZE_SMALL, text_box_w);
+        wrap_and_append_line(l, UI_FONT_SIZE_BODY, text_box_w);
     }
 
     s_state = POPUP_STATE_OPENING;
@@ -261,18 +263,18 @@ void popup_render(void) {
         int render_y = text_area_y + (i * (int)s_line_height);
 
         Rect t_rect = { x_origin + 15, render_y, popup_w - 30, (int)s_line_height };
-        ui_draw_text(s_wrapped_lines[line_idx], t_rect, body_color, UI_FONT_SIZE_TINY, ALIGN_LEFT);
+        ui_draw_text(s_wrapped_lines[line_idx], t_rect, body_color, UI_FONT_SIZE_BODY, ALIGN_LEFT);
     }
 
     // --- Scroll Indicators ---
     if (s_scroll_offset > 0) {
         Rect up_rect = { 0, text_area_y - 12, 480, 12 };
-        ui_draw_text("▲", up_rect, text_color, UI_FONT_SIZE_TINY, ALIGN_CENTER); // Basic Triangle pointer / indicator
+        ui_draw_text("▲", up_rect, text_color, UI_FONT_SIZE_MEDIUM, ALIGN_CENTER); // Basic Triangle pointer / indicator
     }
 
     int max_scroll = s_wrapped_count - max_visible;
     if (max_scroll > 0 && s_scroll_offset < max_scroll) {
         Rect down_rect = { 0, text_area_y + text_area_h + 2, 480, 12 };
-        ui_draw_text("▼", down_rect, text_color, UI_FONT_SIZE_TINY, ALIGN_CENTER); // Basic downward indicator
+        ui_draw_text("▼", down_rect, text_color, UI_FONT_SIZE_MEDIUM, ALIGN_CENTER); // Basic downward indicator
     }
 }

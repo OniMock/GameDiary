@@ -34,18 +34,24 @@
 #define COLOR_ACCENT 0xFFFFC040 // #40C0FF
 #define COLOR_SUCCESS   0xFF20B020 // Success (green) - #20B020
 
-// --- Font Sizes (Scales relative to 17px IntraFont base) ---
-#define UI_FONT_SIZE_TITLE_MAIN  1.30f    // Page headers & Branding (~22px)
-#define UI_FONT_SIZE_TITLE_HUGE  1.00f    // Pop-up headers & Error titles (17px)
-#define UI_FONT_SIZE_TITLE_LIST  0.95f    // List item primary focus (~16px)
-#define UI_FONT_SIZE_PRIMARY     0.90f    // Menu entries & Card titles (~15px)
-#define UI_FONT_SIZE_MEDIUM      0.85f    // Emphasized stats (~14px)
-#define UI_FONT_SIZE_NORMAL      0.80f    // Standard labels & UI body (~13px)
-#define UI_FONT_SIZE_SMALL       0.75f    // Secondary text & wrapped body (~12px)
-#define UI_FONT_SIZE_COMPACT     0.72f    // Metadata line (~12px)
-#define UI_FONT_SIZE_TINY        0.70f    // Indicators & Footers (~12px)
-#define UI_FONT_SIZE_MICRO       0.65f    // Sidebar headers & tags (~11px)
-#define UI_FONT_SIZE_NANO        0.60f    // Detailed graph data values (~10px)
+// --- Font Sizes (Values in pixels) ---
+#define UI_FONT_SIZE_TITLE_MAIN  22.0f    // Page headers & Branding
+#define UI_FONT_SIZE_TITLE_HUGE  17.0f    // Pop-up headers & Error titles
+#define UI_FONT_SIZE_TITLE_LIST  16.0f    // List item primary focus
+#define UI_FONT_SIZE_PRIMARY     15.0f    // Menu entries & Card titles
+#define UI_FONT_SIZE_MEDIUM      14.0f    // Emphasized stats & secondary titles
+#define UI_FONT_SIZE_NORMAL      13.0f    // Standard labels & UI body
+#define UI_FONT_SIZE_SMALL       12.0f    // Secondary text & wrapped body
+#define UI_FONT_SIZE_TINY        11.0f    // Indicators, Footers & Dates
+#define UI_FONT_SIZE_NANO        10.0f    // Detailed graph data values
+#define UI_FONT_SIZE_MINIMUM      8.0f    // Absolute limit for auto-fit
+
+// --- Icon Sizes (Values in pixels) ---
+#define UI_ICON_SIZE_LOGO        32
+#define UI_ICON_SIZE_TITLE       24
+#define UI_ICON_SIZE_MENU        24
+#define UI_ICON_SIZE_SMALL       16
+#define UI_ICON_SIZE_TINY        12
 
 
 typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } UIAlign;

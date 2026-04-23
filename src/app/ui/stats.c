@@ -112,7 +112,7 @@ static void stats_draw(void) {
     int filter_y = safe_rect.y + 8; // Exactly same baseline as main title
 
     // Perfect vertical alignment logic
-    float filter_center_y = filter_y - (UI_FONT_SIZE_TITLE_HUGE * 6.0f);
+    float filter_center_y = filter_y - (UI_FONT_SIZE_TITLE_HUGE * 0.35f);
     int icon_y = (int)(filter_center_y - (icon_size / 2.0f));
 
     // Draw filter icon in white

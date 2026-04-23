@@ -148,7 +148,7 @@ static void activity_draw(void) {
   ui_draw_card(glob_play_rect, COLOR_CARD, COLOR_BORDER);
   char glob_time[32];
   ui_format_duration(global_playtime, glob_time, sizeof(glob_time));
-  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){right_x + 8, top_y + 4, 160, 12}, COLOR_SUBTEXT, UI_FONT_SIZE_MICRO, ALIGN_LEFT);
+  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){right_x + 8, top_y + 4, 160, 12}, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
   ui_draw_text(glob_time, (Rect){right_x + 8, top_y + 16, 160, 15}, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
 
   // Total Sessions Global
@@ -156,7 +156,7 @@ static void activity_draw(void) {
   ui_draw_card(glob_sess_rect, COLOR_CARD, COLOR_BORDER);
   char sess_buf[32];
   snprintf(sess_buf, sizeof(sess_buf), "%lu", (unsigned long)global_sessions);
-  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){right_x + 8, top_y + sub_card_h + 12, 160, 12}, COLOR_SUBTEXT, UI_FONT_SIZE_MICRO, ALIGN_LEFT);
+  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){right_x + 8, top_y + sub_card_h + 12, 160, 12}, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
   ui_draw_text(sess_buf, (Rect){right_x + 8, top_y + sub_card_h + 24, 160, 15}, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
 
   // 3. LAYOUT - BOTTOM SECTION (Recent Activity Card)
@@ -178,8 +178,8 @@ static void activity_draw(void) {
       char cat_tag[32] = {0};
       snprintf(cat_tag, sizeof(cat_tag), "[%s]", game_category_get_name(g->entry.category));
 
-      float tag_w = font_get_width(cat_tag, UI_FONT_SIZE_MICRO);
-      ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, UI_FONT_SIZE_MICRO, ALIGN_LEFT);
+      float tag_w = font_get_width(cat_tag, UI_FONT_SIZE_TINY);
+      ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
 
       // Game Name
       ui_draw_text(g->entry.game_name, (Rect){30 + (int)tag_w + 5, row_y, 240, 20}, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);

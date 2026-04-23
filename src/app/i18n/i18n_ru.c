@@ -26,7 +26,7 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK]             = "Неделя",
     [MSG_TOP_MONTH]            = "Месяц",
     [MSG_TOP_YEAR]             = "Год",
-    [MSG_TOP_ALL]              = "Все время",
+    [MSG_TOP_ALL]              = "Все",
     [MSG_DETAILS_FIRST_PLAYED] = "Первая игра",
     [MSG_CAT_PSP]              = "PlayStation Portable",
     [MSG_CAT_PSX]              = "PlayStation (PSX)",
@@ -85,6 +85,6 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: Навигация",
     [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] или [ ◉ ]: Навигация",
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] или [ ◉ ]: Изменить фильтр",
-    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ◻ ]: Фильтр",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: Фильтр",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Статистика",
 };

@@ -44,7 +44,8 @@ void ui_draw_text(const char *text, Rect r, u32 color, float size,
   if (!text)
     return;
 
-  float y_pos = floorf(r.y + (r.h / 2.0f) + (size * 6.0f) + 0.5f);
+  // The 0.35f ratio corresponds to the baseline offset (6px for a 17px font)
+  float y_pos = floorf(r.y + (r.h / 2.0f) + (size * 0.35f) + 0.5f);
 
   switch (align) {
   case ALIGN_LEFT:
@@ -73,7 +74,7 @@ void ui_draw_standard_hints(void) {
     u32 col = COLOR_SUBTEXT;
     float sz = UI_FONT_SIZE_TINY;
     const char* text = i18n_get(MSG_HINT_HELPER);
-    
+
     float text_w = font_get_width(text, sz);
     int x = 240 - (int)(text_w / 2.0f);
 
@@ -86,18 +87,17 @@ void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
   float text_size = UI_FONT_SIZE_TITLE_MAIN;
 
   float text_w = font_get_width(text, text_size);
-  float text_h = font_get_height(text_size);
 
   int icon_size =
-      (custom_icon_size > 0) ? custom_icon_size : (int)(text_h * 0.9f);
+      (custom_icon_size > 0) ? custom_icon_size : UI_ICON_SIZE_TITLE;
   int spacing = 12;
 
   int baseline_y = r.y + 8;
 
   // The key to perfect alignment: use the same center pivot as ui_draw_text
-  // In ui_draw_text: baseline = center + (size * 6.0f) So: center =
-  // baseline - (size * 6.0f)
-  float text_center_y = baseline_y - (text_size * 6.0f);
+  // In ui_draw_text: baseline = center + (size * 0.35f) So: center =
+  // baseline - (size * 0.35f)
+  float text_center_y = baseline_y - (text_size * 0.35f);
 
   int total_w = (int)text_w + (icon ? (icon_size + spacing) : 0);
 
@@ -123,7 +123,7 @@ void ui_draw_app_header(Rect r) {
   const char *title = APP_TITLE;
   float text_size = UI_FONT_SIZE_TITLE_MAIN;
   int spacing = 12;
-  int icon_size = 32;
+  int icon_size = UI_ICON_SIZE_LOGO;
 
   char part1[64];
   char part2[64];
@@ -136,7 +136,7 @@ void ui_draw_app_header(Rect r) {
   int total_w = icon_size + spacing + (int)total_text_w;
 
   int baseline_y = r.y + 8;
-  float text_center_y = baseline_y - (text_size * 6.0f);
+  float text_center_y = baseline_y - (text_size * 0.35f);
   int icon_y = (int)(text_center_y - (icon_size / 2.0f));
 
   // 1. Draw Logo
@@ -487,7 +487,7 @@ void ui_draw_menu_item(int x, int y, int w, int h, const char *label,
   int current_x = x + 12;
   int center_y = y + (h / 2);
 
-  int icon_size = (custom_icon_size > 0) ? custom_icon_size : (int)(h * 0.5f);
+  int icon_size = (custom_icon_size > 0) ? custom_icon_size : UI_ICON_SIZE_MENU;
 
   // 2. Left Icon
   if (left_icon) {

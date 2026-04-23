@@ -25,7 +25,7 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK]             = "Week",
     [MSG_TOP_MONTH]            = "Month",
     [MSG_TOP_YEAR]             = "Year",
-    [MSG_TOP_ALL]              = "All Time",
+    [MSG_TOP_ALL]              = "All",
     [MSG_DETAILS_FIRST_PLAYED] = "First Played",
     [MSG_CAT_PSP]              = "PlayStation Portable",
     [MSG_CAT_PSX]              = "PlayStation (PSX)",
@@ -84,6 +84,6 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: Navigate",
     [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] or [ ◉ ]: Navigate",
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] or [ ◉ ]: Change filter",
-    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ □ ]: Filter",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: Filter",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Statistics",
 };

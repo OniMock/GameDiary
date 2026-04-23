@@ -27,7 +27,7 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK]             = "周",
     [MSG_TOP_MONTH]            = "月",
     [MSG_TOP_YEAR]             = "年",
-    [MSG_TOP_ALL]              = "全部",
+    [MSG_TOP_ALL]              = "所有",
     [MSG_DETAILS_FIRST_PLAYED] = "首次游玩",
     [MSG_CAT_PSP]              = "PSP",
     [MSG_CAT_PSX]              = "PSX",
@@ -89,6 +89,6 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: 导航",
     [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] 或 [ ◉ ]: 导航",
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] 或 [ ◉ ]: 更改过滤",
-    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ◻ ]: 过滤",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: 过滤",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: 统计",
 };

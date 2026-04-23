@@ -26,7 +26,7 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_TOP_WEEK]             = "週",
     [MSG_TOP_MONTH]            = "月",
     [MSG_TOP_YEAR]             = "年",
-    [MSG_TOP_ALL]              = "全期間",
+    [MSG_TOP_ALL]              = "全て",
     [MSG_DETAILS_FIRST_PLAYED] = "初プレイ",
     [MSG_CAT_PSP]              = "PSP",
     [MSG_CAT_PSX]              = "PSX",
@@ -88,6 +88,6 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: 移動",
     [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] または [ ◉ ]: 移動",
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] または [ ◉ ]: フィルター変更",
-    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ◻ ]: フィルター",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ■ ]: フィルター",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: 統計",
 };
