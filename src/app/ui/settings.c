@@ -23,7 +23,7 @@
 #include <pspctrl.h>
 #include <stdio.h>
 
-#define SETTINGS_MENU_COUNT 1
+#define SETTINGS_MENU_COUNT 2
 
 static int g_selection = 0;
 
@@ -65,6 +65,8 @@ static void settings_update(u32 buttons, u32 pressed) {
     if (pressed & PSP_CTRL_CROSS) {
         if (g_selection == 0) {
             screen_manager_push(&g_screen_language_select);
+        } else if (g_selection == 1) {
+            screen_manager_push(&g_screen_about);
         }
     }
 }
@@ -90,6 +92,9 @@ static void settings_draw(void) {
             label = i18n_get(MSG_SETTINGS_LANGUAGE);
             left_icon = &GD_IMG_ICON_LANGUAGE_32_PNG;
             right_icon = i18n_get_current_flag();
+        } else if (i == 1) {
+            label = i18n_get(MSG_SETTINGS_ABOUT);
+            left_icon = &GD_IMG_ICON_ABOUT_32_PNG;
         }
 
         ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,

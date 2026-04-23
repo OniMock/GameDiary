@@ -23,6 +23,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_CTRL_MENU]            = "Menú",
     [MSG_CTRL_CONFIG]          = "Config",
     [MSG_SETTINGS_LANGUAGE]    = "Idioma",
+    [MSG_SETTINGS_ABOUT]       = "Sobre",
     [MSG_TOP_WEEK]             = "Semana",
     [MSG_TOP_MONTH]            = "Mes",
     [MSG_TOP_YEAR]             = "Año",
@@ -96,5 +97,15 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "Información detallada del juego y su historial.",
     [MSG_HELP_DESC_MAIN_MENU]      = "Menú principal para acceder a juegos, estadísticas y ajustes.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Elige el idioma de la interfaz. Se aplica al instante.",
+
+    [MSG_HELP_DESC_ABOUT]          = "Información sobre la aplicación, versión y créditos de desarrollo.",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Cerrar",
+
+    [MSG_ABOUT_TITLE]              = "Acerca de GameDiary",
+    [MSG_ABOUT_DESC]               = "GameDiary es un sistema de seguimiento de tiempo de juego para PSP, diseñado para ayudarte a gestionar tu biblioteca y colecciones.",
+    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/GameDiary",
+    [MSG_ABOUT_VERSION]            = "Versión",
+    [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
+    [MSG_ABOUT_DATE]               = "Fecha",
+    [MSG_ABOUT_DEVELOPER]          = "Desarrollado por OniMock",
 };

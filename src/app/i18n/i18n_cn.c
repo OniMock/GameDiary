@@ -24,6 +24,7 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_CTRL_MENU]            = "菜单",
     [MSG_CTRL_CONFIG]          = "设置",
     [MSG_SETTINGS_LANGUAGE]    = "语言",
+    [MSG_SETTINGS_ABOUT]       = "关于",
     [MSG_TOP_WEEK]             = "周",
     [MSG_TOP_MONTH]            = "月",
     [MSG_TOP_YEAR]             = "年",
@@ -99,5 +100,15 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "查看游戏详细信息和完整记录。",
     [MSG_HELP_DESC_MAIN_MENU]      = "主菜单，可进入游戏、统计、记录或设置。",
     [MSG_HELP_DESC_LANG_SELECT]    = "选择界面语言，立即生效。",
+
+    [MSG_HELP_DESC_ABOUT]          = "有关应用程序、版本和开发者信息的说明。",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: 关闭",
+
+    [MSG_ABOUT_TITLE]              = "关于 GameDiary",
+    [MSG_ABOUT_DESC]               = "GameDiary 是一个用于 PSP 的游戏时间追踪系统，旨在帮助您管理您的游戏库和收藏。",
+    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/GameDiary",
+    [MSG_ABOUT_VERSION]            = "版本",
+    [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
+    [MSG_ABOUT_DATE]               = "日期",
+    [MSG_ABOUT_DEVELOPER]          = "开发者：OniMock",
 };

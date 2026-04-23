@@ -37,6 +37,11 @@ INCDIR = include
 CFLAGS = -O2 -Os -G0 -Wall -Wextra \
          -D_PSP_FW_VERSION=661 -DGDIARY_APP \
          -DAPP_TITLE=\"$(APP_NAME)\" \
+         -DAPP_VERSION=\"$(PROJECT_VERSION)\" \
+         -DSDK_VERSION=\"$(shell psp-gcc -dumpversion)\" \
+         -DBUILD_YEAR=$(shell date +'%Y') \
+         -DBUILD_MONTH=$(shell date +'%m') \
+         -DBUILD_DAY=$(shell date +'%d') \
          -Iinclude \
          -Iinclude/app \
          -Ilib

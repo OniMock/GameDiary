@@ -22,8 +22,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define MAX_VISIBLE_LINES 128
-#define MAX_LINE_WIDTH 512
+// Constants moved to ui_text.h
 // Body text font size
 #define UI_FONT_SIZE_BODY UI_FONT_SIZE_MEDIUM
 
@@ -48,94 +47,7 @@ static const PopupData* s_current_data = NULL;
 static int s_scroll_offset = 0;
 static float s_line_height = 0.0f;
 
-static void wrap_and_append_line(const char* src, float scale, int max_px_width) {
-    if (!src) return;
-
-    // Handle explicit empty strings to create a blank line
-    if (src[0] == '\0') {
-        if (s_wrapped_count < MAX_VISIBLE_LINES) {
-            s_wrapped_lines[s_wrapped_count][0] = '\0';
-            s_wrapped_count++;
-        }
-        return;
-    }
-
-    size_t i = 0;
-    while (src[i] != '\0' && s_wrapped_count < MAX_VISIBLE_LINES) {
-        float current_w = 0.0f;
-        size_t last_space_i = 0;
-        size_t current_segment_start = i;
-        int found_space = 0;
-        int found_newline = 0;
-        char temp_char[5];
-
-        size_t cursor = i;
-        size_t last_fitting_cursor = cursor;
-
-        while (src[cursor] != '\0') {
-            // Hard break on newline
-            if (src[cursor] == '\n') {
-                found_newline = 1;
-                break;
-            }
-
-            size_t sz = utf8_char_size((unsigned char)src[cursor]);
-            memcpy(temp_char, &src[cursor], sz);
-            temp_char[sz] = '\0';
-
-            float char_w = font_get_width(temp_char, scale);
-            if (current_w + char_w > max_px_width && cursor > current_segment_start) {
-                break;
-            }
-
-            current_w += char_w;
-            if (src[cursor] == ' ') {
-                found_space = 1;
-                last_space_i = cursor;
-            }
-
-            last_fitting_cursor = cursor + sz;
-            cursor += sz;
-        }
-
-        if (found_newline) {
-            size_t len = cursor - current_segment_start;
-            if (len >= MAX_LINE_WIDTH) len = MAX_LINE_WIDTH - 1;
-            memcpy(s_wrapped_lines[s_wrapped_count], &src[current_segment_start], len);
-            s_wrapped_lines[s_wrapped_count][len] = '\0';
-            s_wrapped_count++;
-            i = cursor + 1; // Skip the newline char
-            continue;
-        }
-
-        if (src[cursor] == '\0') {
-            // Fits entirely in remaining space
-            size_t len = cursor - current_segment_start;
-            if (len >= MAX_LINE_WIDTH) len = MAX_LINE_WIDTH - 1;
-            memcpy(s_wrapped_lines[s_wrapped_count], &src[current_segment_start], len);
-            s_wrapped_lines[s_wrapped_count][len] = '\0';
-            s_wrapped_count++;
-            break;
-        } else {
-            // Needs breaking
-            size_t break_pt = 0;
-            if (found_space) {
-                break_pt = last_space_i;
-            } else {
-                break_pt = last_fitting_cursor;
-            }
-
-            size_t len = break_pt - current_segment_start;
-            if (len >= MAX_LINE_WIDTH) len = MAX_LINE_WIDTH - 1;
-            memcpy(s_wrapped_lines[s_wrapped_count], &src[current_segment_start], len);
-            s_wrapped_lines[s_wrapped_count][len] = '\0';
-            s_wrapped_count++;
-
-            i = break_pt;
-            if (found_space && src[i] == ' ') i++;
-        }
-    }
-}
+// wrap_and_append_line removed, using ui_text_wrap from ui_text.h
 
 void popup_open(const PopupData* data) {
     if (!data) return;
@@ -153,7 +65,9 @@ void popup_open(const PopupData* data) {
     for (int i = 0; i < data->line_count; i++) {
         const char* l = data->lines[i];
         if (!l) continue;
-        wrap_and_append_line(l, UI_FONT_SIZE_BODY, text_box_w);
+        int lines_added = 0;
+        ui_text_wrap(l, UI_FONT_SIZE_BODY, text_box_w, &s_wrapped_lines[s_wrapped_count], MAX_VISIBLE_LINES - s_wrapped_count, &lines_added);
+        s_wrapped_count += lines_added;
     }
 
     s_state = POPUP_STATE_OPENING;

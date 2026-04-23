@@ -14,6 +14,9 @@
 #include "app/ui/ui_components.h"
 #include <stddef.h>
 
+#define MAX_LINE_WIDTH 512
+#define MAX_VISIBLE_LINES 128
+
 
 /**
  * @brief Returns UTF-8 character byte size based on first byte.
@@ -68,5 +71,18 @@ void ui_text_utf8_split_smart(const char *src,
                               char *out1, char *out2,
                               size_t out1_size, size_t out2_size,
                               float text_size);
+
+/**
+ * @brief Simple multi-line text wrapping helper.
+ * 
+ * @param src Source text.
+ * @param scale Font scale.
+ * @param max_px_width Target pixel width.
+ * @param out_lines Output 2D array [MAX_VISIBLE_LINES][MAX_LINE_WIDTH].
+ * @param max_lines Maximum number of lines.
+ * @param out_count Actual number of lines populated.
+ */
+void ui_text_wrap(const char* src, float scale, int max_px_width,
+                  char out_lines[][MAX_LINE_WIDTH], int max_lines, int* out_count);
 
 #endif // GAMEDIARY_UI_TEXT_H

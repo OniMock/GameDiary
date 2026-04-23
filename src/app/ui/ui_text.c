@@ -235,3 +235,93 @@ void ui_draw_text_auto_fit(const char *text, Rect r, u32 color, float size,
 
   ui_draw_text(draw_ptr, r, color, final_scale, align);
 }
+
+void ui_text_wrap(const char* src, float scale, int max_px_width,
+                  char out_lines[][MAX_LINE_WIDTH], int max_lines, int* out_count) {
+    if (!src || !out_count) return;
+
+    *out_count = 0;
+    if (src[0] == '\0') {
+        if (*out_count < max_lines) {
+            out_lines[*out_count][0] = '\0';
+            (*out_count)++;
+        }
+        return;
+    }
+
+    size_t i = 0;
+    while (src[i] != '\0' && *out_count < max_lines) {
+        float current_w = 0.0f;
+        size_t last_space_i = 0;
+        size_t current_segment_start = i;
+        int found_space = 0;
+        int found_newline = 0;
+        char temp_char[5];
+
+        size_t cursor = i;
+        size_t last_fitting_cursor = cursor;
+
+        while (src[cursor] != '\0') {
+            // Hard break on newline
+            if (src[cursor] == '\n') {
+                found_newline = 1;
+                break;
+            }
+
+            size_t sz = utf8_char_size((unsigned char)src[cursor]);
+            memcpy(temp_char, &src[cursor], sz);
+            temp_char[sz] = '\0';
+
+            float char_w = font_get_width(temp_char, scale);
+            if (current_w + char_w > (float)max_px_width && cursor > current_segment_start) {
+                break;
+            }
+
+            current_w += char_w;
+            if (src[cursor] == ' ') {
+                found_space = 1;
+                last_space_i = cursor;
+            }
+
+            last_fitting_cursor = cursor + sz;
+            cursor += sz;
+        }
+
+        if (found_newline) {
+            size_t len = cursor - current_segment_start;
+            if (len >= MAX_LINE_WIDTH) len = MAX_LINE_WIDTH - 1;
+            memcpy(out_lines[*out_count], &src[current_segment_start], len);
+            out_lines[*out_count][len] = '\0';
+            (*out_count)++;
+            i = cursor + 1; // Skip the newline char
+            continue;
+        }
+
+        if (src[cursor] == '\0') {
+            // Fits entirely in remaining space
+            size_t len = cursor - current_segment_start;
+            if (len >= MAX_LINE_WIDTH) len = MAX_LINE_WIDTH - 1;
+            memcpy(out_lines[*out_count], &src[current_segment_start], len);
+            out_lines[*out_count][len] = '\0';
+            (*out_count)++;
+            break;
+        } else {
+            // Needs breaking
+            size_t break_pt = 0;
+            if (found_space) {
+                break_pt = last_space_i;
+            } else {
+                break_pt = last_fitting_cursor;
+            }
+
+            size_t len = break_pt - current_segment_start;
+            if (len >= MAX_LINE_WIDTH) len = MAX_LINE_WIDTH - 1;
+            memcpy(out_lines[*out_count], &src[current_segment_start], len);
+            out_lines[*out_count][len] = '\0';
+            (*out_count)++;
+
+            i = break_pt;
+            if (found_space && src[i] == ' ') i++;
+        }
+    }
+}

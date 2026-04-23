@@ -23,6 +23,7 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_CTRL_MENU]            = "メニュー",
     [MSG_CTRL_CONFIG]          = "設定",
     [MSG_SETTINGS_LANGUAGE]    = "言語",
+    [MSG_SETTINGS_ABOUT]       = "情報",
     [MSG_TOP_WEEK]             = "週",
     [MSG_TOP_MONTH]            = "月",
     [MSG_TOP_YEAR]             = "年",
@@ -99,5 +100,15 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_DETAILS]        = "ゲームの詳細情報やプレイ履歴を確認できます。",
     [MSG_HELP_DESC_MAIN_MENU]      = "メインメニュー。ゲーム、統計、履歴、設定に移動します。",
     [MSG_HELP_DESC_LANG_SELECT]    = "表示言語を選択します。すぐに反映されます。",
+
+    [MSG_HELP_DESC_ABOUT]          = "アプリの情報、バージョン、開発者について。",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: 閉じる",
+
+    [MSG_ABOUT_TITLE]              = "GameDiary について",
+    [MSG_ABOUT_DESC]               = "GameDiary は、PSP向けのプレイ時間追跡システムで、ライブラリやコレクションの管理をサポートします。",
+    [MSG_ABOUT_GITHUB]             = "github.com/OniMock/GameDiary",
+    [MSG_ABOUT_VERSION]            = "バージョン",
+    [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
+    [MSG_ABOUT_DATE]               = "日付",
+    [MSG_ABOUT_DEVELOPER]          = "開発：OniMock",
 };

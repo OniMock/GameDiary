@@ -18,7 +18,7 @@ from font_generator import generate_fonts, FONT_MAP
 from embed_generator import generate_embeds
 
 EXTRA_CHARS = set(
-    "®°©™€£¥¢§¶†‡•…‰′″←↑→↓↔⇒⇐⇔♠♣♥♦★☆○●◎◊□◻■△▲▼·◉"
+    "®°©™€£¥¢§¶†‡•…‰′″←↑→↓↔⇒⇐⇔♠♣♥♦★☆○●◎◊□◻■△▲▼·◉—"
 )
 
 def main():
