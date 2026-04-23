@@ -207,8 +207,8 @@ void popup_render(void) {
     if (s_state == POPUP_STATE_CLOSED) return;
 
     // --- Backdrop Overlay ---
-    // RGB 0x000000, max alpha 51 (20% of 255)
-    uint32_t bg_alpha = (uint32_t)(51.0f * s_alpha);
+    // RGB 0x000000, max alpha 153 (60% of 255) for better focus
+    uint32_t bg_alpha = (uint32_t)(153.0f * s_alpha);
     if (bg_alpha > 255) bg_alpha = 255;
     uint32_t background_tint = (bg_alpha << 24) | 0x000000;
     renderer_draw_rect(0, 0, 480, 272, background_tint);
@@ -221,10 +221,13 @@ void popup_render(void) {
     int y_origin = 15;
 
     uint32_t element_alpha = (uint32_t)(255.0f * s_alpha);
-    uint32_t card_bg     = (element_alpha << 24) | 0x111111;
-    uint32_t card_border = (element_alpha << 24) | 0x555555;
-    uint32_t text_color  = (element_alpha << 24) | 0xFFFFFF;
-    uint32_t line_color  = (element_alpha << 24) | 0x333333;
+    uint32_t card_alpha    = (uint32_t)(153.0f * s_alpha); // 0x99 (60% opacity)
+    
+    // Mask out original alpha (0x00FFFFFF) and inject our calculated card_alpha
+    uint32_t card_bg     = (card_alpha << 24)    | (0x111111 & 0x00FFFFFF);
+    uint32_t card_border = (card_alpha << 24)    | (0x444444 & 0x00FFFFFF);
+    uint32_t text_color  = (element_alpha << 24) | (0xFFFFFF & 0x00FFFFFF);
+    uint32_t line_color  = (element_alpha << 24) | (0x333333 & 0x00FFFFFF);
 
     Rect box_rect = { x_origin, y_origin, popup_w, popup_h };
     ui_draw_card(box_rect, card_bg, card_border);
