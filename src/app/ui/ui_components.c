@@ -251,8 +251,8 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
 
   // Draw Context String (e.g. "Apr 2026")
   if (data->context_title[0] != '\0') {
-      Rect sub_rect = {gx, gy + 15, graph_w, 20};
-      ui_draw_text(data->context_title, sub_rect, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_CENTER);
+      Rect sub_rect = {gx, gy + 25, graph_w, 20};
+      ui_draw_text(data->context_title, sub_rect, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL, ALIGN_CENTER);
   }
 
   // Find Peak Index
