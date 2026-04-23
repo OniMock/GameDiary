@@ -201,7 +201,7 @@ static void main_menu_draw(void) {
             float text_alpha = 1.0f - (fabsf(offset) * 10.0f); // fade text quickly
             if (text_alpha > 0.0f) {
                 u32 text_col = COLOR_TEXT; // We don't have alpha easily passing into ui_draw_text without modifications, but we can assume fully opaque for near-center
-                ui_draw_text(i18n_get(g_menu_items[idx].label_msg), (Rect){draw_x - 100, center_y + 45, 200, 20}, text_col, 1.0f, ALIGN_CENTER);
+                ui_draw_text(i18n_get(g_menu_items[idx].label_msg), (Rect){draw_x - 100, center_y + 45, 200, 20}, text_col, UI_FONT_SIZE_TITLE_HUGE, ALIGN_CENTER);
             }
         }
     }

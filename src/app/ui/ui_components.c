@@ -61,17 +61,17 @@ void ui_draw_text(const char *text, Rect r, u32 color, float size,
 }
 
 void ui_draw_hint(const char *text, int x, int y, u32 color) {
-  font_draw_string(x, y, text, color, 0.8f);
+  font_draw_string(x, y, text, color, UI_FONT_SIZE_NORMAL);
 }
 
 void ui_draw_hint_footer(const char *text, int x, u32 color) {
-  font_draw_string(x, 267, text, color, 0.8f);
+  font_draw_string(x, 267, text, color, UI_FONT_SIZE_NORMAL);
 }
 
 void ui_draw_standard_hints(void) {
     int y = 267;
     u32 col = COLOR_SUBTEXT;
-    float sz = 0.7f;
+    float sz = UI_FONT_SIZE_TINY;
     const char* text = i18n_get(MSG_HINT_HELPER);
     
     float text_w = font_get_width(text, sz);
@@ -83,7 +83,7 @@ void ui_draw_standard_hints(void) {
 void ui_draw_title(const char *text, Rect r, const ImageResource *icon,
                    int custom_icon_size) {
   int text_x = r.x;
-  float text_size = 1.3f;
+  float text_size = UI_FONT_SIZE_TITLE_MAIN;
 
   float text_w = font_get_width(text, text_size);
   float text_h = font_get_height(text_size);
@@ -121,7 +121,7 @@ void ui_draw_title_auto(const char *text, Rect r, const ImageResource *icon) {
 
 void ui_draw_app_header(Rect r) {
   const char *title = APP_TITLE;
-  float text_size = 1.3f;
+  float text_size = UI_FONT_SIZE_TITLE_MAIN;
   int spacing = 12;
   int icon_size = 32;
 
@@ -240,19 +240,19 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
 
   if (!found_any) {
     Rect msg_rect = {gx, gy - 50, graph_w, 30};
-    ui_draw_text(i18n_get(MSG_STATS_NO_ACTIVITY), msg_rect, COLOR_SUBTEXT, 0.8f, ALIGN_CENTER);
+    ui_draw_text(i18n_get(MSG_STATS_NO_ACTIVITY), msg_rect, COLOR_SUBTEXT, UI_FONT_SIZE_NORMAL, ALIGN_CENTER);
   }
 
   // Draw Total Playtime (above graph, near title)
   if (data->context_subtitle[0] != '\0') {
       Rect total_rect = {gx, gy - max_bar_h - 40, graph_w, 20};
-      ui_draw_text(data->context_subtitle, total_rect, COLOR_ACCENT, 0.85f, ALIGN_CENTER);
+      ui_draw_text(data->context_subtitle, total_rect, COLOR_ACCENT, UI_FONT_SIZE_MEDIUM, ALIGN_CENTER);
   }
 
   // Draw Context String (e.g. "Apr 2026")
   if (data->context_title[0] != '\0') {
       Rect sub_rect = {gx, gy + 15, graph_w, 20};
-      ui_draw_text(data->context_title, sub_rect, COLOR_SUBTEXT, 0.7f, ALIGN_CENTER);
+      ui_draw_text(data->context_title, sub_rect, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_CENTER);
   }
 
   // Find Peak Index
@@ -321,8 +321,8 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     }
 
     draw_bar_column(x, gy, bar_w, h, bar_color, fade_gloss,
-                    time_buf[0] != '\0' ? time_buf : NULL, 0.6f, fade_label,
-                    label_buf[0] != '\0' ? label_buf : NULL, 0.7f, fade_label);
+                    time_buf[0] != '\0' ? time_buf : NULL, UI_FONT_SIZE_NANO, fade_label,
+                    label_buf[0] != '\0' ? label_buf : NULL, UI_FONT_SIZE_TINY, fade_label);
   }
 }
 
@@ -458,7 +458,7 @@ void ui_draw_game_daily_graph(const SessionEntry *sessions, int count,
              &ts_tm);
 
     draw_bar_column(bx, baseline_y, bar_w, h, bar_color, gloss_a,
-                    h > 0 ? dur_buf : NULL, 0.75f, lbl_color, date_buf, 0.75f,
+                    h > 0 ? dur_buf : NULL, UI_FONT_SIZE_SMALL, lbl_color, date_buf, UI_FONT_SIZE_SMALL,
                     COLOR_SUBTEXT);
   }
 }
@@ -500,7 +500,7 @@ void ui_draw_menu_item(int x, int y, int w, int h, const char *label,
 
   // 3. Label
   Rect text_rect = {current_x, y, w - (current_x - x) - 40, h};
-  ui_draw_text_auto_fit(label, text_rect, text_color, 0.9f, ALIGN_LEFT);
+  ui_draw_text_auto_fit(label, text_rect, text_color, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
 
   // 4. Right Icon (often used for flags or arrows)
   if (right_icon) {

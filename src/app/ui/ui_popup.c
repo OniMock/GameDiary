@@ -14,6 +14,7 @@
 #include "app/render/texture.h"
 #include "app/ui/ui_layout.h"
 #include "app/ui/ui_components.h"
+#include "app/ui/ui_text.h"
 #include <pspctrl.h>
 #include <pspgu.h>
 #include <string.h>
@@ -38,15 +39,6 @@ static float s_alpha = 0.0f;
 static const PopupData* s_current_data = NULL;
 static int s_scroll_offset = 0;
 static float s_line_height = 0.0f;
-
-/* CJK byte identification */
-static size_t utf8_char_size(unsigned char c) {
-    if ((c & 0x80) == 0x00) return 1;
-    if ((c & 0xE0) == 0xC0) return 2;
-    if ((c & 0xF0) == 0xE0) return 3;
-    if ((c & 0xF8) == 0xF0) return 4;
-    return 1;
-}
 
 static void wrap_and_append_line(const char* src, float scale, int max_px_width) {
     if (!src) return;
@@ -123,7 +115,7 @@ void popup_open(const PopupData* data) {
     s_scroll_offset = 0;
 
     // Cache font metric
-    s_line_height = font_get_height(0.8f) + 4.0f; // Size logic plus 4px gap
+    s_line_height = font_get_height(UI_FONT_SIZE_SMALL) + 4.0f; // Size logic plus 4px gap
 
     // Box constraints
     int text_box_w = 420; // 450 card - 30 padding
@@ -131,7 +123,7 @@ void popup_open(const PopupData* data) {
     for (int i = 0; i < data->line_count; i++) {
         const char* l = data->lines[i];
         if (!l) continue;
-        wrap_and_append_line(l, 0.8f, text_box_w);
+        wrap_and_append_line(l, UI_FONT_SIZE_SMALL, text_box_w);
     }
 
     s_state = POPUP_STATE_OPENING;
@@ -222,7 +214,7 @@ void popup_render(void) {
 
     uint32_t element_alpha = (uint32_t)(255.0f * s_alpha);
     uint32_t card_alpha    = (uint32_t)(153.0f * s_alpha); // 0x99 (60% opacity)
-    
+
     // Mask out original alpha (0x00FFFFFF) and inject our calculated card_alpha
     uint32_t card_bg     = (card_alpha << 24)    | (0x111111 & 0x00FFFFFF);
     uint32_t card_border = (card_alpha << 24)    | (0x444444 & 0x00FFFFFF);
@@ -247,7 +239,7 @@ void popup_render(void) {
     if (s_current_data && s_current_data->title) {
         // Center text vertically relative to the 24px icon.
         Rect title_rect = { text_offset_x, header_y + 4, popup_w - 60, 24 };
-        ui_draw_text(s_current_data->title, title_rect, text_color, 1.0f, ALIGN_LEFT);
+        ui_draw_text(s_current_data->title, title_rect, text_color, UI_FONT_SIZE_TITLE_HUGE, ALIGN_LEFT);
     }
 
     // Header Separator
@@ -269,18 +261,18 @@ void popup_render(void) {
         int render_y = text_area_y + (i * (int)s_line_height);
 
         Rect t_rect = { x_origin + 15, render_y, popup_w - 30, (int)s_line_height };
-        ui_draw_text(s_wrapped_lines[line_idx], t_rect, body_color, 0.8f, ALIGN_LEFT);
+        ui_draw_text(s_wrapped_lines[line_idx], t_rect, body_color, UI_FONT_SIZE_TINY, ALIGN_LEFT);
     }
 
     // --- Scroll Indicators ---
     if (s_scroll_offset > 0) {
         Rect up_rect = { 0, text_area_y - 12, 480, 12 };
-        ui_draw_text("~", up_rect, text_color, 0.7f, ALIGN_CENTER); // Basic Triangle pointer / indicator
+        ui_draw_text("▲", up_rect, text_color, UI_FONT_SIZE_TINY, ALIGN_CENTER); // Basic Triangle pointer / indicator
     }
 
     int max_scroll = s_wrapped_count - max_visible;
     if (max_scroll > 0 && s_scroll_offset < max_scroll) {
         Rect down_rect = { 0, text_area_y + text_area_h + 2, 480, 12 };
-        ui_draw_text("v", down_rect, text_color, 0.7f, ALIGN_CENTER); // Basic downward indicator
+        ui_draw_text("▼", down_rect, text_color, UI_FONT_SIZE_TINY, ALIGN_CENTER); // Basic downward indicator
     }
 }

@@ -80,8 +80,8 @@ static void game_details_update(u32 buttons, u32 pressed) {
 }
 
 static void draw_stat_row(Rect r, const char* label, const char* value) {
-    ui_draw_text(label, r, COLOR_SUBTEXT, 0.8f, ALIGN_LEFT);
-    ui_draw_text(value, r, COLOR_TEXT, 0.8f, ALIGN_RIGHT);
+    ui_draw_text(label, r, COLOR_SUBTEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
+    ui_draw_text(value, r, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_RIGHT);
 }
 
 static void game_details_draw(void) {
@@ -124,19 +124,19 @@ static void game_details_draw(void) {
 
     /* Game name — use auto-fit (scale then ellipsis) for long titles */
     ui_draw_text_auto_fit(g->entry.game_name, (Rect){tx, 18, tw_max, 22},
-                          COLOR_ACCENT, 1.0f, ALIGN_LEFT);
+                          COLOR_ACCENT, UI_FONT_SIZE_TITLE_HUGE, ALIGN_LEFT);
 
     /* ID + Category sub-line */
     const char* cat_str = game_category_get_name(g->entry.category);
     char sub_buf[80];
     snprintf(sub_buf, sizeof(sub_buf), "%s  ·  %s", g->entry.game_id, cat_str);
-    ui_draw_text(sub_buf, (Rect){tx, 50, tw_max, 14}, COLOR_SUBTEXT, 0.72f, ALIGN_LEFT);
+    ui_draw_text(sub_buf, (Rect){tx, 50, tw_max, 14}, COLOR_SUBTEXT, UI_FONT_SIZE_COMPACT, ALIGN_LEFT);
 
     /* Sessions count */
     char vbuf[32];
     snprintf(vbuf, sizeof(vbuf), "%lu", (unsigned long)g->session_count);
-    ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){tx, 80, tw_max, 14}, COLOR_SUBTEXT, 0.72f, ALIGN_LEFT);
-    ui_draw_text(vbuf,                         (Rect){tx, 80, tw_max, 14}, COLOR_TEXT,    0.72f, ALIGN_RIGHT);
+    ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){tx, 80, tw_max, 14}, COLOR_SUBTEXT, UI_FONT_SIZE_COMPACT, ALIGN_LEFT);
+    ui_draw_text(vbuf,                         (Rect){tx, 80, tw_max, 14}, COLOR_TEXT,    UI_FONT_SIZE_COMPACT, ALIGN_RIGHT);
 
     /* ----------------------------------------------------------------
      * SECTION 2 — History card (left)
@@ -172,8 +172,8 @@ static void game_details_draw(void) {
     renderer_draw_rect(30, 189, 190, 1, COLOR_BORDER);
     char total_buf[32];
     ui_format_duration(g->total_playtime, total_buf, sizeof(total_buf));
-    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){30, 196, 190, 18}, COLOR_SUBTEXT, 0.75f, ALIGN_LEFT);
-    ui_draw_text(total_buf, (Rect){30, 196, 190, 18}, COLOR_TEXT, 0.9f, ALIGN_RIGHT);
+    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){30, 196, 190, 18}, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
+    ui_draw_text(total_buf, (Rect){30, 196, 190, 18}, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_RIGHT);
 
     /* ----------------------------------------------------------------
      * SECTION 3 — Playtime card (right)

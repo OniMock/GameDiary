@@ -89,6 +89,6 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: 导航",
     [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] 或 [ ◉ ]: 导航",
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] 或 [ ◉ ]: 更改过滤",
-    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ □ ]: 过滤",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ◻ ]: 过滤",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: 统计",
 };

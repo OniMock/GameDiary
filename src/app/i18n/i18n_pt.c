@@ -85,6 +85,6 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: Navegar",
     [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] ou [ ◉ ]: Navegar",
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] ou [ ◉ ]: Alterar filtro",
-    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ □ ]: Filtrar",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ◻ ]: Filtrar",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Estatísticas",
 };

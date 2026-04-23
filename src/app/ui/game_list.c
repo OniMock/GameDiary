@@ -175,8 +175,8 @@ static void draw_stats_block(const GameStats *g,
     ui_draw_card(box1, COLOR_CARD, COLOR_BORDER);
     ui_format_duration(g->total_playtime, val_buf, sizeof(val_buf));
     Rect text_rect1 = {start_x + 10, start_y + 7, box_w - 20, 10};
-    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), text_rect1, COLOR_TEXT, 0.8f, ALIGN_LEFT);
-    ui_draw_text(val_buf, text_rect1, COLOR_TEXT, 0.8f, ALIGN_RIGHT);
+    ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), text_rect1, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
+    ui_draw_text(val_buf, text_rect1, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_RIGHT);
 
     /* Last Played Date */
     time_t last_time = 0;
@@ -194,8 +194,8 @@ static void draw_stats_block(const GameStats *g,
     Rect box2 = {start_x, start_y + line_gap, box_w, box_h};
     ui_draw_card(box2, COLOR_CARD, COLOR_BORDER);
     Rect text_rect2 = {start_x + 10, start_y + line_gap + 7, box_w - 20, 10};
-    ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), text_rect2, COLOR_TEXT, 0.8f, ALIGN_LEFT);
-    ui_draw_text(last_str, text_rect2, COLOR_TEXT, 0.8f, ALIGN_RIGHT);
+    ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), text_rect2, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
+    ui_draw_text(last_str, text_rect2, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_RIGHT);
 
     /* Days Active */
     Rect box3 = {start_x, start_y + line_gap * 2, box_w, box_h};
@@ -203,8 +203,8 @@ static void draw_stats_block(const GameStats *g,
     int days = carousel_count_days_active(sessions, sess_count, g->entry.uid);
     snprintf(val_buf, sizeof(val_buf), "%d", days);
     Rect text_rect3 = {start_x + 10, start_y + line_gap * 2 + 7, box_w - 20, 10};
-    ui_draw_text(i18n_get(MSG_STATS_DAYS_ACTIVE), text_rect3, COLOR_TEXT, 0.8f, ALIGN_LEFT);
-    ui_draw_text(val_buf, text_rect3, COLOR_TEXT, 0.8f, ALIGN_RIGHT);
+    ui_draw_text(i18n_get(MSG_STATS_DAYS_ACTIVE), text_rect3, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
+    ui_draw_text(val_buf, text_rect3, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_RIGHT);
 }
 
 /* -----------------------------------------------------------------------
@@ -342,7 +342,7 @@ static void game_list_draw(void) {
     char filter_buf[64];
     snprintf(filter_buf, sizeof(filter_buf), "%s: %s", i18n_get(MSG_FILTER), filter_name);
 
-    float filter_text_size = 1.0f;
+    float filter_text_size = UI_FONT_SIZE_TITLE_HUGE;
     int icon_size = 24;
     int spacing = 8;
     float text_w = font_get_width(filter_buf, filter_text_size);
@@ -362,7 +362,7 @@ static void game_list_draw(void) {
      * ---------------------------------------------------------------- */
     if (s_filtered_count == 0) {
         ui_draw_text(i18n_get(MSG_ERROR_NO_GAMES),
-                     (Rect){0, 136, 480, 20}, COLOR_SUBTEXT, 1.0f,
+                     (Rect){0, 136, 480, 20}, COLOR_SUBTEXT, UI_FONT_SIZE_TITLE_HUGE,
                      ALIGN_CENTER);
         ui_draw_standard_hints();
         return;
@@ -465,7 +465,7 @@ static void game_list_draw(void) {
 
     /* Clamp long names to avoid overflowing the info strip. */
     Rect name_rect = {60, NAME_Y, 360, 14};
-    ui_draw_text_auto_fit(g->entry.game_name, name_rect, COLOR_TEXT, 0.9f,
+    ui_draw_text_auto_fit(g->entry.game_name, name_rect, COLOR_TEXT, UI_FONT_SIZE_PRIMARY,
                           ALIGN_CENTER);
 
     /* ----------------------------------------------------------------

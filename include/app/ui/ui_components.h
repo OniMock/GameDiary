@@ -15,6 +15,7 @@
 #include "app/data/stats_calculator.h"
 #include "common/db_schema.h"
 #include <psptypes.h>
+#include "app/render/image_resources.h"
 
 // Theme Colors (ABGR - 0xAABBGGRR)
 
@@ -33,9 +34,23 @@
 #define COLOR_ACCENT 0xFFFFC040 // #40C0FF
 #define COLOR_SUCCESS   0xFF20B020 // Success (green) - #20B020
 
+// --- Font Sizes (Scales relative to 17px IntraFont base) ---
+#define UI_FONT_SIZE_TITLE_MAIN  1.30f    // Page headers & Branding (~22px)
+#define UI_FONT_SIZE_TITLE_HUGE  1.00f    // Pop-up headers & Error titles (17px)
+#define UI_FONT_SIZE_TITLE_LIST  0.95f    // List item primary focus (~16px)
+#define UI_FONT_SIZE_PRIMARY     0.90f    // Menu entries & Card titles (~15px)
+#define UI_FONT_SIZE_MEDIUM      0.85f    // Emphasized stats (~14px)
+#define UI_FONT_SIZE_NORMAL      0.80f    // Standard labels & UI body (~13px)
+#define UI_FONT_SIZE_SMALL       0.75f    // Secondary text & wrapped body (~12px)
+#define UI_FONT_SIZE_COMPACT     0.72f    // Metadata line (~12px)
+#define UI_FONT_SIZE_TINY        0.70f    // Indicators & Footers (~12px)
+#define UI_FONT_SIZE_MICRO       0.65f    // Sidebar headers & tags (~11px)
+#define UI_FONT_SIZE_NANO        0.60f    // Detailed graph data values (~10px)
+
+
 typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } UIAlign;
 
-#include "app/render/image_resources.h"
+
 
 /**
  * Draws a stylized card.

@@ -68,7 +68,7 @@ static void activity_draw(void) {
 
   if (total_games == 0) {
       Rect msg_rect = {20, 100, 440, 40};
-      ui_draw_text(i18n_get(MSG_ERROR_NO_GAMES), msg_rect, COLOR_SUBTEXT, 1.0f, ALIGN_CENTER);
+      ui_draw_text(i18n_get(MSG_ERROR_NO_GAMES), msg_rect, COLOR_SUBTEXT, UI_FONT_SIZE_TITLE_HUGE, ALIGN_CENTER);
       ui_draw_standard_hints();
       return;
   }
@@ -119,24 +119,24 @@ static void activity_draw(void) {
       Rect focus_padded = rect_padding(focus_rect, 10);
 
       // Label "Último Jogo"
-      ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), (Rect){focus_padded.x, focus_padded.y, focus_padded.w, 15}, COLOR_ACCENT, 0.7f, ALIGN_LEFT);
+      ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), (Rect){focus_padded.x, focus_padded.y, focus_padded.w, 15}, COLOR_ACCENT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
 
       // Title
-      ui_draw_text(last_g->entry.game_name, (Rect){focus_padded.x, focus_padded.y + 18, focus_padded.w, 20}, COLOR_TEXT, 0.95f, ALIGN_LEFT);
+      ui_draw_text(last_g->entry.game_name, (Rect){focus_padded.x, focus_padded.y + 18, focus_padded.w, 20}, COLOR_TEXT, UI_FONT_SIZE_TITLE_LIST, ALIGN_LEFT);
 
       // Detailed Playtime
       char dur_buf[32];
       ui_format_duration(last_g->total_playtime, dur_buf, sizeof(dur_buf));
       char final_dur[64];
       snprintf(final_dur, sizeof(final_dur), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), dur_buf);
-      ui_draw_text(final_dur, (Rect){focus_padded.x, focus_padded.y + 40, focus_padded.w, 15}, COLOR_SUBTEXT, 0.75f, ALIGN_LEFT);
+      ui_draw_text(final_dur, (Rect){focus_padded.x, focus_padded.y + 40, focus_padded.w, 15}, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
 
       // Date
       time_t lplayed = (time_t)last_g->last_played_ts;
       struct tm *lt = localtime(&lplayed);
       char date_buf[32];
       strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT), lt);
-      ui_draw_text(date_buf, (Rect){focus_padded.x, focus_padded.y + 55, focus_padded.w, 15}, COLOR_SUBTEXT, 0.75f, ALIGN_LEFT);
+      ui_draw_text(date_buf, (Rect){focus_padded.x, focus_padded.y + 55, focus_padded.w, 15}, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
   }
 
   // Right: Global Stats
@@ -148,23 +148,23 @@ static void activity_draw(void) {
   ui_draw_card(glob_play_rect, COLOR_CARD, COLOR_BORDER);
   char glob_time[32];
   ui_format_duration(global_playtime, glob_time, sizeof(glob_time));
-  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){right_x + 8, top_y + 4, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
-  ui_draw_text(glob_time, (Rect){right_x + 8, top_y + 16, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
+  ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), (Rect){right_x + 8, top_y + 4, 160, 12}, COLOR_SUBTEXT, UI_FONT_SIZE_MICRO, ALIGN_LEFT);
+  ui_draw_text(glob_time, (Rect){right_x + 8, top_y + 16, 160, 15}, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
 
   // Total Sessions Global
   Rect glob_sess_rect = {right_x, top_y + sub_card_h + 8, 180, sub_card_h};
   ui_draw_card(glob_sess_rect, COLOR_CARD, COLOR_BORDER);
   char sess_buf[32];
   snprintf(sess_buf, sizeof(sess_buf), "%lu", (unsigned long)global_sessions);
-  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){right_x + 8, top_y + sub_card_h + 12, 160, 12}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
-  ui_draw_text(sess_buf, (Rect){right_x + 8, top_y + sub_card_h + 24, 160, 15}, COLOR_TEXT, 0.9f, ALIGN_LEFT);
+  ui_draw_text(i18n_get(MSG_STATS_SESSIONS), (Rect){right_x + 8, top_y + sub_card_h + 12, 160, 12}, COLOR_SUBTEXT, UI_FONT_SIZE_MICRO, ALIGN_LEFT);
+  ui_draw_text(sess_buf, (Rect){right_x + 8, top_y + sub_card_h + 24, 160, 15}, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
 
   // 3. LAYOUT - BOTTOM SECTION (Recent Activity Card)
   int list_y = top_y + card_h + 8;
   Rect history_card_rect = {20, list_y, 440, 105};
   ui_draw_card(history_card_rect, COLOR_CARD, COLOR_BORDER);
 
-  ui_draw_text(i18n_get(MSG_MENU_ACTIVITY), (Rect){30, list_y + 8, 420, 15}, COLOR_ACCENT, 0.75f, ALIGN_LEFT);
+  ui_draw_text(i18n_get(MSG_MENU_ACTIVITY), (Rect){30, list_y + 8, 420, 15}, COLOR_ACCENT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
   renderer_draw_rect(30, list_y + 24, 420, 1, COLOR_BORDER & 0x66FFFFFF);
 
   for (int i = 1; i < (int)recent_counts; i++) { // Skip the first one which is prominent above
@@ -178,18 +178,18 @@ static void activity_draw(void) {
       char cat_tag[32] = {0};
       snprintf(cat_tag, sizeof(cat_tag), "[%s]", game_category_get_name(g->entry.category));
 
-      float tag_w = font_get_width(cat_tag, 0.65f);
-      ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, 0.65f, ALIGN_LEFT);
+      float tag_w = font_get_width(cat_tag, UI_FONT_SIZE_MICRO);
+      ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, UI_FONT_SIZE_MICRO, ALIGN_LEFT);
 
       // Game Name
-      ui_draw_text(g->entry.game_name, (Rect){30 + (int)tag_w + 5, row_y, 240, 20}, COLOR_TEXT, 0.8f, ALIGN_LEFT);
+      ui_draw_text(g->entry.game_name, (Rect){30 + (int)tag_w + 5, row_y, 240, 20}, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
 
       // Last Played Date (Full)
       time_t item_ts = (time_t)g->last_played_ts;
       struct tm *lt = localtime(&item_ts);
       char date_buf[32];
       strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT), lt);
-      ui_draw_text(date_buf, (Rect){330, row_y, 120, 20}, COLOR_SUBTEXT, 0.75f, ALIGN_RIGHT);
+      ui_draw_text(date_buf, (Rect){330, row_y, 120, 20}, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL, ALIGN_RIGHT);
   }
 
   ui_draw_standard_hints();

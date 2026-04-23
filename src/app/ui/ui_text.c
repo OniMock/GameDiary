@@ -22,7 +22,7 @@
 /**
  * @brief Returns the size of a UTF-8 character based on its lead byte.
  */
-static size_t utf8_char_size(unsigned char c) {
+size_t utf8_char_size(unsigned char c) {
   if ((c & 0x80) == 0x00) return 1;
   if ((c & 0xE0) == 0xC0) return 2;
   if ((c & 0xF0) == 0xE0) return 3;

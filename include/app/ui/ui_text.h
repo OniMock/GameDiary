@@ -14,9 +14,19 @@
 #include "app/ui/ui_components.h"
 #include <stddef.h>
 
+
+/**
+ * @brief Returns UTF-8 character byte size based on first byte.
+ *
+ * @param c First byte of UTF-8 character.
+ * @return Number of bytes (1–4).
+ */
+size_t utf8_char_size(unsigned char c);
+
+
 /**
  * @brief Truncates a string with an ellipsis ("...") if it exceeds a maximum width.
- * 
+ *
  * Uses an optimized binary search to find the cutoff point based on font metrics.
  *
  * @param src       Source string.

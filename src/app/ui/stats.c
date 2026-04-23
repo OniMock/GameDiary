@@ -102,17 +102,17 @@ static void stats_draw(void) {
     char filter_buf[64];
     snprintf(filter_buf, sizeof(filter_buf), "%s: %s", i18n_get(MSG_FILTER), mode_str);
 
-    float filter_text_size = 1.0f;
+
     int filter_spacing = 8;
     int icon_size = 24; // slightly smaller for filter
-    float text_w = font_get_width(filter_buf, filter_text_size);
+    float text_w = font_get_width(filter_buf, UI_FONT_SIZE_TITLE_HUGE);
     int total_filter_w = icon_size + filter_spacing + (int)text_w;
 
     int filter_x = safe_rect.x + safe_rect.w - total_filter_w;
     int filter_y = safe_rect.y + 8; // Exactly same baseline as main title
 
     // Perfect vertical alignment logic
-    float filter_center_y = filter_y - (filter_text_size * 6.0f);
+    float filter_center_y = filter_y - (UI_FONT_SIZE_TITLE_HUGE * 6.0f);
     int icon_y = (int)(filter_center_y - (icon_size / 2.0f));
 
     // Draw filter icon in white
@@ -120,7 +120,7 @@ static void stats_draw(void) {
     texture_draw_resource(&GD_IMG_ICON_FILTER_32_PNG, filter_x, icon_y, icon_size, icon_size);
 
     // Draw filter text
-    font_draw_string(filter_x + icon_size + filter_spacing, filter_y, filter_buf, COLOR_TEXT, filter_text_size);
+    font_draw_string(filter_x + icon_size + filter_spacing, filter_y, filter_buf, COLOR_TEXT, UI_FONT_SIZE_TITLE_HUGE);
 
     // 3. Main Content: Cached Graph Area
     ui_draw_stats_graph(&g_cached_graph_data, 240, 190, 360, 80);

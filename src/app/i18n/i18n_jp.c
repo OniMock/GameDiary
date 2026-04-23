@@ -88,6 +88,6 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: 移動",
     [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] または [ ◉ ]: 移動",
     [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] または [ ◉ ]: フィルター変更",
-    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ □ ]: フィルター",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ ◻ ]: フィルター",
     [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: 統計",
 };
