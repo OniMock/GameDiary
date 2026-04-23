@@ -72,6 +72,19 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "Ноябрь",
     [MSG_MONTH_DEC]            = "Декабрь",
 
-    [MSG_HINT_CHANGE_MODE]     = "Используйте ← → или Стик для смены",
     [MSG_FILTER]               = "Фильтр",
+
+    [MSG_HINT_HELPER]              = "[ L ]: Помощь",
+    [MSG_HELP_TITLE]               = "Помощь",
+    [MSG_HELP_BTN_X_SELECT]        = "[ X ]: Выбрать",
+    [MSG_HELP_BTN_X_CONFIRM]       = "[ X ]: Подтвердить",
+    [MSG_HELP_BTN_X_CHANGE]        = "[ X ]: Изменить",
+    [MSG_HELP_BTN_O_BACK]          = "[ O ]: Назад",
+    [MSG_HELP_BTN_START_MENU]      = "[ START ]: Меню",
+    [MSG_HELP_BTN_SELECT_CONFIG]   = "[ SELECT ]: Настройки",
+    [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: Навигация",
+    [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] или [ ◉ ]: Навигация",
+    [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] или [ ◉ ]: Изменить фильтр",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ □ ]: Фильтр",
+    [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Статистика",
 };

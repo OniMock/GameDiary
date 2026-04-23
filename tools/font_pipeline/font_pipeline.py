@@ -18,7 +18,7 @@ from font_generator import generate_fonts, FONT_MAP
 from embed_generator import generate_embeds
 
 EXTRA_CHARS = set(
-    "®°©™€£¥¢§¶†‡•…‰′″←↑→↓↔⇒⇐⇔♠♣♥♦★☆○●◎◊□■△▲▼·"
+    "®°©™€£¥¢§¶†‡•…‰′″←↑→↓↔⇒⇐⇔♠♣♥♦★☆○●◎◊□■△▲▼·◉"
 )
 
 def main():
@@ -58,7 +58,7 @@ def main():
     for g, files in manifest.items():
         if g not in FONT_MAP:
             continue
-            
+
         group_changed = False
         for charset_filename in files:
             charset_path = os.path.join(tmp_fonts_dir, charset_filename)

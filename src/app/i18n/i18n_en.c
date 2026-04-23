@@ -71,6 +71,19 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "November",
     [MSG_MONTH_DEC]            = "December",
 
-    [MSG_HINT_CHANGE_MODE]     = "Use ← → or Analog to change",
     [MSG_FILTER]               = "Filter",
+
+    [MSG_HINT_HELPER]              = "[ L ]: Help",
+    [MSG_HELP_TITLE]               = "Help",
+    [MSG_HELP_BTN_X_SELECT]        = "[ X ]: Select",
+    [MSG_HELP_BTN_X_CONFIRM]       = "[ X ]: Confirm",
+    [MSG_HELP_BTN_X_CHANGE]        = "[ X ]: Change",
+    [MSG_HELP_BTN_O_BACK]          = "[ O ]: Back",
+    [MSG_HELP_BTN_START_MENU]      = "[ START ]: Menu",
+    [MSG_HELP_BTN_SELECT_CONFIG]   = "[ SELECT ]: Settings",
+    [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: Navigate",
+    [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] or [ ◉ ]: Navigate",
+    [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] or [ ◉ ]: Change filter",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ □ ]: Filter",
+    [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: Statistics",
 };

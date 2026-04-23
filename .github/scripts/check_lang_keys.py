@@ -71,7 +71,8 @@ def extract_c_keys(c_path):
         content = f.read()
 
     # Look for array initialization like: [KEY_NAME] = "..."
-    all_keys = re.findall(r"\[\s*([A-Z][A-Z0-9_]+)\s*\]", content)
+    # Only match if it's inside brackets at the start of a logical line (ignoring whitespace)
+    all_keys = re.findall(r"^\s*\[\s*([A-Z][A-Z0-9_]+)\s*\]", content, re.MULTILINE)
 
     # Exclude array size constants and language enums
     exclude = {

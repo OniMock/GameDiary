@@ -35,6 +35,7 @@
 #include "app/ui/ui_text.h"
 #include "app/ui/ui_layout.h"
 #include "app/ui/carousel_state.h"
+#include "app/ui/ui_popup.h"
 #include "app/i18n/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -108,6 +109,9 @@ static int s_current_filter = FILTER_ALL;
 static int s_filtered_indices[512]; // Static buffer for games in the current filter
 static int s_filtered_count = 0;
 
+static const char* s_helper_lines[6];
+static PopupData s_helper_data;
+
 /* -----------------------------------------------------------------------
  * Internal helpers
  * ----------------------------------------------------------------------- */
@@ -118,7 +122,7 @@ static void update_filtered_list(void) {
     s_filtered_count = 0;
 
     for (u32 i = 0; i < total; i++) {
-        if (s_current_filter == FILTER_ALL || 
+        if (s_current_filter == FILTER_ALL ||
             game_category_normalize(all_games[i].entry.category) == s_current_filter) {
             if (s_filtered_count < 512) {
                 s_filtered_indices[s_filtered_count++] = i;
@@ -208,6 +212,18 @@ static void draw_stats_block(const GameStats *g,
  * ----------------------------------------------------------------------- */
 
 static void game_list_init(void) {
+    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_X_SELECT);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_ANALOG_NAVIGATE);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_SQUARE_FILTER);
+    s_helper_lines[4] = i18n_get(MSG_HELP_BTN_START_MENU);
+    s_helper_lines[5] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+
+    s_helper_data.title = i18n_get(MSG_HELP_TITLE);
+    s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
+    s_helper_data.lines = s_helper_lines;
+    s_helper_data.line_count = 6;
+
     /* Enable analog sampling for joystick navigation */
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 
@@ -217,7 +233,7 @@ static void game_list_init(void) {
 
     /* Identify available categories for filtering */
     s_available_count = game_category_get_available(s_available_filters);
-    
+
     /* Ensure the current filter is still valid if data changed */
     if (s_current_filter != FILTER_ALL) {
         int found = 0;
@@ -247,9 +263,14 @@ static void game_list_init(void) {
 }
 
 static void game_list_update(u32 buttons, u32 pressed) {
+    if (pressed & PSP_CTRL_LTRIGGER) {
+        popup_open(&s_helper_data);
+        return;
+    }
+
     if (s_filtered_count == 0 && s_current_filter == FILTER_ALL) {
         if (pressed & PSP_CTRL_CROSS)
-            screen_manager_set(&g_screen_dashboard);
+            screen_manager_set(&g_screen_stats);
         return;
     }
 
@@ -318,7 +339,7 @@ static void game_list_draw(void) {
 
     /* Header: Filter Indicator (Right Aligned) */
     const char *filter_name = (s_current_filter == FILTER_ALL) ? i18n_get(MSG_TOP_ALL) : game_category_get_name(s_current_filter);
-    
+
     char filter_buf[64];
     snprintf(filter_buf, sizeof(filter_buf), "%s: %s", i18n_get(MSG_FILTER), filter_name);
 

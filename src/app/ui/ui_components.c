@@ -72,47 +72,12 @@ void ui_draw_standard_hints(void) {
     int y = 267;
     u32 col = COLOR_SUBTEXT;
     float sz = 0.7f;
+    const char* text = i18n_get(MSG_HINT_HELPER);
+    
+    float text_w = font_get_width(text, sz);
+    int x = 240 - (int)(text_w / 2.0f);
 
-    const char* labels[] = {
-        i18n_get(MSG_CTRL_NAVIGATE),
-        i18n_get(MSG_CTRL_SELECT),
-        i18n_get(MSG_CTRL_BACK),
-        i18n_get(MSG_CTRL_MENU),
-        i18n_get(MSG_CTRL_CONFIG)
-    };
-
-    const char* icons[] = {
-        "[← →]",
-        "[X]",
-        "[O]",
-        "[START]",
-        "[SELECT]"
-    };
-
-    int count = 5;
-    int padding = 5;
-    float widths[5];
-    float total_width = 0.0f;
-
-    // Calculate total width
-    for (int i = 0; i < count; i++) {
-        char buffer[64];
-        snprintf(buffer, sizeof(buffer), "%s %s", icons[i], labels[i]);
-
-        widths[i] = font_get_width(buffer, sz);
-        total_width += widths[i];
-    }
-
-    float spacing = (480.0f - total_width - (padding * 2)) / (count - 1);
-    float x = (float)padding;
-
-    for (int i = 0; i < count; i++) {
-        char buffer[64];
-        snprintf(buffer, sizeof(buffer), "%s %s", icons[i], labels[i]);
-
-        font_draw_string((int)x, y, buffer, col, sz);
-        x += widths[i] + spacing;
-    }
+    font_draw_string(x, y, text, col, sz);
 }
 
 void ui_draw_title(const char *text, Rect r, const ImageResource *icon,

@@ -50,7 +50,7 @@ static size_t utf8_char_size(unsigned char c) {
 
 static void wrap_and_append_line(const char* src, float scale, int max_px_width) {
     if (!src) return;
-    
+
     size_t i = 0;
     while (src[i] != '\0' && s_wrapped_count < MAX_VISIBLE_LINES) {
         float current_w = 0.0f;
@@ -58,31 +58,31 @@ static void wrap_and_append_line(const char* src, float scale, int max_px_width)
         size_t current_segment_start = i;
         int found_space = 0;
         char temp_char[5];
-        
+
         size_t cursor = i;
         size_t last_fitting_cursor = cursor;
-        
+
         while (src[cursor] != '\0') {
             size_t sz = utf8_char_size((unsigned char)src[cursor]);
             memcpy(temp_char, &src[cursor], sz);
             temp_char[sz] = '\0';
-            
+
             float char_w = font_get_width(temp_char, scale);
             if (current_w + char_w > max_px_width && cursor > current_segment_start) {
                 // Width exceeded, must break here or at the last space
                 break;
             }
-            
+
             current_w += char_w;
             if (src[cursor] == ' ') {
                 found_space = 1;
                 last_space_i = cursor;
             }
-            
+
             last_fitting_cursor = cursor + sz;
             cursor += sz;
         }
-        
+
         if (src[cursor] == '\0') {
             // Fits entirely in remaining space
             size_t len = cursor - current_segment_start;
@@ -101,29 +101,29 @@ static void wrap_and_append_line(const char* src, float scale, int max_px_width)
                 // Break at exact char (CJK or very long word)
                 break_pt = last_fitting_cursor;
             }
-            
+
             size_t len = break_pt - current_segment_start;
             if (len >= MAX_LINE_WIDTH) len = MAX_LINE_WIDTH - 1;
             memcpy(s_wrapped_lines[s_wrapped_count], &src[current_segment_start], len);
             s_wrapped_lines[s_wrapped_count][len] = '\0';
             s_wrapped_count++;
-            
+
             i = break_pt;
             // Skip the space we broke on, don't carry it to next line
-            if (found_space && src[i] == ' ') i++; 
+            if (found_space && src[i] == ' ') i++;
         }
     }
 }
 
 void popup_open(const PopupData* data) {
     if (!data) return;
-    
+
     s_current_data = data;
     s_wrapped_count = 0;
     s_scroll_offset = 0;
-    
+
     // Cache font metric
-    s_line_height = font_get_height(0.85f) + 4.0f; // Size logic plus 4px gap
+    s_line_height = font_get_height(0.8f) + 4.0f; // Size logic plus 4px gap
 
     // Box constraints
     int text_box_w = 420; // 450 card - 30 padding
@@ -131,9 +131,9 @@ void popup_open(const PopupData* data) {
     for (int i = 0; i < data->line_count; i++) {
         const char* l = data->lines[i];
         if (!l) continue;
-        wrap_and_append_line(l, 0.85f, text_box_w);
+        wrap_and_append_line(l, 0.8f, text_box_w);
     }
-    
+
     s_state = POPUP_STATE_OPENING;
     s_alpha = 0.0f;
 }
@@ -173,7 +173,7 @@ void popup_update(uint32_t buttons, uint32_t pressed) {
         }
 
         // Scroll Logic
-        int text_area_h = 160; 
+        int text_area_h = 160;
         int max_visible = text_area_h / (int)s_line_height;
         int max_scroll = s_wrapped_count - max_visible;
         if (max_scroll < 0) max_scroll = 0;
@@ -254,16 +254,19 @@ void popup_render(void) {
     // --- Text Area (Scrollable body) ---
     int text_area_y = sep_y + 10;
     int text_area_h = popup_h - 50 - 10 - 20; // 50(hdr) + 10(ptop) + 20(pbot) = 162
-    
+
     int max_visible = text_area_h / (int)s_line_height;
-    
+
+    uint32_t body_alpha = (uint32_t)(170.0f * s_alpha); // 0xAA is 170
+    uint32_t body_color = (body_alpha << 24) | (COLOR_SUBTEXT & 0x00FFFFFF);
+
     // Safety crop loop logic
     for (int i = 0; i < max_visible && (s_scroll_offset + i) < s_wrapped_count; i++) {
         int line_idx = s_scroll_offset + i;
         int render_y = text_area_y + (i * (int)s_line_height);
-        
+
         Rect t_rect = { x_origin + 15, render_y, popup_w - 30, (int)s_line_height };
-        ui_draw_text(s_wrapped_lines[line_idx], t_rect, text_color, 0.85f, ALIGN_LEFT);
+        ui_draw_text(s_wrapped_lines[line_idx], t_rect, body_color, 0.8f, ALIGN_LEFT);
     }
 
     // --- Scroll Indicators ---
@@ -271,7 +274,7 @@ void popup_render(void) {
         Rect up_rect = { 0, text_area_y - 12, 480, 12 };
         ui_draw_text("~", up_rect, text_color, 0.7f, ALIGN_CENTER); // Basic Triangle pointer / indicator
     }
-    
+
     int max_scroll = s_wrapped_count - max_visible;
     if (max_scroll > 0 && s_scroll_offset < max_scroll) {
         Rect down_rect = { 0, text_area_y + text_area_h + 2, 480, 12 };

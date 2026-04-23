@@ -16,6 +16,7 @@
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
+#include "app/ui/ui_popup.h"
 #include "app/i18n/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -26,12 +27,28 @@
 
 static int g_selection = 0;
 
+static const char* s_helper_lines[4];
+static PopupData s_helper_data;
+
 static void settings_init(void) {
-    // Keep selection or reset
+    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_X_SELECT);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_ARROWS_NAVIGATE);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_START_MENU);
+
+    s_helper_data.title = i18n_get(MSG_HELP_TITLE);
+    s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
+    s_helper_data.lines = s_helper_lines;
+    s_helper_data.line_count = 4;
 }
 
 static void settings_update(u32 buttons, u32 pressed) {
     (void)buttons;
+
+    if (pressed & PSP_CTRL_LTRIGGER) {
+        popup_open(&s_helper_data);
+        return;
+    }
 
     if (pressed & PSP_CTRL_UP) {
         g_selection = (g_selection - 1 + SETTINGS_MENU_COUNT) % SETTINGS_MENU_COUNT;

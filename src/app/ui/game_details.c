@@ -17,6 +17,7 @@
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_text.h"
 #include "app/ui/ui_layout.h"
+#include "app/ui/ui_popup.h"
 #include "app/i18n/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -34,12 +35,24 @@ static Texture* g_game_icon = NULL;
 
 static GameDetailStats s_stats;
 
+static const char* s_helper_lines[3];
+static PopupData s_helper_data;
+
 void game_details_set_idx(int idx) {
     g_game_idx = idx;
 }
 
 
 static void game_details_init(void) {
+    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_START_MENU);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+
+    s_helper_data.title = i18n_get(MSG_HELP_TITLE);
+    s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
+    s_helper_data.lines = s_helper_lines;
+    s_helper_data.line_count = 3;
+
     if (g_game_icon) texture_free(g_game_icon);
 
     GameStats* games = data_get_games();
@@ -57,6 +70,12 @@ static void game_details_init(void) {
 static void game_details_update(u32 buttons, u32 pressed) {
     (void)buttons;
     (void)pressed;
+
+    if (pressed & PSP_CTRL_LTRIGGER) {
+        popup_open(&s_helper_data);
+        return;
+    }
+
     // inputs like Triangle, Start, Select are handled globally by screen_manager
 }
 

@@ -75,6 +75,19 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "11月",
     [MSG_MONTH_DEC]            = "12月",
 
-    [MSG_HINT_CHANGE_MODE]     = "← → または アナログで変更",
     [MSG_FILTER]               = "フィルター",
+
+    [MSG_HINT_HELPER]              = "[ L ]: ヘルプ",
+    [MSG_HELP_TITLE]               = "ヘルプ",
+    [MSG_HELP_BTN_X_SELECT]        = "[ X ]: 選択",
+    [MSG_HELP_BTN_X_CONFIRM]       = "[ X ]: 決定",
+    [MSG_HELP_BTN_X_CHANGE]        = "[ X ]: 変更",
+    [MSG_HELP_BTN_O_BACK]          = "[ O ]: 戻る",
+    [MSG_HELP_BTN_START_MENU]      = "[ START ]: メニュー",
+    [MSG_HELP_BTN_SELECT_CONFIG]   = "[ SELECT ]: 設定",
+    [MSG_HELP_BTN_ARROWS_NAVIGATE] = "[ ↑ ↓ ]: 移動",
+    [MSG_HELP_BTN_ANALOG_NAVIGATE] = "[ ← → ] または [ ◉ ]: 移動",
+    [MSG_HELP_BTN_ANALOG_FILTER]   = "[ ← → ] または [ ◉ ]: フィルター変更",
+    [MSG_HELP_BTN_SQUARE_FILTER]   = "[ □ ]: フィルター",
+    [MSG_HELP_BTN_TRIANGLE_STATS]  = "[ △ ]: 統計",
 };

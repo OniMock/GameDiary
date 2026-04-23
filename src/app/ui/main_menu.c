@@ -16,6 +16,7 @@
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
+#include "app/ui/ui_popup.h"
 #include "app/i18n/i18n.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
@@ -29,6 +30,9 @@
 static float g_current_index = 0.0f;
 static float g_target_index = 0.0f;
 
+static const char* s_helper_lines[4];
+static PopupData s_helper_data;
+
 typedef struct {
     MessageId label_msg;
     const ImageResource* icon;
@@ -37,12 +41,22 @@ typedef struct {
 
 static const MainMenuItem g_menu_items[MENU_ITEM_COUNT] = {
     { MSG_MENU_GAMES, &GD_IMG_ICON_GAME_128_PNG, &g_screen_game_list },
-    { MSG_MENU_STATS, &GD_IMG_ICON_STATS_128_PNG, &g_screen_dashboard },
-    { MSG_MENU_ACTIVITY, &GD_IMG_ICON_ACTIVITY_128_PNG, &g_screen_stats },
+    { MSG_MENU_STATS, &GD_IMG_ICON_STATS_128_PNG, &g_screen_stats },
+    { MSG_MENU_ACTIVITY, &GD_IMG_ICON_ACTIVITY_128_PNG, &g_screen_activity },
     { MSG_MENU_SETTINGS, &GD_IMG_ICON_SETTINGS_128_PNG, &g_screen_settings }
 };
 
 static void main_menu_init(void) {
+    s_helper_lines[0] = i18n_get(MSG_HELP_BTN_X_SELECT);
+    s_helper_lines[1] = i18n_get(MSG_HELP_BTN_ANALOG_NAVIGATE);
+    s_helper_lines[2] = i18n_get(MSG_HELP_BTN_O_BACK);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+
+    s_helper_data.title = i18n_get(MSG_HELP_TITLE);
+    s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
+    s_helper_data.lines = s_helper_lines;
+    s_helper_data.line_count = 4;
+
     // Preserve target_index between visits, snap current_index for visual entry
     g_current_index = g_target_index;
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
@@ -50,6 +64,12 @@ static void main_menu_init(void) {
 
 static void main_menu_update(u32 buttons, u32 pressed) {
     (void)buttons;
+
+    if (pressed & PSP_CTRL_LTRIGGER) {
+        popup_open(&s_helper_data);
+        return;
+    }
+
     static int repeat_timer = 0;
     static int last_dir = 0;
 
