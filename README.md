@@ -9,9 +9,9 @@
 
 # 🎮 GameDiary
 
-> A modern playtime tracking system for the PlayStation Portable.
+> Your handheld gaming history, beautifully tracked.
 
-A complete playtime tracking and game management suite for the PlayStation Portable.
+**GameDiary** is a seamless background playtime tracker and stats visualizer for the PlayStation Portable. It bridges the gap between retro hardware and modern ecosystems by automatically building a premium, localized dashboard of your gaming habits.
 
 <p align="center">
   <img src="./assets-src/logo.png" width="380" />
@@ -61,11 +61,12 @@ It exists to give PSP power-users modern, console-like play tracking capabilitie
 * **Automatic Icon Management**: Automatically extracts `ICON0.PNG`
 from EBOOTs and ISOs for a rich visual diary without manual scraping.
 ### 🎨 UI / UX
-* **Premium User Interface**: Fluid carousel navigation, smooth
-transitions, depth-sorted overlapping icons, and dynamic backgrounds built from the ground up to feel like native OS features.
+* **Premium User Interface**: Fluid carousel navigation, smooth transitions, depth-sorted overlapping icons, and dynamic backgrounds built from the ground up to feel like native OS features.
+* **Sharp SDF Font Engine**: Custom Multi-Page MSDF rendering pipeline delivers perfectly crisp text at any font size without pixelation or stair-stepping.
 * **Comprehensive Stats**: View total playtime, session history, and detailed graphs.
+
 ### 🧩 System
-* **Internationalization (i18n)**: Fully localized in English, Spanish, and Portuguese with automatic detection based on PSP system settings.
+* **Global Internationalization (i18n)**: Fully localized in English, Spanish, Portuguese, Russian, Japanese, and Chinese with automatic language detection based on PSP system settings.
 * **POPS Compatibility**: Reliable tracking and icon parsing for PlayStation 1 classics running via the official emulator.
 
 ---
@@ -74,7 +75,7 @@ transitions, depth-sorted overlapping icons, and dynamic backgrounds built from 
 
 | Home / Carousel | Session Statistics |
 | :---: | :---: |
-| ![Carousel Screen Placeholder](https://via.placeholder.com/480x272/1a1a2e/ffffff?text=Smooth+Carousel+Interface) | ![Stats Screen Placeholder](https://via.placeholder.com/480x272/1a1a2e/ffffff?text=Date-Labeled+Bar+Graphs) |
+| ![Carousel Screen Placeholder](./.github/sources/carousel_game_list.png) | ![Stats Screen Placeholder](./.github/sources/stats.png) |
 | *Fluid infinite-scrolling game carousel with depth sorting.* | *Detailed left-aligned session statistics with playtime graphs.* |
 
 ---
@@ -125,12 +126,13 @@ Simply navigate to your PSP's **Game** menu on the XMB and launch **GameDiary** 
 
 | Button | Action |
 | :--- | :--- |
-| **D-Pad Left/Right** | Navigate carousel / Select previous/next game |
+| **D-Pad Left/Right** | Navigate carousel / Change tabs |
 | **Analog Stick** | Smooth scrolling through the game carousel |
-| **Cross (X) / Circle (O)** | Open detailed game statistics (Respects region config) |
-| **Triangle (△)** | Open application settings / Options menu |
-| **Square (□)** | Change graph sorting modes |
-| **L/R Triggers** | Fast jump between letters/pages |
+| **Cross (X) / Circle (O)** | Confirm / Back (Respects your PSP's X/O region setting) |
+| **Square (□)** | Toggle Game Category filter |
+| **START** | Open Main Dashboard Menu |
+| **SELECT** | Open Settings Menu (Language, Support, About) |
+| **L-Trigger** | Open context-sensitive Help Popup |
 
 ### 🔄 Example Workflows
 1. **Playing a game**: Boot up a UMD or ISO. The plugin silently detects the game ID, extracts the icon if missing, and begins tracking your playtime.
@@ -212,8 +214,10 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 ## 🗺️ Roadmap
 
 - [x] Background play tracking and database mapping.
-- [x] MSDF font rendering and multi-language support.
+- [x] MSDF font rendering with full Latin, Cyrillic, and CJK fallback chains.
+- [x] Multi-language support (EN, PT, ES, RU, JP, CN).
 - [x] Auto-extraction of `ICON0.PNG` for PS1/POPS Eboots.
+- [x] Context-sensitive help and standardized Helper popups.
 - [ ] Expand UI features with thematic templates.
 - [ ] Export stats to JSON/CSV for external use.
 
