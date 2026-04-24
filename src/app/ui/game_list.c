@@ -385,7 +385,14 @@ static void game_list_draw(void) {
     CarouselItem items[7];
     int item_count = 0;
 
-    for (int i = -3; i <= 3; i++) {
+    /* When there is only one game in the current filter, restrict the
+     * iteration range to the center slot only.  Without this guard every
+     * neighbour index wraps back to the single game, producing duplicate
+     * ghost copies on both sides of the carousel. */
+    int carousel_lo = (s_filtered_count == 1) ? 0 : -3;
+    int carousel_hi = (s_filtered_count == 1) ? 0 :  3;
+
+    for (int i = carousel_lo; i <= carousel_hi; i++) {
         int inf_idx = g_cs.current_idx + i;
         float t = (float)i - g_cs.anim_offset;
         float abs_t = fabsf(t);
