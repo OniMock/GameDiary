@@ -79,19 +79,27 @@ jobs:
       # -------------------------------------------------------
       - name: Create ZIP
         run: |
+          # Zip manually so the release job can attach it as-is
           cd release
           zip -r ../GameDiary.zip .
           cd ..
-          ls -lh GameDiary.zip
+          echo "📦 ZIP contents:"
+          unzip -l GameDiary.zip
 
       # -------------------------------------------------------
       # 📤 Upload artifact
       # -------------------------------------------------------
+      # Upload the raw .zip file wrapped in a folder named 'GameDiary'.
+      # upload-artifact@v4 always re-zips what you give it, so passing a
+      # pre-built .zip would cause a zip-in-zip. Instead we upload the
+      # contents of the release/ folder; the action compresses them into
+      # the downloadable artifact automatically.
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: GameDiary
-          path: GameDiary.zip
+          # Pass the folder, NOT the .zip, to avoid zip-within-zip
+          path: release/
 
   # ===========================================================
   # 🚀 AUTOMATIC RELEASE
@@ -141,6 +149,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: GameDiary
+          # Extract into a known subdirectory to avoid collisions
+          path: artifact/
+
+      # Re-zip the extracted contents so the release attachment is a .zip
+      - name: Repack artifact as ZIP
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          cd artifact
+          zip -r ../GameDiary.zip .
+          cd ..
+          echo "📦 Release ZIP:"
+          unzip -l GameDiary.zip
 
       # -------------------------------------------------------
       # 📝 Generate Changelog
