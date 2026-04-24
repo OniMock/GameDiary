@@ -102,11 +102,23 @@ Ensure you have the latest release downloaded from the [Releases](https://github
 ### 1. Installing the Plugin (Tracker)
 1. Copy the `gamediary.prx` file to your `seplugins` folder on your memory stick (`ms0:/seplugins/` or `ef0:/seplugins/` for PSP Go).
 2. Open `ms0:/seplugins/game.txt` in a text editor.
-3. Add the following line:
-   ```text
-   ms0:/seplugins/gamediary.prx 1
-   ```
-   *(Use `ef0:/seplugins/gamediary.prx 1` if using a PSP Go's internal storage).*
+3. Enable plugin:
+    - For ARK-4:
+        + Add the following line to enable tracking for PSP games:
+        ```text
+        psp, GameDiary.prx, on
+        ```
+        + To enable PS1 games tracking also add the following line:
+        ```text
+        ps1, GameDiary.prx, on
+        ```
+    - For other CFWs:
+        + Add the following line to enable tracking for PSP games:
+        ```text
+        ms0:/seplugins/gamediary.prx 1
+        ```
+        *(Use `ef0:/seplugins/gamediary.prx 1` if using a PSP Go's internal storage).*
+        + Do the same for `ms0:/seplugins/pops.txt` to enable PS1 tracking
 4. Do the same for `ms0:/seplugins/pops.txt` to enable PS1 tracking.
 5. Restart your PSP (or reset VSH).
 
