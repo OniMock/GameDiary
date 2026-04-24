@@ -81,7 +81,9 @@ static int tracker_thread_main(SceSize args, void *argp) {
 
   // Initialize session (marks as a new launch)
   const GameMetadata *metadata = detector_get_metadata();
-  if (storage_get_or_create_game(metadata, &current_game_uid) < 0) {
+  int st_res = storage_get_or_create_game(metadata, &current_game_uid);
+  if (st_res < 0) {
+    utils_log_error("tracker", "storage_get_or_create_game failed", st_res);
     current_game_uid = 0;
   }
 

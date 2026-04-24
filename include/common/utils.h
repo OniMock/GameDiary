@@ -48,6 +48,16 @@ void utils_format_duration_compact(u32 seconds, char *out, size_t size);
 const char* utils_get_device_prefix(void);
 void utils_ensure_storage_dirs(const char* prefix);
 
+/**
+ * @brief Logs an error to error.txt with timestamp.
+ */
+void utils_log_error(const char *module, const char *msg, int code);
+
+/**
+ * @brief Logs a trace message to error.txt
+ */
+void utils_log_trace(const char *module, const char *msg);
+
 #ifdef GDIARY_PLUGIN
 /**
  * @brief Captures/extracts a game icon to the destination directory.

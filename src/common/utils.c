@@ -181,3 +181,32 @@ int utils_extract_pbp_icon(const char *pbp_path, const char *dst) {
   sceIoClose(f_out);
   return 0;
 }
+
+void utils_log_error(const char *module, const char *msg, int code) {
+  char log_path[128];
+  snprintf(log_path, sizeof(log_path), "%s/PSP/COMMON/GameDiary/error.txt", utils_get_device_prefix());
+  
+  SceUID fd = sceIoOpen(log_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+  if (fd >= 0) {
+    char buf[256];
+    u32 ts = utils_get_timestamp();
+    int len = snprintf(buf, sizeof(buf), "[%u] [ERR] [%s] %s (Code: %d)\r\n", (unsigned int)ts, module, msg, code);
+    sceIoWrite(fd, buf, len);
+    sceIoClose(fd);
+  }
+}
+
+void utils_log_trace(const char *module, const char *msg) {
+  char log_path[128];
+  snprintf(log_path, sizeof(log_path), "%s/PSP/COMMON/GameDiary/error.txt", utils_get_device_prefix());
+  
+  SceUID fd = sceIoOpen(log_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+  if (fd >= 0) {
+    char buf[256];
+    u32 ts = utils_get_timestamp();
+    int len = snprintf(buf, sizeof(buf), "[%u] [TRC] [%s] %s\r\n", (unsigned int)ts, module, msg);
+    sceIoWrite(fd, buf, len);
+    sceIoClose(fd);
+  }
+}
+

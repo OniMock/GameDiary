@@ -129,8 +129,15 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
     get_full_path(path, GAMES_DAT);
     get_full_path(tmp_path, GAMES_TMP);
 
+    // PRO-C Workaround: Ensure the tmp file is deleted before truncating/creating, 
+    // as some older CFW drivers have buggy PSP_O_TRUNC behavior when the file exists.
+    sceIoRemove(tmp_path);
+
     SceUID out_fd = sceIoOpen(tmp_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-    if (out_fd < 0) return -1;
+    if (out_fd < 0) {
+        utils_log_error("storage", "Failed to open games.tmp for writing", out_fd);
+        return -1;
+    }
 
     GameRegistryHeader h = *h_template;
     h.ready_flag = 0; // Not ready yet
@@ -179,6 +186,8 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
     int res = sceIoRename(tmp_path, path);
     if (res >= 0) {
         sceIoSync(g_device, 0); /* One critical sync after the atomic rename */
+    } else {
+        utils_log_error("storage", "Failed to rename games.tmp to games.dat", res);
     }
 
     return (res >= 0) ? 0 : -2;
@@ -364,14 +373,24 @@ int storage_log_session(u32 game_uid, u32 duration, u32 timestamp, SceOff *offse
   if (*offset == -1) {
     // New session: Append
     fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
-    if (fd < 0) return -1;
+    if (fd < 0) {
+        // Fallback for PRO-C if PSP_O_APPEND behavior is strictly failing over missing file?
+        fd = sceIoOpen(path, PSP_O_RDWR | PSP_O_CREAT, 0777);
+        if (fd < 0) {
+            utils_log_error("storage", "Failed to create/append sessions.dat", fd);
+            return -1;
+        }
+    }
 
     // Get the current offset before writing (since it's append, it's just size)
     *offset = sceIoLseek(fd, 0, PSP_SEEK_END);
   } else {
     // Existing session: Overwrite
     fd = sceIoOpen(path, PSP_O_WRONLY, 0777);
-    if (fd < 0) return -2;
+    if (fd < 0) {
+        utils_log_error("storage", "Failed to open sessions.dat for update", fd);
+        return -2;
+    }
     sceIoLseek(fd, *offset, PSP_SEEK_SET);
   }
 
