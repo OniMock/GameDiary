@@ -182,4 +182,13 @@ const ImageResource* i18n_get_current_flag(void);
  */
 const ImageResource* i18n_get_lang_flag(int index);
 
+/**
+ * Get the LanguageId enum value for the Nth language in alphabetical
+ * (A-Z) display order. Use this for sorted UI lists.
+ *
+ * @param sorted_pos  Visual position in the A-Z list (0 = first).
+ * @return            The corresponding LanguageId, or LANG_EN on error.
+ */
+LanguageId i18n_get_sorted_lang_index(int sorted_pos);
+
 #endif // GAMEDIARY_I18N_H

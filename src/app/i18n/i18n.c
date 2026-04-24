@@ -132,3 +132,35 @@ const char *i18n_get_lang_name(int index) {
   }
   return g_lang_registry[index].name;
 }
+
+/**
+ * Sorted lookup table: maps visual A-Z position → LanguageId enum value.
+ *
+ * Sorted alphabetically by language name:
+ *   0 Chinese  (LANG_CN)
+ *   1 English  (LANG_EN)
+ *   2 German   (LANG_DE)
+ *   3 Japanese (LANG_JP)
+ *   4 Portuguese (LANG_PT)
+ *   5 Russian  (LANG_RU)
+ *   6 Spanish  (LANG_ES)
+ *
+ * When adding a new language: insert it here in the correct A-Z slot.
+ * The enum value in LanguageId never changes — only this table grows.
+ */
+static const LanguageId g_lang_sorted_order[LANG_COUNT] = {
+    LANG_CN,  /* Chinese    */
+    LANG_EN,  /* English    */
+    LANG_DE,  /* German     */
+    LANG_JP,  /* Japanese   */
+    LANG_PT,  /* Portuguese */
+    LANG_RU,  /* Russian    */
+    LANG_ES,  /* Spanish    */
+};
+
+LanguageId i18n_get_sorted_lang_index(int sorted_pos) {
+  if (sorted_pos < 0 || sorted_pos >= LANG_COUNT) {
+    return LANG_EN;
+  }
+  return g_lang_sorted_order[sorted_pos];
+}

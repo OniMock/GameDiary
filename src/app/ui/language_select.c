@@ -49,10 +49,22 @@ static void language_select_init(void) {
     s_helper_data.show_close_hint = true;
 
     int current = config_get()->language;
-    if (current == LANG_AUTO) g_selection = 0;
-    else g_selection = current + 1;
+    if (current == LANG_AUTO) {
+        g_selection = 0;
+    } else {
+        /* Find the A-Z sorted visual row for the saved LanguageId.
+         * We can't use the enum value directly because the sorted
+         * order differs from the enum declaration order. */
+        g_selection = 0; /* fallback to Auto if not found */
+        for (int i = 0; i < LANG_COUNT; i++) {
+            if (i18n_get_sorted_lang_index(i) == current) {
+                g_selection = i + 1; /* +1: slot 0 is reserved for "Auto" */
+                break;
+            }
+        }
+    }
 
-    // Ensure selection is visible
+    /* Ensure the initial selection is within the visible window */
     if (g_selection >= MAX_VISIBLE_ITEMS) {
         g_scroll_offset = g_selection - (MAX_VISIBLE_ITEMS - 1);
     } else {
@@ -94,7 +106,10 @@ static void language_select_update(u32 buttons, u32 pressed) {
     }
 
     if (pressed & PSP_CTRL_CROSS) {
-        int target_lang = (g_selection == 0) ? LANG_AUTO : g_selection - 1;
+        /* Map visual A-Z position back to the real LanguageId enum value */
+        int target_lang = (g_selection == 0)
+            ? LANG_AUTO
+            : (int)i18n_get_sorted_lang_index(g_selection - 1);
         i18n_init(target_lang);
         config_get()->language = target_lang;
         config_save();
@@ -121,18 +136,26 @@ static void language_select_draw(void) {
         Rect item_rect = rect_column(list_area, i, MAX_VISIBLE_ITEMS, 5);
         const char* name;
 
-        if (idx == 0) name = "Auto (System)";
-        else name = i18n_get_lang_name(idx - 1);
+        if (idx == 0) {
+            name = "Auto (System)";
+        } else {
+            /* Resolve the real LanguageId for this A-Z visual slot */
+            LanguageId lang_id = i18n_get_sorted_lang_index(idx - 1);
+            name = i18n_get_lang_name(lang_id);
+        }
 
         int current_config = config_get()->language;
-        int item_lang = (idx == 0) ? LANG_AUTO : idx - 1;
-        // Active Language Check
+        /* item_lang is the real LanguageId so it can be compared to config */
+        int item_lang = (idx == 0)
+            ? LANG_AUTO
+            : (int)i18n_get_sorted_lang_index(idx - 1);
+        /* Active Language Check */
         bool is_active = (item_lang == current_config);
 
         const ImageResource* right_flag = NULL;
 
         if (idx != 0) {
-          right_flag = i18n_get_lang_flag(idx - 1);
+            right_flag = i18n_get_lang_flag(i18n_get_sorted_lang_index(idx - 1));
         }
 
         ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
