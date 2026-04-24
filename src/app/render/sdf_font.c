@@ -521,21 +521,19 @@ static void draw_string_internal(float x, float y, const char *str,
              *   sy = baseline + vertical bearing  (planeBounds.top,  em units)
              *   sw/sh: glyph UV fraction × atlas pixel size × scale factor
              *
-             * The scale factor (px_size / 24.0f) converts from the 24-px em
-             * coordinate system used by msdf-atlas-gen to screen pixels.
+             * The scale factor (px_size / base_size) converts from the atlas
+             * em coordinate system to screen pixels.
              *
-             * Pixel Snapping: Use the consistent snapped baseline (cy) and 
-             * cursor (cx) to calculate position. 
-             * 
-             * Fix: We STOPPED rounding sy per-glyph. Rounding sy independently
-             * caused 1px vertical jitter (stair-stepping) because metrics (yoff)
-             * vary slightly. By using the shared snapped baseline (cy), all 
-             * characters align perfectly while remaining sharp.
+             * We do NOT integer-snap sx, sy, sw, sh. Because we are using an SDF
+             * (Signed Distance Field) with bilinear filtering, we want the quads
+             * to be positioned at sub-pixel precision. Snapping the quad dimensions
+             * while UVs are exact causes the distance field to stretch/squash 
+             * unevenly, which creates wavy baselines (the "staircase" effect).
              */
-            float sx = floorf(cx + g->xoff * px_size + 0.5f);
+            float sx = cx + (g->xoff * px_size);
             float sy = cy + (g->yoff * px_size);
-            float sw = floorf((g->w * (float)at->header.width)  * (px_size / 24.0f) + 0.5f);
-            float sh = floorf((g->h * (float)at->header.height) * (px_size / 24.0f) + 0.5f);
+            float sw = (g->w * (float)at->header.width)  * (px_size / at->header.base_size);
+            float sh = (g->h * (float)at->header.height) * (px_size / at->header.base_size);
 
             VertexSDF *v = (VertexSDF *)sceGuGetMemory(2 * sizeof(VertexSDF));
             v[0].u = u0;  v[0].v = v0;  v[0].color = color;
