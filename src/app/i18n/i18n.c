@@ -41,7 +41,7 @@ const ImageResource* i18n_get_current_flag(void);
 const ImageResource* i18n_get_lang_flag(int index);
 
 static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
-[LANG_CN] = {"Chinese",  g_lang_cn_entries, &GD_IMG_FLAG_CN_PNG},
+    [LANG_CN] = {"Chinese",  g_lang_cn_entries, &GD_IMG_FLAG_CN_PNG},
     [LANG_EN] = {"English",  g_lang_en_entries, &GD_IMG_FLAG_EN_PNG},
     [LANG_DE] = {"German",   g_lang_de_entries, &GD_IMG_FLAG_DE_PNG},
     [LANG_JP] = {"Japanese", g_lang_jp_entries, &GD_IMG_FLAG_JP_PNG},
