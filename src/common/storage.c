@@ -205,10 +205,10 @@ void storage_init(const char *base_dir) {
   ensure_dir(g_base_dir);
   ensure_dir(g_db_dir);
 
-  /* Ensure source directory exists for capturing game icons. */
-  char source_dir[160];
-  snprintf(source_dir, sizeof(source_dir), "%s/source", g_base_dir);
-  ensure_dir(source_dir);
+  /* Ensure icons directory exists for capturing game icons. */
+  char icons_dir[160];
+  snprintf(icons_dir, sizeof(icons_dir), "%s/icons", g_base_dir);
+  ensure_dir(icons_dir);
 
   char path[256], tmp_path[256];
   get_full_path(path, GAMES_DAT);
@@ -338,10 +338,10 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
       add_to_cache(&new_game); // Success! Add to cache now.
 
 #if defined(GDIARY_PLUGIN) && !defined(GDIARY_APP)
-      /* Capture icon using the stored base dir (no sctrl needed here). */
-      char source_dir[160];
-      snprintf(source_dir, sizeof(source_dir), "%s/icons", g_base_dir);
-      utils_capture_icon(new_game.game_id, new_game.category, source_dir, meta->file_path);
+      /* Capture icon using the stored base dir. */
+      char icons_dir[160];
+      snprintf(icons_dir, sizeof(icons_dir), "%s/icons", g_base_dir);
+      utils_capture_icon(new_game.game_id, new_game.category, icons_dir, meta->file_path);
 #endif
 
       return 0;
