@@ -25,6 +25,7 @@ extern const char *g_lang_es_entries[MSG_COUNT];
 extern const char *g_lang_ru_entries[MSG_COUNT];
 extern const char *g_lang_jp_entries[MSG_COUNT];
 extern const char *g_lang_cn_entries[MSG_COUNT];
+extern const char *g_lang_de_entries[MSG_COUNT];
 
 /* --- Global Pointer --- */
 const char **g_i18n_msg = NULL;
@@ -40,12 +41,14 @@ const ImageResource* i18n_get_current_flag(void);
 const ImageResource* i18n_get_lang_flag(int index);
 
 static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
-    [LANG_EN] = {"English", g_lang_en_entries, &GD_IMG_FLAG_EN_PNG},
-    [LANG_PT] = {"Português", g_lang_pt_entries, &GD_IMG_FLAG_PT_PNG},
-    [LANG_ES] = {"Español", g_lang_es_entries, &GD_IMG_FLAG_ES_PNG},
-    [LANG_RU] = {"Русский", g_lang_ru_entries, &GD_IMG_FLAG_RU_PNG},
-    [LANG_JP] = {"日本語", g_lang_jp_entries, &GD_IMG_FLAG_JP_PNG},
-    [LANG_CN] = {"中文", g_lang_cn_entries, &GD_IMG_FLAG_CN_PNG}};
+[LANG_CN] = {"Chinese",  g_lang_cn_entries, &GD_IMG_FLAG_CN_PNG},
+    [LANG_EN] = {"English",  g_lang_en_entries, &GD_IMG_FLAG_EN_PNG},
+    [LANG_DE] = {"German",   g_lang_de_entries, &GD_IMG_FLAG_DE_PNG},
+    [LANG_JP] = {"Japanese", g_lang_jp_entries, &GD_IMG_FLAG_JP_PNG},
+    [LANG_PT] = {"Portuguese", g_lang_pt_entries, &GD_IMG_FLAG_PT_PNG},
+    [LANG_RU] = {"Russian",  g_lang_ru_entries, &GD_IMG_FLAG_RU_PNG},
+    [LANG_ES] = {"Spanish",  g_lang_es_entries, &GD_IMG_FLAG_ES_PNG},
+  };
 
 static int g_current_lang_idx = LANG_EN;
 
@@ -77,6 +80,8 @@ static int i18n_detect_system_lang(void) {
     return LANG_JP;
   case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
     return LANG_CN;
+  case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
+    return LANG_DE;
   case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
   default:
     return LANG_EN;

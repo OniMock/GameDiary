@@ -35,6 +35,7 @@ typedef struct {
 #define GD_IMAGE_BYTES(img) ((img)->size)
 
 extern const ImageResource GD_IMG_FLAG_CN_PNG;
+extern const ImageResource GD_IMG_FLAG_DE_PNG;
 extern const ImageResource GD_IMG_FLAG_EN_PNG;
 extern const ImageResource GD_IMG_FLAG_ES_PNG;
 extern const ImageResource GD_IMG_FLAG_JP_PNG;
