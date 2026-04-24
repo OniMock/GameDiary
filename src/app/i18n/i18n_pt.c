@@ -24,6 +24,7 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_CTRL_CONFIG]          = "Config",
     [MSG_SETTINGS_LANGUAGE]    = "Idioma",
     [MSG_SETTINGS_ABOUT]       = "Sobre",
+    [MSG_SETTINGS_SUPPORT]     = "Suporte",
     [MSG_TOP_WEEK]             = "Semana",
     [MSG_TOP_MONTH]            = "Mês",
     [MSG_TOP_YEAR]             = "Ano",
@@ -98,6 +99,7 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_MAIN_MENU]      = "Menu principal de navegação. Acesse rapidamente sua lista de jogos, estatísticas detalhadas, registro de atividades ou configurações do sistema.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Escolha o idioma desejado para toda a interface do GameDiary. As alterações são aplicadas instantaneamente em todos os menus e telas.",
     [MSG_HELP_DESC_ABOUT]          = "Informações sobre o aplicativo, versão e créditos de desenvolvimento.",
+    [MSG_HELP_DESC_SUPPORT]        = "Como apoiar o desenvolvedor e ajudar o projeto.",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Fechar",
 
     [MSG_ABOUT_TITLE]              = "Sobre o %s",
@@ -107,4 +109,7 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
     [MSG_ABOUT_DATE]               = "Data",
     [MSG_ABOUT_DEVELOPER]          = "Desenvolvido por OniMock",
+    [MSG_SUPPORT_DESC]             = "Se você gosta do meu trabalho e quer ajudar a mantê-lo ativo, considere fazer uma doação. Não é obrigatório, mas ajuda muito na evolução do projeto!",
+    [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
+    [MSG_SUPPORT_WALLET]           = "Wallet EVM",
 };

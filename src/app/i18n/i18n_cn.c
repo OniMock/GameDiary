@@ -25,6 +25,7 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_CTRL_CONFIG]          = "设置",
     [MSG_SETTINGS_LANGUAGE]    = "语言",
     [MSG_SETTINGS_ABOUT]       = "关于",
+    [MSG_SETTINGS_SUPPORT]     = "支持",
     [MSG_TOP_WEEK]             = "周",
     [MSG_TOP_MONTH]            = "月",
     [MSG_TOP_YEAR]             = "年",
@@ -111,4 +112,8 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
     [MSG_ABOUT_DATE]               = "日期",
     [MSG_ABOUT_DEVELOPER]          = "开发者：OniMock",
+    [MSG_HELP_DESC_SUPPORT]        = "如何支持开发者并帮助项目。",
+    [MSG_SUPPORT_DESC]             = "如果你喜欢我的作品并希望支持项目的持续开发，可以考虑进行捐赠。这不是必须的，但对项目发展非常有帮助！",
+    [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
+    [MSG_SUPPORT_WALLET]           = "Wallet EVM",
 };

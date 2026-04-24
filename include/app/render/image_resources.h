@@ -62,5 +62,8 @@ extern const ImageResource GD_IMG_ICON_SETTINGS_128_PNG;
 extern const ImageResource GD_IMG_ICON_SETTINGS_32_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_128_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_32_PNG;
+extern const ImageResource GD_IMG_ICON_SUPPORT_32_PNG;
+extern const ImageResource GD_IMG_QR_COFFEE_128_PNG;
+extern const ImageResource GD_IMG_QR_WALLET_128_PNG;
 
 #endif // GAMEDIARY_IMAGE_RESOURCES_H

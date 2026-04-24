@@ -23,6 +23,7 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_CTRL_CONFIG]          = "Settings",
     [MSG_SETTINGS_LANGUAGE]    = "Language",
     [MSG_SETTINGS_ABOUT]       = "About",
+    [MSG_SETTINGS_SUPPORT]     = "Support",
     [MSG_TOP_WEEK]             = "Week",
     [MSG_TOP_MONTH]            = "Month",
     [MSG_TOP_YEAR]             = "Year",
@@ -97,6 +98,7 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_MAIN_MENU]      = "Main navigation menu. Quickly access games, stats, activity, or settings.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Choose the interface language. Changes are applied instantly.",
     [MSG_HELP_DESC_ABOUT]          = "Information about the application, version, and development credits.",
+    [MSG_HELP_DESC_SUPPORT]        = "How to support the developer and help the project.",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Close",
 
     [MSG_ABOUT_TITLE]              = "About %s",
@@ -106,4 +108,7 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_ABOUT_PSP_SDK]            = "PSP SDK",
     [MSG_ABOUT_DATE]               = "Date",
     [MSG_ABOUT_DEVELOPER]          = "Developed by OniMock",
+    [MSG_SUPPORT_DESC]             = "If you like my work and want to help keep it active, consider making a donation. It's not mandatory, but it helps a lot in the project's evolution!",
+    [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
+    [MSG_SUPPORT_WALLET]           = "Wallet EVM",
 };

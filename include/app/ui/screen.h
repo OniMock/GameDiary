@@ -43,6 +43,7 @@ extern Screen g_screen_game_list;
 extern Screen g_screen_game_details;
 extern Screen g_screen_settings;
 extern Screen g_screen_about;
+extern Screen g_screen_support;
 extern Screen g_screen_language_select;
 
 #endif // GAMEDIARY_SCREEN_H
