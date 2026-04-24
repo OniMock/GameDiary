@@ -39,7 +39,7 @@ split_commits = false
 # regex for preprocessing the commit messages
 commit_preprocessors = [
     # links de issues
-    { pattern = "#([0-9]+)", replace = "[#${1}](https://github.com/OniMock/snes9xTYL/issues/${1})" },
+    { pattern = "#([0-9]+)", replace = "[#${1}](https://github.com/OniMock/GameDiary/issues/${1})" },
 
     # old commits
     { pattern = "^\\[add\\]", replace = "feat:" },
