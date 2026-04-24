@@ -62,11 +62,12 @@ static void support_draw(void) {
     int content_w = safe_rect.w - 20;
 
     // --- Card 1: Description (Top) ---
-    Rect card1_rect = { content_x, content_y, content_w, 65 };
+    // Reduced height from 65 to 55 to give more space
+    Rect card1_rect = { content_x, content_y, content_w, 55 };
     ui_draw_card(card1_rect, COLOR_CARD, COLOR_BORDER);
 
     int tx = card1_rect.x + 15;
-    int ty = card1_rect.y + 12;
+    int ty = card1_rect.y + 6; // Pulled text up slightly
     int tw = card1_rect.w - 30;
 
     char wrapped[6][MAX_LINE_WIDTH];
@@ -79,34 +80,37 @@ static void support_draw(void) {
     }
 
     // --- Bottom Row: Two Cards Side-by-side ---
-    int card_btm_y = card1_rect.y + card1_rect.h + 10;
+    // Reduced gap between cards to 8
+    int card_btm_y = card1_rect.y + card1_rect.h + 8;
     int card_w = (content_w - 10) / 2;
 
     // QR Coffee
-    Rect card_coffee = { content_x, card_btm_y, card_w, 140 };
+    // Reduced height from 140 to 124
+    Rect card_coffee = { content_x, card_btm_y, card_w, 124 };
     ui_draw_card(card_coffee, COLOR_CARD, COLOR_BORDER);
 
-    ui_draw_text(i18n_get(MSG_SUPPORT_COFFEE), (Rect){card_coffee.x, card_coffee.y + 8, card_coffee.w, 14}, COLOR_ACCENT, UI_FONT_SIZE_SMALL, ALIGN_CENTER);
+    ui_draw_text(i18n_get(MSG_SUPPORT_COFFEE), (Rect){card_coffee.x, card_coffee.y + 6, card_coffee.w, 14}, COLOR_ACCENT, UI_FONT_SIZE_SMALL, ALIGN_CENTER);
 
     // Reset color to white so QR codes are not tinted (prevents them from staying blue/accent)
     sceGuColor(0xFFFFFFFF);
 
-    // QR is 128x128 but we want it to fit perfectly within cards
-    int qr_size = 110;
+    // Scaled QR down to 96 to fit well within shorter card
+    int qr_size = 96;
+    int qr_y_off = 22;
     int qr_x_off = (card_coffee.w - qr_size) / 2;
-    texture_draw_resource(&GD_IMG_QR_COFFEE_128_PNG, card_coffee.x + qr_x_off, card_coffee.y + 25, qr_size, qr_size);
+    texture_draw_resource(&GD_IMG_QR_COFFEE_128_PNG, card_coffee.x + qr_x_off, card_coffee.y + qr_y_off, qr_size, qr_size);
 
     // QR Wallet
-    Rect card_wallet = { content_x + card_w + 10, card_btm_y, card_w, 140 };
+    Rect card_wallet = { content_x + card_w + 10, card_btm_y, card_w, 124 };
     ui_draw_card(card_wallet, COLOR_CARD, COLOR_BORDER);
 
-    ui_draw_text(i18n_get(MSG_SUPPORT_WALLET), (Rect){card_wallet.x, card_wallet.y + 8, card_wallet.w, 14}, COLOR_ACCENT, UI_FONT_SIZE_SMALL, ALIGN_CENTER);
+    ui_draw_text(i18n_get(MSG_SUPPORT_WALLET), (Rect){card_wallet.x, card_wallet.y + 6, card_wallet.w, 14}, COLOR_ACCENT, UI_FONT_SIZE_SMALL, ALIGN_CENTER);
 
     // Ensure white for second QR too
     sceGuColor(0xFFFFFFFF);
 
     qr_x_off = (card_wallet.w - qr_size) / 2;
-    texture_draw_resource(&GD_IMG_QR_WALLET_128_PNG, card_wallet.x + qr_x_off, card_wallet.y + 25, qr_size, qr_size);
+    texture_draw_resource(&GD_IMG_QR_WALLET_128_PNG, card_wallet.x + qr_x_off, card_wallet.y + qr_y_off, qr_size, qr_size);
 
     ui_draw_standard_hints();
 }
