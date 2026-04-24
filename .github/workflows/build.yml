@@ -151,7 +151,7 @@ jobs:
         id: git-cliff
         with:
           config: .github/scripts/cliff.toml
-          args: --latest --strip header --tag ${{ steps.get_version.outputs.tag }} --output CHANGELOG.tmp.md
+          args: --unreleased --strip header --tag ${{ steps.get_version.outputs.tag }} --output CHANGELOG.tmp.md
 
       - name: Update CHANGELOG.md (prepend)
         if: steps.check_tag.outputs.exists == 'false'
