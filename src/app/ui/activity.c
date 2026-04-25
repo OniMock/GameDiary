@@ -21,6 +21,7 @@
 #include "app/ui/ui_components.h"
 #include "app/ui/ui_layout.h"
 #include "app/ui/ui_popup.h"
+#include "app/ui/ui_text.h"
 #include "app/render/font.h"
 #include "app/data/game_category.h"
 #include <pspctrl.h>
@@ -127,7 +128,7 @@ static void activity_draw(void) {
       ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), (Rect){focus_padded.x, focus_padded.y, focus_padded.w, 15}, COLOR_ACCENT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
 
       // Title
-      ui_draw_text(last_g->entry.game_name, (Rect){focus_padded.x, focus_padded.y + 18, focus_padded.w, 20}, COLOR_TEXT, UI_FONT_SIZE_TITLE_LIST, ALIGN_LEFT);
+      ui_draw_game_name(last_g->entry.game_name, (Rect){focus_padded.x, focus_padded.y + 18, focus_padded.w, 20}, COLOR_TEXT, UI_FONT_SIZE_TITLE_LIST, ALIGN_LEFT);
 
       // Detailed Playtime
       char dur_buf[32];
@@ -187,7 +188,7 @@ static void activity_draw(void) {
       ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
 
       // Game Name
-      ui_draw_text(g->entry.game_name, (Rect){30 + (int)tag_w + 5, row_y, 240, 20}, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
+      ui_draw_game_name(g->entry.game_name, (Rect){30 + (int)tag_w + 5, row_y, 240, 20}, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
 
       // Last Played Date (Full)
       time_t item_ts = (time_t)g->last_played_ts;

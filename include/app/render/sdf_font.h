@@ -48,6 +48,12 @@ void sdf_font_draw_string_centered(float x, float y, const char *str, uint32_t c
 float sdf_font_get_width(const char *str, float size);
 
 /**
+ * Check if the string contains any characters not present in the loaded atlases.
+ * @return 1 if missing glyphs are found, 0 otherwise.
+ */
+int sdf_font_has_missing_glyphs(const char *str);
+
+/**
  * Cleanup SDF font resources.
  */
 void sdf_font_cleanup(void);

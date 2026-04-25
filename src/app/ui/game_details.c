@@ -129,8 +129,8 @@ static void game_details_draw(void) {
     if (tw_max < 50) tw_max = 50; /* safety floor */
 
     /* Game name — use auto-fit (scale then ellipsis) for long titles */
-    ui_draw_text_auto_fit(g->entry.game_name, (Rect){tx, 18, tw_max, 22},
-                          COLOR_ACCENT, UI_FONT_SIZE_TITLE_HUGE, ALIGN_LEFT);
+    ui_draw_game_name_auto_fit(g->entry.game_name, (Rect){tx, 18, tw_max, 22},
+                               COLOR_ACCENT, UI_FONT_SIZE_TITLE_HUGE, ALIGN_LEFT);
 
     /* ID + Category sub-line */
     const char* cat_str = game_category_get_name(g->entry.category);

@@ -51,6 +51,22 @@ float font_get_width(const char *str, float size);
 float font_get_height(float size);
 
 /**
+ * @brief Draws a game name string, using the native PSP font as fallback if characters are missing.
+ * @param x X coordinate.
+ * @param y Y coordinate.
+ * @param str The string to draw.
+ * @param color The color (0xAABBGGRR).
+ * @param size Font scale/size.
+ * @param align Alignment (0 = Left, 1 = Center, 2 = Right).
+ */
+void font_draw_game_name(float x, float y, const char *str, uint32_t color, float size, int align);
+
+/**
+ * @brief Get the width of a game name string, handling fallback metrics if necessary.
+ */
+float font_get_game_name_width(const char *str, float size);
+
+/**
  * @brief Cleans up font resources.
  */
 void font_cleanup(void);

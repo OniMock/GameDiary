@@ -477,8 +477,8 @@ static void game_list_draw(void) {
 
     /* Clamp long names to avoid overflowing the info strip. */
     Rect name_rect = {60, NAME_Y, 360, 14};
-    ui_draw_text_auto_fit(g->entry.game_name, name_rect, COLOR_TEXT, UI_FONT_SIZE_PRIMARY,
-                          ALIGN_CENTER);
+    ui_draw_game_name_auto_fit(g->entry.game_name, name_rect, COLOR_TEXT, UI_FONT_SIZE_PRIMARY,
+                               ALIGN_CENTER);
 
     /* ----------------------------------------------------------------
      * Thin separator between info and stats

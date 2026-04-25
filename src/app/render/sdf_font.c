@@ -567,6 +567,17 @@ float sdf_font_get_width(const char *str, float size) {
     return tw;
 }
 
+int sdf_font_has_missing_glyphs(const char *str) {
+    if (!str || !*str) return 0;
+    const char *p = str;
+    while (*p) {
+        uint32_t cp = utf8_decode_next(&p);
+        if (cp >= 65536) return 1; /* Unsupported by our 16-bit lookup */
+        if (g_glyph_map[cp] == 0xFF) return 1; /* Missing mapped glyph */
+    }
+    return 0;
+}
+
 void sdf_font_draw_string(float x, float y, const char *str,
                           uint32_t color, float size) {
     draw_string_internal(x, y, str, color, size, 0);

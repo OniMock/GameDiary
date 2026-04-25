@@ -57,6 +57,23 @@ void ui_draw_text_auto_fit(const char *text, Rect r, u32 color, float size,
                            UIAlign align);
 
 /**
+ * @brief Draws a game name text using an "Auto-Fit" strategy and the fallback font if necessary.
+ *
+ * @param text   Game name to draw.
+ * @param r      Rectangle area.
+ * @param color  Text color.
+ * @param size   Initial font scale.
+ * @param align  Alignment.
+ */
+void ui_draw_game_name_auto_fit(const char *text, Rect r, u32 color, float size,
+                                UIAlign align);
+
+/**
+ * @brief Draws a game name text without auto-fitting.
+ */
+void ui_draw_game_name(const char *text, Rect r, u32 color, float size, UIAlign align);
+
+/**
  * @brief Splits a UTF-8 string into two parts, attempting to balance visual width
  *        while prioritizing semantic breakpoints (spaces or CamelCase transitions).
  *

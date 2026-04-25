@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 /**
  * @brief Returns the size of a UTF-8 character based on its lead byte.
@@ -234,6 +235,95 @@ void ui_draw_text_auto_fit(const char *text, Rect r, u32 color, float size,
   }
 
   ui_draw_text(draw_ptr, r, color, final_scale, align);
+}
+
+void ui_draw_game_name(const char *text, Rect r, u32 color, float size, UIAlign align) {
+  if (!text || !*text) return;
+  float y_pos = floorf(r.y + (r.h / 2.0f) + (size * 0.35f) + 0.5f);
+  int ialign = 0;
+  if (align == ALIGN_CENTER) ialign = 1;
+  else if (align == ALIGN_RIGHT) ialign = 2;
+  
+  if (ialign == 0) {
+    font_draw_game_name(r.x, y_pos, text, color, size, ialign);
+  } else if (ialign == 1) {
+    font_draw_game_name(r.x + (r.w / 2.0f), y_pos, text, color, size, ialign);
+  } else {
+    font_draw_game_name(r.x + r.w, y_pos, text, color, size, ialign);
+  }
+}
+
+void ui_draw_game_name_auto_fit(const char *text, Rect r, u32 color, float size,
+                                UIAlign align) {
+  if (!text || !*text)
+    return;
+
+  float current_w = font_get_game_name_width(text, size);
+  float final_scale = size;
+  char buffer[256];
+  const char *draw_ptr = text;
+
+  if (current_w > (float)r.w) {
+    float needed_scale = ((float)r.w / current_w) * size;
+    float min_scale = size * 0.8f;
+    if (needed_scale < min_scale) {
+      final_scale = min_scale;
+      
+      // Ellipsis logic adapted for font_get_game_name_width
+      const char *ellipsis = "...";
+      float ellipsis_w = font_get_game_name_width(ellipsis, final_scale);
+      float target_w = (float)r.w - ellipsis_w;
+      
+      if (target_w < 0) {
+        if (ellipsis_w <= (float)r.w) {
+          strncpy(buffer, ellipsis, sizeof(buffer) - 1);
+          buffer[sizeof(buffer) - 1] = '\0';
+        } else {
+          buffer[0] = '\0';
+        }
+      } else {
+        size_t best_fit = 0;
+        char temp[128];
+        size_t curr_len = 0;
+        size_t max_len = strlen(text);
+        
+        while (curr_len < max_len) {
+          size_t c_size = utf8_char_size((unsigned char)text[curr_len]);
+          if (c_size == 0) c_size = 1; // Fallback
+
+          size_t next_len = curr_len + c_size;
+          if (next_len >= sizeof(temp)) break;
+
+          snprintf(temp, sizeof(temp), "%.*s", (int)next_len, text);
+          float w = font_get_game_name_width(temp, final_scale);
+
+          if (w <= target_w) {
+            best_fit = next_len;
+            curr_len = next_len;
+          } else {
+            break;
+          }
+        }
+        snprintf(buffer, sizeof(buffer), "%.*s%s", (int)best_fit, text, ellipsis);
+      }
+      draw_ptr = buffer;
+    } else {
+      final_scale = needed_scale;
+    }
+  }
+
+  float y_pos = floorf(r.y + (r.h / 2.0f) + (final_scale * 0.35f) + 0.5f);
+  int ialign = 0;
+  if (align == ALIGN_CENTER) ialign = 1;
+  else if (align == ALIGN_RIGHT) ialign = 2;
+  
+  if (ialign == 0) {
+    font_draw_game_name(r.x, y_pos, draw_ptr, color, final_scale, ialign);
+  } else if (ialign == 1) {
+    font_draw_game_name(r.x + (r.w / 2.0f), y_pos, draw_ptr, color, final_scale, ialign);
+  } else {
+    font_draw_game_name(r.x + r.w, y_pos, draw_ptr, color, final_scale, ialign);
+  }
 }
 
 void ui_text_wrap(const char* src, float scale, int max_px_width,
