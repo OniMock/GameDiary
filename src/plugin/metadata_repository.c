@@ -84,11 +84,72 @@ static void fetch_ps1_metadata(GameMetadata *metadata, const char *path) {
 }
 
 /**
+ * @brief Reads TITLE and DISC_ID from the SFO embedded in a homebrew EBOOT.PBP.
+ *
+ * sctrlGetInitPARAM often returns empty strings for homebrews because the kernel
+ * does not populate the PARAM cache the same way it does for UMD/ISO titles.
+ * This function directly parses the PBP header and embedded SFO, which is the
+ * same approach already used for PS1 EBOOTs.
+ *
+ * If the embedded SFO also has no usable TITLE (e.g. a minimal homebrew),
+ * the game folder name is extracted from the executable path as a last resort.
+ */
+static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
+    if (metadata->file_path[0] == '\0') return;
+
+    /* --- 1. First priority: Use the game folder name from the path ---
+     * Users often name their folders cleanly (e.g. "Super Mario 64").
+     * This avoids dirty embedded SFO titles like "sm64-port d98e233-dirty". */
+    if (metadata->game_name[0] == '\0' || strcmp(metadata->game_name, "Unknown Game") == 0) {
+        char path_copy[256];
+        strncpy(path_copy, metadata->file_path, sizeof(path_copy) - 1);
+        path_copy[sizeof(path_copy) - 1] = '\0';
+
+        char *last_slash = strrchr(path_copy, '/');
+        if (last_slash) {
+            *last_slash = '\0';
+            char *prev_slash = strrchr(path_copy, '/');
+            const char *dir_name = prev_slash ? prev_slash + 1 : path_copy;
+            if (dir_name[0] != '\0') {
+                strncpy(metadata->game_name, dir_name, sizeof(metadata->game_name) - 1);
+                metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
+            }
+        }
+    }
+
+    /* --- 2. Fallback: Try TITLE from the SFO embedded inside EBOOT.PBP ---
+     * Only if folder name extraction failed or resulted in something generic like "GAME" */
+    if (metadata->game_name[0] == '\0' || strcmp(metadata->game_name, "Unknown Game") == 0 || strcmp(metadata->game_name, "GAME") == 0) {
+        char title_buf[128];
+        title_buf[0] = '\0';
+        if (pbp_read_sfo_string(metadata->file_path, "TITLE", title_buf, sizeof(title_buf)) && title_buf[0] != '\0') {
+            strncpy(metadata->game_name, title_buf, sizeof(metadata->game_name) - 1);
+            metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
+        }
+    }
+
+    /* --- 3. Try DISC_ID from the same embedded SFO --- */
+    if (strcmp(metadata->game_id, "UNKNOWN-00000") == 0) {
+        char id_buf[16];
+        id_buf[0] = '\0';
+        if (pbp_read_sfo_string(metadata->file_path, "DISC_ID", id_buf, sizeof(id_buf)) && id_buf[0] != '\0') {
+            // Reject lazy SFO copies! Many homebrew ports (like Mario64) use copied UMD PARAM.SFO files
+            // (e.g. LocoRoco UCJS10041). If it starts with standard Sony regions (UC, UL, NP), 
+            // reject it so GameDiary forces a unique HBX- hash based on the resolved name.
+            if (strncmp(id_buf, "UC", 2) != 0 && strncmp(id_buf, "UL", 2) != 0 && strncmp(id_buf, "NP", 2) != 0) {
+                strncpy(metadata->game_id, id_buf, sizeof(metadata->game_id) - 1);
+                metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
+            }
+        }
+    }
+}
+
+/**
  * @brief Generates a unique ID for Homebrews using a hash of their title.
  */
 static void fetch_homebrew_fallback_id(GameMetadata *metadata) {
     if (strcmp(metadata->game_id, "UNKNOWN-00000") == 0) {
-        snprintf(metadata->game_id, sizeof(metadata->game_id), "HBX-%08X",
+        snprintf(metadata->game_id, sizeof(metadata->game_id), "HBX%08X",
                  (unsigned int)hash_string(metadata->game_name));
     }
 }
@@ -113,11 +174,26 @@ int metadata_fetch(GameMetadata *metadata) {
             break;
 
         case CAT_PSP:
-        case CAT_HOMEBREW:
+            // For official PSP games, we trust the system metadata (DISC_ID/TITLE)
             fetch_system_metadata(metadata);
-            if (metadata->category == CAT_HOMEBREW) {
-                fetch_homebrew_fallback_id(metadata);
+            break;
+
+        case CAT_HOMEBREW:
+            // For Homebrews, we first try system metadata
+            fetch_system_metadata(metadata);
+            
+            // Critical CFW spoofing fix:
+            // ISO drivers spoof DISC_ID to LocoRoco (UCJS10041). Reject it for HBs.
+            // Check if the ID looks like a standard Sony ID (UC/UL/NP)
+            if (strncmp(metadata->game_id, "UC", 2) == 0 || 
+                strncmp(metadata->game_id, "UL", 2) == 0 || 
+                strncmp(metadata->game_id, "NP", 2) == 0) {
+                strncpy(metadata->game_id, "UNKNOWN-00000", sizeof(metadata->game_id) - 1);
             }
+
+            /* Resolve name from folder and PBP SFO, then hash if needed */
+            fetch_homebrew_sfo_metadata(metadata);
+            fetch_homebrew_fallback_id(metadata);
             break;
 
         default:
