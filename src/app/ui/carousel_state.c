@@ -21,6 +21,7 @@
 #include "app/data/data_loader.h"
 #include "app/render/texture.h"
 #include "common/utils.h"
+#include "common/db_schema.h"
 
 #include <pspctrl.h>
 #include <math.h>
@@ -55,7 +56,7 @@ static int slot_for(int game_idx) {
 static void build_icon_path(char *out, size_t size, int game_idx) {
     const GameStats *games = data_get_games();
     snprintf(out, size,
-             "%s/PSP/COMMON/GameDiary/icons/%s.png",
+             "%s" GDIARY_BASE_DIR "/" GDIARY_ICON_DIR "/%s.png",
              utils_get_device_prefix(),
              games[game_idx].entry.game_id);
 }
@@ -108,7 +109,7 @@ static int carousel_loader_thread(SceSize args, void *argp) {
                     s_active_cs->cache[s].state == CACHE_SLOT_PENDING) {
 
                     int wrap_idx = (target_idx % s_active_cs->total + s_active_cs->total) % s_active_cs->total;
-                    
+
                     /* Resolve logical index to physical game index using the map */
                     int physical_game_idx = wrap_idx;
                     if (s_active_cs->index_map) {

@@ -35,13 +35,13 @@ void storage_init(const char *base_dir);
 int storage_get_or_create_game(const GameMetadata *meta, u32 *uid);
 
 /**
- * @brief Persists a session entry (duration, timestamp) to sessions.dat.
+ * @brief Persists a session entry (duration, timestamp) to "SESSIONS_DAT".
  *        If *offset == -1 a new entry is appended; otherwise it overwrites
  *        the entry at the given offset (incremental update pattern).
  * @param game_uid  UID of the game being tracked.
  * @param duration  Total session duration in seconds.
  * @param timestamp UNIX timestamp of the update.
- * @param offset    In/out: byte offset of the session entry in sessions.dat.
+ * @param offset    In/out: byte offset of the session entry in "SESSIONS_DAT".
  * @return 0 on success, negative on error.
  */
 int storage_log_session(u32 game_uid, u32 duration, u32 timestamp, SceOff *offset);

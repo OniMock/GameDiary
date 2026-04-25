@@ -63,6 +63,14 @@ static void ensure_dir(const char *path) {
   sceIoMkdir(tmp, 0777);
 }
 
+static void safe_remove_if_exists(const char *path) {
+    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0);
+    if (fd >= 0) {
+        sceIoClose(fd);
+        sceIoRemove(path);
+    }
+}
+
 static u32 calculate_generic_checksum(const void *data, size_t len, size_t skip_offset) {
     u32 hash = 2166136261U; // FNV offset basis
     const unsigned char *p = (const unsigned char *)data;
@@ -131,7 +139,9 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
 
     // PRO-C Workaround: Ensure the tmp file is deleted before truncating/creating, 
     // as some older CFW drivers have buggy PSP_O_TRUNC behavior when the file exists.
-    sceIoRemove(tmp_path);
+    // HOWEVER, calling sceIoRemove on a non-existent file in PRO-C corrupts the FAT entry cache,
+    // causing the immediate sceIoOpen(O_CREAT) to fail with ENOENT (-2147351775).
+    safe_remove_if_exists(tmp_path);
 
     SceUID out_fd = sceIoOpen(tmp_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (out_fd < 0) {
@@ -139,7 +149,7 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
         // In some PRO-C FAT drivers, PSP_O_TRUNC or PSP_O_WRONLY when file is missing returns ENOENT.
         out_fd = sceIoOpen(tmp_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
         if (out_fd < 0) {
-            utils_log_error("storage", "Failed to open games.tmp for writing", out_fd);
+            utils_log_error("storage", "Failed to open " GAMES_TMP " for writing", out_fd);
             return -1;
         }
     }
@@ -192,7 +202,7 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
     if (res >= 0) {
         sceIoSync(g_device, 0); /* One critical sync after the atomic rename */
     } else {
-        utils_log_error("storage", "Failed to rename games.tmp to games.dat", res);
+        utils_log_error("storage", "Failed to rename " GAMES_TMP " to " GAMES_DAT, res);
     }
 
     return (res >= 0) ? 0 : -2;
@@ -228,7 +238,7 @@ void storage_init(const char *base_dir) {
   get_full_path(path, GAMES_DAT);
   get_full_path(tmp_path, GAMES_TMP);
 
-  /* Recovery: check if games.tmp is valid and should be promoted. */
+  /* Recovery: check if " GAMES_TMP " is valid and should be promoted. */
   GameRegistryHeader tmp_header;
   if (load_reliable_header(&tmp_header, tmp_path) == 0) {
       sceIoRemove(path);
@@ -268,7 +278,8 @@ void storage_init(const char *base_dir) {
     if (size % sizeof(SessionEntry) != 0) {
       SceOff valid_size = (size / sizeof(SessionEntry)) * sizeof(SessionEntry);
       char s_tmp[256];
-      get_full_path(s_tmp, "sessions.tmp");
+      get_full_path(s_tmp, SESSIONS_TMP);
+      safe_remove_if_exists(s_tmp);
       SceUID in_fd = sceIoOpen(s_path, PSP_O_RDONLY, 0777);
       SceUID out_fd = sceIoOpen(s_tmp, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
       if (out_fd < 0) {
@@ -395,7 +406,7 @@ int storage_log_session(u32 game_uid, u32 duration, u32 timestamp, SceOff *offse
         // Fallback for PRO-C if PSP_O_APPEND behavior is strictly failing over missing file?
         fd = sceIoOpen(path, PSP_O_RDWR | PSP_O_CREAT, 0777);
         if (fd < 0) {
-            utils_log_error("storage", "Failed to create/append sessions.dat", fd);
+            utils_log_error("storage", "Failed to create/append " SESSIONS_DAT, fd);
             return -1;
         }
     }
@@ -406,7 +417,7 @@ int storage_log_session(u32 game_uid, u32 duration, u32 timestamp, SceOff *offse
     // Existing session: Overwrite
     fd = sceIoOpen(path, PSP_O_WRONLY, 0777);
     if (fd < 0) {
-        utils_log_error("storage", "Failed to open sessions.dat for update", fd);
+        utils_log_error("storage", "Failed to open " SESSIONS_DAT " for update", fd);
         return -2;
     }
     sceIoLseek(fd, *offset, PSP_SEEK_SET);

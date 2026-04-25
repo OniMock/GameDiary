@@ -15,6 +15,7 @@
 
 #include "app/data/data_loader.h"
 #include "common/utils.h"
+#include "common/db_schema.h"
 #include <pspkernel.h>
 #include <psprtc.h>
 #include <stdio.h>
@@ -37,7 +38,7 @@ int data_load_all(void) {
 
     // 1. Load games.dat
     char path[256];
-    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/db/games.dat", prefix);
+    snprintf(path, sizeof(path), "%s" GDIARY_BASE_DIR "/" GDIARY_DB_DIR "/" GAMES_DAT, prefix);
     SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     if (fd < 0) return -1;
 
@@ -69,8 +70,8 @@ int data_load_all(void) {
         }
     }
 
-    // 2. Load sessions.dat
-    snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/db/sessions.dat", prefix);
+    // 2. Load "SESSIONS_DAT"
+    snprintf(path, sizeof(path), "%s" GDIARY_BASE_DIR "/" GDIARY_DB_DIR "/" SESSIONS_DAT, prefix);
     fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     if (fd >= 0) {
         SceOff size = sceIoLseek(fd, 0, PSP_SEEK_END);

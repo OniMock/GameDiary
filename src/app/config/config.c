@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pspkernel.h>
+#include "common/db_schema.h"
 
 #include "common/utils.h"
 
@@ -29,7 +30,7 @@ void config_init(const char *app_path) {
     if (last_slash) {
         *(last_slash + 1) = '\0'; // Keep the trailing slash
     }
-    strcat(g_config_path, "config.dat");
+    strcat(g_config_path, CONFIG_DAT);
 }
 
 int config_load(void) {

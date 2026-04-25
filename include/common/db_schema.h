@@ -17,13 +17,17 @@
 #define GAMEDIARY_MAGIC 0x444D4147
 #define DB_VERSION 3
 
-// Path logic is handled in storage.c with sctrlKernelMsIsEf()
-#define DB_DIR_MS "ms0:/PSP/COMMON/GameDiary/db"
-#define DB_DIR_EF "ef0:/PSP/COMMON/GameDiary/db"
+// Path logic is resolved dynamically at runtime via utils_get_device_prefix()
+#define GDIARY_BASE_DIR "/PSP/COMMON/GameDiary"
+#define GDIARY_ICON_DIR "icons"
+#define GDIARY_DB_DIR "db"
 
+// Database files
 #define GAMES_DAT "games.dat"
 #define GAMES_TMP "games.tmp"
 #define SESSIONS_DAT "sessions.dat"
+#define SESSIONS_TMP "sessions.tmp"
+#define CONFIG_DAT "config.dat"
 
 /**
  * @brief Game entry structure.

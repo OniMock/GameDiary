@@ -25,6 +25,7 @@
 #include "app/data/data_loader.h"
 #include "common/utils.h"
 #include "common/models.h"
+#include "common/db_schema.h"
 #include "app/data/game_category.h"
 #include <pspctrl.h>
 #include <stdio.h>
@@ -64,7 +65,7 @@ static void game_details_init(void) {
     GameStats* g = &games[g_game_idx];
 
     char icon_path[256];
-    snprintf(icon_path, sizeof(icon_path), "%s/PSP/COMMON/GameDiary/icons/%s.png",
+    snprintf(icon_path, sizeof(icon_path), "%s" GDIARY_BASE_DIR "/" GDIARY_ICON_DIR "/%s.png",
              utils_get_device_prefix(), g->entry.game_id);
     g_game_icon = texture_load_png(icon_path);
 

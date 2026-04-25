@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     /* Initialize storage with dynamic device prefix (ms0: vs ef0:) */
     char base_path[128];
-    snprintf(base_path, sizeof(base_path), "%s/PSP/COMMON/GameDiary", utils_get_device_prefix());
+    snprintf(base_path, sizeof(base_path), "%s" GDIARY_BASE_DIR, utils_get_device_prefix());
     storage_init(base_path);
 
     /* 3. Systems Initialization */

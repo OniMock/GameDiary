@@ -14,6 +14,7 @@
  */
 
 #include "common/utils.h"
+#include "common/db_schema.h"
 #include <pspkernel.h>
 #include <pspsdk/systemctrl.h>
 #include <psprtc.h>
@@ -56,7 +57,7 @@ const char *utils_get_device_prefix(void) {
   SceUID fd;
 
   // 1. Check for existing database on Memory Stick (ms0) - Standard Priority
-  fd = sceIoOpen("ms0:/PSP/COMMON/GameDiary/db/games.dat", PSP_O_RDONLY, 0);
+  fd = sceIoOpen("ms0:" GDIARY_BASE_DIR "/" GDIARY_DB_DIR "/" GAMES_DAT, PSP_O_RDONLY, 0);
   if (fd >= 0) {
     sceIoClose(fd);
     cached = "ms0:";
@@ -64,7 +65,7 @@ const char *utils_get_device_prefix(void) {
   }
 
   // 2. Check for existing database on Internal Storage (ef0)
-  fd = sceIoOpen("ef0:/PSP/COMMON/GameDiary/db/games.dat", PSP_O_RDONLY, 0);
+  fd = sceIoOpen("ef0:" GDIARY_BASE_DIR "/" GDIARY_DB_DIR "/" GAMES_DAT, PSP_O_RDONLY, 0);
   if (fd >= 0) {
     sceIoClose(fd);
     cached = "ef0:";
@@ -88,11 +89,11 @@ void utils_ensure_storage_dirs(const char *prefix) {
   char path[128];
 
   // 1. Create root GameDiary folder
-  snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary", prefix);
+  snprintf(path, sizeof(path), "%s" GDIARY_BASE_DIR, prefix);
   sceIoMkdir(path, 0777);
 
   // 2. Create db subfolder
-  snprintf(path, sizeof(path), "%s/PSP/COMMON/GameDiary/db", prefix);
+  snprintf(path, sizeof(path), "%s" GDIARY_BASE_DIR "/db", prefix);
   sceIoMkdir(path, 0777);
 }
 
@@ -103,7 +104,7 @@ int utils_copy_file(const char *src, const char *dst) {
     return -1;
   SceUID f_out = sceIoOpen(dst, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
   if (f_out < 0) f_out = sceIoOpen(dst, PSP_O_RDWR | PSP_O_CREAT, 0777);
-  
+
   if (f_out < 0) {
     utils_log_error("utils", "Failed to create/open icon dest file in copy", f_out);
     sceIoClose(f_in);
@@ -165,7 +166,7 @@ int utils_extract_pbp_icon(const char *pbp_path, const char *dst) {
 
   SceUID f_out = sceIoOpen(dst, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
   if (f_out < 0) f_out = sceIoOpen(dst, PSP_O_RDWR | PSP_O_CREAT, 0777);
-  
+
   if (f_out < 0) {
     utils_log_error("utils", "Failed to create/open icon dest file in extract", f_out);
     sceIoClose(f_in);
@@ -197,7 +198,7 @@ void utils_set_log_context(const char *game_id) {
     if (game_id && game_id[0] != '\0') {
         snprintf(g_log_game_id, sizeof(g_log_game_id), "%s", game_id);
     }
-    
+
     if (!g_log_context_set) {
         int fw = sceKernelDevkitVersion();
 #ifdef GDIARY_PLUGIN
@@ -212,16 +213,16 @@ void utils_set_log_context(const char *game_id) {
 
 void utils_log_error(const char *module, const char *msg, int code) {
   char log_path[128];
-  snprintf(log_path, sizeof(log_path), "%s/PSP/COMMON/GameDiary/error.txt", utils_get_device_prefix());
-  
+  snprintf(log_path, sizeof(log_path), "%s" GDIARY_BASE_DIR "/error.txt", utils_get_device_prefix());
+
   SceUID fd = sceIoOpen(log_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
   if (fd < 0) fd = sceIoOpen(log_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
-  
+
   if (fd >= 0) {
     char buf[256];
     u32 ts = utils_get_timestamp();
     if (!g_log_context_set) utils_set_log_context(NULL);
-    int len = snprintf(buf, sizeof(buf), "[%u] [ERR] [%s] %s (Code: %d) | Game: %s | Sys: %s\r\n", 
+    int len = snprintf(buf, sizeof(buf), "[%u] [ERR] [%s] %s (Code: %d) | Game: %s | Sys: %s\r\n",
                        (unsigned int)ts, module, msg, code, g_log_game_id, g_log_cfw_info);
     sceIoWrite(fd, buf, len);
     sceIoClose(fd);
@@ -230,16 +231,16 @@ void utils_log_error(const char *module, const char *msg, int code) {
 
 void utils_log_trace(const char *module, const char *msg) {
   char log_path[128];
-  snprintf(log_path, sizeof(log_path), "%s/PSP/COMMON/GameDiary/error.txt", utils_get_device_prefix());
-  
+  snprintf(log_path, sizeof(log_path), "%s" GDIARY_BASE_DIR "/error.txt", utils_get_device_prefix());
+
   SceUID fd = sceIoOpen(log_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
   if (fd < 0) fd = sceIoOpen(log_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
-  
+
   if (fd >= 0) {
     char buf[256];
     u32 ts = utils_get_timestamp();
     if (!g_log_context_set) utils_set_log_context(NULL);
-    int len = snprintf(buf, sizeof(buf), "[%u] [TRC] [%s] %s | Game: %s | Sys: %s\r\n", 
+    int len = snprintf(buf, sizeof(buf), "[%u] [TRC] [%s] %s | Game: %s | Sys: %s\r\n",
                        (unsigned int)ts, module, msg, g_log_game_id, g_log_cfw_info);
     sceIoWrite(fd, buf, len);
     sceIoClose(fd);
