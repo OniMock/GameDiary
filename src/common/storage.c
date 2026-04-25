@@ -135,8 +135,13 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
 
     SceUID out_fd = sceIoOpen(tmp_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (out_fd < 0) {
-        utils_log_error("storage", "Failed to open games.tmp for writing", out_fd);
-        return -1;
+        // PRO-C CFW Fallback:
+        // In some PRO-C FAT drivers, PSP_O_TRUNC or PSP_O_WRONLY when file is missing returns ENOENT.
+        out_fd = sceIoOpen(tmp_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
+        if (out_fd < 0) {
+            utils_log_error("storage", "Failed to open games.tmp for writing", out_fd);
+            return -1;
+        }
     }
 
     GameRegistryHeader h = *h_template;
@@ -244,6 +249,9 @@ void storage_init(const char *base_dir) {
     memset(g_header.reserved, 0, sizeof(g_header.reserved));
 
     SceUID fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    if (fd < 0) {
+        fd = sceIoOpen(path, PSP_O_RDWR | PSP_O_CREAT, 0777);
+    }
     if (fd >= 0) {
       sceIoWrite(fd, &g_header, sizeof(GameRegistryHeader));
       sceIoClose(fd);
@@ -263,6 +271,9 @@ void storage_init(const char *base_dir) {
       get_full_path(s_tmp, "sessions.tmp");
       SceUID in_fd = sceIoOpen(s_path, PSP_O_RDONLY, 0777);
       SceUID out_fd = sceIoOpen(s_tmp, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+      if (out_fd < 0) {
+          out_fd = sceIoOpen(s_tmp, PSP_O_RDWR | PSP_O_CREAT, 0777);
+      }
       if (in_fd >= 0 && out_fd >= 0) {
           static char recovery_buf[512]; // Static to avoid stack usage
           SceOff copied = 0;
@@ -297,6 +308,13 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
   /* Caller must have called storage_init() before this point.
    * If not initialized, we can't recover gracefully without a base_dir. */
   if (!g_initialized) return -1;
+
+  // PRO-C Workaround: Retry ensuring directories exist.
+  // During CFW boot (module_start), the MS can be locked or virtualized, 
+  // causing original ensure_dir() inside storage_init() to silently fail.
+  // Now, 5 seconds later in the tracker thread, MS access is solid.
+  ensure_dir(g_base_dir);
+  ensure_dir(g_db_dir);
 
   for (u32 i = 0; i < g_cache_count; i++) {
     if (strcmp(g_cache[i].game_id, meta->game_id) == 0) {

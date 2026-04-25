@@ -101,6 +101,8 @@ int utils_copy_file(const char *src, const char *dst) {
   if (f_in < 0)
     return -1;
   SceUID f_out = sceIoOpen(dst, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+  if (f_out < 0) f_out = sceIoOpen(dst, PSP_O_RDWR | PSP_O_CREAT, 0777);
+  
   if (f_out < 0) {
     sceIoClose(f_in);
     return -2;
@@ -160,6 +162,8 @@ int utils_extract_pbp_icon(const char *pbp_path, const char *dst) {
   }
 
   SceUID f_out = sceIoOpen(dst, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+  if (f_out < 0) f_out = sceIoOpen(dst, PSP_O_RDWR | PSP_O_CREAT, 0777);
+  
   if (f_out < 0) {
     sceIoClose(f_in);
     return -7;
