@@ -15,6 +15,7 @@
 
 #include "common/utils.h"
 #include <pspkernel.h>
+#include <pspsdk/systemctrl.h>
 #include <psprtc.h>
 #include <stdio.h>
 #include <string.h>
@@ -104,6 +105,7 @@ int utils_copy_file(const char *src, const char *dst) {
   if (f_out < 0) f_out = sceIoOpen(dst, PSP_O_RDWR | PSP_O_CREAT, 0777);
   
   if (f_out < 0) {
+    utils_log_error("utils", "Failed to create/open icon dest file in copy", f_out);
     sceIoClose(f_in);
     return -2;
   }
@@ -165,6 +167,7 @@ int utils_extract_pbp_icon(const char *pbp_path, const char *dst) {
   if (f_out < 0) f_out = sceIoOpen(dst, PSP_O_RDWR | PSP_O_CREAT, 0777);
   
   if (f_out < 0) {
+    utils_log_error("utils", "Failed to create/open icon dest file in extract", f_out);
     sceIoClose(f_in);
     return -7;
   }
@@ -186,15 +189,40 @@ int utils_extract_pbp_icon(const char *pbp_path, const char *dst) {
   return 0;
 }
 
+static char g_log_game_id[32] = "N/A";
+static char g_log_cfw_info[64] = "FW: Unknown | HEN: Unknown";
+static int g_log_context_set = 0;
+
+void utils_set_log_context(const char *game_id) {
+    if (game_id && game_id[0] != '\0') {
+        snprintf(g_log_game_id, sizeof(g_log_game_id), "%s", game_id);
+    }
+    
+    if (!g_log_context_set) {
+        int fw = sceKernelDevkitVersion();
+#ifdef GDIARY_PLUGIN
+        u32 hen = sctrlHENGetVersion();
+        snprintf(g_log_cfw_info, sizeof(g_log_cfw_info), "FW: %08X | HEN: %08X", fw, (unsigned int)hen);
+#else
+        snprintf(g_log_cfw_info, sizeof(g_log_cfw_info), "FW: %08X | AppMode", fw);
+#endif
+        g_log_context_set = 1;
+    }
+}
+
 void utils_log_error(const char *module, const char *msg, int code) {
   char log_path[128];
   snprintf(log_path, sizeof(log_path), "%s/PSP/COMMON/GameDiary/error.txt", utils_get_device_prefix());
   
   SceUID fd = sceIoOpen(log_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+  if (fd < 0) fd = sceIoOpen(log_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
+  
   if (fd >= 0) {
     char buf[256];
     u32 ts = utils_get_timestamp();
-    int len = snprintf(buf, sizeof(buf), "[%u] [ERR] [%s] %s (Code: %d)\r\n", (unsigned int)ts, module, msg, code);
+    if (!g_log_context_set) utils_set_log_context(NULL);
+    int len = snprintf(buf, sizeof(buf), "[%u] [ERR] [%s] %s (Code: %d) | Game: %s | Sys: %s\r\n", 
+                       (unsigned int)ts, module, msg, code, g_log_game_id, g_log_cfw_info);
     sceIoWrite(fd, buf, len);
     sceIoClose(fd);
   }
@@ -205,10 +233,14 @@ void utils_log_trace(const char *module, const char *msg) {
   snprintf(log_path, sizeof(log_path), "%s/PSP/COMMON/GameDiary/error.txt", utils_get_device_prefix());
   
   SceUID fd = sceIoOpen(log_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+  if (fd < 0) fd = sceIoOpen(log_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
+  
   if (fd >= 0) {
     char buf[256];
     u32 ts = utils_get_timestamp();
-    int len = snprintf(buf, sizeof(buf), "[%u] [TRC] [%s] %s\r\n", (unsigned int)ts, module, msg);
+    if (!g_log_context_set) utils_set_log_context(NULL);
+    int len = snprintf(buf, sizeof(buf), "[%u] [TRC] [%s] %s | Game: %s | Sys: %s\r\n", 
+                       (unsigned int)ts, module, msg, g_log_game_id, g_log_cfw_info);
     sceIoWrite(fd, buf, len);
     sceIoClose(fd);
   }

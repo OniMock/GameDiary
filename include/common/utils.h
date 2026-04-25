@@ -66,4 +66,9 @@ void utils_log_trace(const char *module, const char *msg);
 void utils_capture_icon(const char *game_id, u8 category, const char *dest_dir, const char *executable_path);
 #endif
 
+/**
+ * @brief Sets global context information for the error logs.
+ */
+void utils_set_log_context(const char *game_id);
+
 #endif // _COMMON_UTILS_H_
