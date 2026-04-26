@@ -75,14 +75,23 @@ static void calc_weekly(const SessionEntry *sessions, int count, StatsQuery quer
         out_data->column_dates[i] = today_start - ((6 - i) * 86400);
     }
 
+    time_t window_start = today_start - 6 * 86400;
+    time_t window_end   = today_start + 86400;
+
+    /* Split each session's duration across the 7-day columns.
+     * A session spanning midnight (e.g. 23:00–01:00) contributes 1h to each
+     * affected day instead of 2h to the day of the timestamp. */
     for (int i = 0; i < count; i++) {
-        time_t s_time = (time_t)sessions[i].timestamp;
-        if (s_time >= (today_start - 6 * 86400) && s_time < (today_start + 86400)) {
-            int days_ago = (today_start >= s_time) ? ((today_start - s_time) / 86400 + 1) : 0;
-            if (days_ago >= 0 && days_ago < 7) {
-                int col_idx = 6 - days_ago;
-                out_data->column_values[col_idx] += sessions[i].duration;
-            }
+        time_t s_start = (time_t)sessions[i].timestamp;
+        time_t s_end   = s_start + (time_t)sessions[i].duration;
+
+        /* Quick cull: skip sessions with no overlap with the 7-day window */
+        if (s_end <= window_start || s_start >= window_end) continue;
+
+        for (int col = 0; col < 7; col++) {
+            time_t day_start = (time_t)out_data->column_dates[col];
+            time_t day_end   = day_start + 86400;
+            out_data->column_values[col] += utils_time_overlap_secs(s_start, s_end, day_start, day_end);
         }
     }
     
@@ -146,13 +155,21 @@ static void calc_monthly(const SessionEntry *sessions, int count, StatsQuery que
     
     time_t month_end = out_data->column_dates[days_in_month - 1] + 86400;
 
+    /* Split each session's duration across the day columns of this month.
+     * A session starting on the last day of the month and running past midnight
+     * correctly contributes time to the next month's first day when that month
+     * is viewed, instead of over-counting on the last day. */
     for (int i = 0; i < count; i++) {
-        time_t s_time = (time_t)sessions[i].timestamp;
-        if (s_time >= month_start && s_time < month_end) {
-            int d = (s_time - month_start) / 86400;
-            if (d >= 0 && d < days_in_month) {
-                out_data->column_values[d] += sessions[i].duration;
-            }
+        time_t s_start = (time_t)sessions[i].timestamp;
+        time_t s_end   = s_start + (time_t)sessions[i].duration;
+
+        /* Quick cull: skip sessions with no overlap with this month */
+        if (s_end <= month_start || s_start >= month_end) continue;
+
+        for (int d = 0; d < days_in_month; d++) {
+            time_t day_start = (time_t)out_data->column_dates[d];
+            time_t day_end   = day_start + 86400;
+            out_data->column_values[d] += utils_time_overlap_secs(s_start, s_end, day_start, day_end);
         }
     }
     
@@ -196,12 +213,31 @@ static void calc_yearly(const SessionEntry *sessions, int count, StatsQuery quer
         out_data->column_dates[i] = mktime(&ytm);
     }
     
+    /* Precompute the exclusive end timestamp of each year column so we can use
+     * time_overlap_secs. year_ends[i] = Jan 1 of (start_year + i + 1). */
+    time_t year_ends[10];
+    for (int i = 0; i < 9; i++) {
+        year_ends[i] = out_data->column_dates[i + 1];
+    }
+    {
+        struct tm nytm = {0};
+        nytm.tm_year = current_year + 1 - 1900; /* year after the last column */
+        nytm.tm_mon = 0; nytm.tm_mday = 1;
+        year_ends[9] = mktime(&nytm);
+    }
+
+    /* Split each session across year columns (handles rare New Year's Eve
+     * marathons that cross into the next year). */
     for (int i = 0; i < count; i++) {
-        time_t s_time = (time_t)sessions[i].timestamp;
-        struct tm s_tm = *localtime(&s_time);
-        int sy = s_tm.tm_year + 1900;
-        if (sy >= start_year && sy <= current_year) {
-            out_data->column_values[sy - start_year] += sessions[i].duration;
+        time_t s_start = (time_t)sessions[i].timestamp;
+        time_t s_end   = s_start + (time_t)sessions[i].duration;
+
+        /* Quick cull: outside the entire 10-year range */
+        if (s_end <= out_data->column_dates[0] || s_start >= year_ends[9]) continue;
+
+        for (int col = 0; col < 10; col++) {
+            out_data->column_values[col] += utils_time_overlap_secs(
+                s_start, s_end, out_data->column_dates[col], year_ends[col]);
         }
     }
     

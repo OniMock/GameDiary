@@ -179,11 +179,13 @@ static void draw_stats_block(const GameStats *g,
     ui_draw_text(i18n_get(MSG_STATS_TOTAL_PLAYTIME), text_rect1, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
     ui_draw_text(val_buf, text_rect1, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_RIGHT);
 
-    /* Last Played Date */
+    /* Last Played Date — use the END of the last session (timestamp+duration)
+     * so that a session crossing midnight shows the correct next-day date. */
     time_t last_time = 0;
     for (int i = 0; i < sess_count; i++) {
         if (sessions[i].game_uid == g->entry.uid && sessions[i].duration > 0) {
-            if (sessions[i].timestamp > last_time) last_time = sessions[i].timestamp;
+            time_t sess_end = (time_t)sessions[i].timestamp + (time_t)sessions[i].duration;
+            if (sess_end > last_time) last_time = sess_end;
         }
     }
     char last_str[32];

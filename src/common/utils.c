@@ -43,6 +43,16 @@ u32 utils_get_timestamp(void) {
   return (u32)((tick / 1000000ULL) - 62135596800ULL);
 }
 
+u32 utils_time_overlap_secs(time_t a_start, time_t a_end, time_t b_start, time_t b_end) {
+  /* Returns the length of the intersection of [a_start, a_end) and [b_start, b_end).
+   * Both intervals are half-open (start inclusive, end exclusive).
+   * Used by all period-based stats calculators to split session duration
+   * across calendar day/month/year boundaries. */
+  time_t s = (a_start > b_start) ? a_start : b_start;
+  time_t e = (a_end   < b_end  ) ? a_end   : b_end;
+  return (e > s) ? (u32)(e - s) : 0u;
+}
+
 void utils_format_duration_compact(u32 seconds, char *out, size_t size) {
   (void)seconds;
   (void)out;

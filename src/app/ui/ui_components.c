@@ -359,42 +359,78 @@ typedef struct {
 static int compute_game_daily_data(const SessionEntry *sessions, int count,
                                    u32 game_uid, int max_days,
                                    DailyPlayData aggregated[], u32 *max_dur_out) {
-  int day_count = 0;
-  u32 max_dur = 60u;
+  /* Step 1: Collect unique "day starts" that any session overlaps.
+   * We use the session END time (timestamp + duration) to detect midnight
+   * crossings and register both the start day and any subsequent days. */
+  time_t day_candidates[MAX_SESSION_BARS * 2]; /* generous upper-bound */
+  int cand_count = 0;
 
-  /* Traverse backward through sessions to find the most recent days */
-  for (int i = count - 1; i >= 0 && day_count < max_days; i--) {
+  for (int i = 0; i < count; i++) {
     if (sessions[i].game_uid != game_uid || sessions[i].duration == 0)
       continue;
 
-    time_t s_time = (time_t)sessions[i].timestamp;
-    struct tm ts_tm = *localtime(&s_time);
-    ts_tm.tm_hour = 0;
-    ts_tm.tm_min = 0;
-    ts_tm.tm_sec = 0;
-    time_t s_day_start = mktime(&ts_tm);
+    time_t s_start = (time_t)sessions[i].timestamp;
+    time_t s_end   = s_start + (time_t)sessions[i].duration;
 
-    /* Check if this session belongs to the current "latest" day we're collecting */
-    if (day_count > 0 && aggregated[day_count - 1].day_start == s_day_start) {
-      aggregated[day_count - 1].duration += sessions[i].duration;
-    } else {
-      /* New day found */
-      if (day_count < max_days) {
-        aggregated[day_count].day_start = s_day_start;
-        aggregated[day_count].duration = sessions[i].duration;
-        day_count++;
+    /* Walk through each calendar day that this session touches */
+    struct tm day_tm = *localtime(&s_start);
+    day_tm.tm_hour = 0; day_tm.tm_min = 0; day_tm.tm_sec = 0;
+    time_t day_cur = mktime(&day_tm);
+
+    while (day_cur < s_end) {
+      /* Register this day if not already present */
+      int found = 0;
+      for (int d = 0; d < cand_count; d++) {
+        if (day_candidates[d] == day_cur) { found = 1; break; }
       }
+      if (!found && cand_count < MAX_SESSION_BARS * 2) {
+        day_candidates[cand_count++] = day_cur;
+      }
+      day_cur += 86400; /* advance one calendar day */
     }
   }
 
-  /* Reverse so oldest is index 0 (left) and newest is index day_count-1 (right) */
-  for (int i = 0; i < day_count / 2; i++) {
-    DailyPlayData tmp = aggregated[i];
-    aggregated[i] = aggregated[day_count - 1 - i];
-    aggregated[day_count - 1 - i] = tmp;
+  if (cand_count == 0) {
+    *max_dur_out = 60u;
+    return 0;
   }
 
-  /* Find max duration for scaling */
+  /* Step 2: Sort day_candidates descending (most recent first) so we can
+   * pick the last max_days unique days. Simple insertion sort — small N. */
+  for (int i = 1; i < cand_count; i++) {
+    time_t key = day_candidates[i];
+    int j = i - 1;
+    while (j >= 0 && day_candidates[j] < key) {
+      day_candidates[j + 1] = day_candidates[j];
+      j--;
+    }
+    day_candidates[j + 1] = key;
+  }
+
+  /* Keep only the most recent max_days days */
+  int day_count = (cand_count < max_days) ? cand_count : max_days;
+
+  /* Step 3: For each selected day, accumulate split duration via time_overlap.
+   * Iterate in reverse so aggregated[0] = oldest, aggregated[day_count-1] = newest. */
+  for (int d = 0; d < day_count; d++) {
+    /* day_candidates[0] is newest; day_candidates[day_count-1] is oldest */
+    time_t day_start = day_candidates[day_count - 1 - d];
+    time_t day_end   = day_start + 86400;
+
+    aggregated[d].day_start = day_start;
+    aggregated[d].duration  = 0;
+
+    for (int i = 0; i < count; i++) {
+      if (sessions[i].game_uid != game_uid || sessions[i].duration == 0)
+        continue;
+      time_t s_start = (time_t)sessions[i].timestamp;
+      time_t s_end   = s_start + (time_t)sessions[i].duration;
+      aggregated[d].duration += utils_time_overlap_secs(s_start, s_end, day_start, day_end);
+    }
+  }
+
+  /* Step 4: Find max duration for bar scaling */
+  u32 max_dur = 60u;
   for (int i = 0; i < day_count; i++) {
     if (aggregated[i].duration > max_dur)
       max_dur = aggregated[i].duration;

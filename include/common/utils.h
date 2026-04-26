@@ -13,6 +13,7 @@
 
 /* pspkernel.h transitively provides u8, u32, and other scalar types. */
 #include <pspkernel.h>
+#include <time.h>
 
 /**
  * @brief Simple djb2 hash function for strings.
@@ -43,6 +44,24 @@ u32 utils_get_u32_le(const u8 *p);
  * Syncs app and plugin time logic.
  */
 u32 utils_get_timestamp(void);
+
+/**
+ * @brief Returns the overlap in seconds between two half-open time intervals.
+ *
+ * Computes the intersection of [a_start, a_end) and [b_start, b_end), expressed
+ * in seconds. Returns 0 if the intervals do not overlap.
+ *
+ * Used by the stats calculators to split a session's duration across calendar
+ * boundaries (day, month, year) so each period only counts the time that
+ * genuinely fell within it.
+ *
+ * @param a_start  Start of interval A (inclusive, UNIX seconds).
+ * @param a_end    End   of interval A (exclusive, UNIX seconds).
+ * @param b_start  Start of interval B (inclusive, UNIX seconds).
+ * @param b_end    End   of interval B (exclusive, UNIX seconds).
+ * @return Overlap duration in seconds, or 0 if no overlap.
+ */
+u32 utils_time_overlap_secs(time_t a_start, time_t a_end, time_t b_start, time_t b_end);
 
 void utils_format_duration_compact(u32 seconds, char *out, size_t size);
 const char* utils_get_device_prefix(void);

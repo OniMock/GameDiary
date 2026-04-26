@@ -109,8 +109,12 @@ void data_calculate_stats(u32 start_ts, u32 end_ts) {
             if (idx != 0xFFFF && idx < g_game_count) {
                 g_games[idx].total_playtime += g_sessions[i].duration;
                 g_games[idx].session_count++;
-                if (g_sessions[i].timestamp > g_games[idx].last_played_ts) {
-                    g_games[idx].last_played_ts = g_sessions[i].timestamp;
+                /* last_played_ts tracks the END of the most recent session
+                 * (timestamp + duration) so that cross-midnight sessions
+                 * show the day they actually finished on. */
+                u32 sess_end_ts = g_sessions[i].timestamp + g_sessions[i].duration;
+                if (sess_end_ts > g_games[idx].last_played_ts) {
+                    g_games[idx].last_played_ts = sess_end_ts;
                 }
 
                 if (g_sessions[i].timestamp >= start_ts && g_sessions[i].timestamp <= end_ts) {
@@ -134,21 +138,22 @@ void data_free(void) {
     g_games = NULL;
     g_sessions = NULL;
     g_uid_map = NULL;
-    g_uid_map_size = 0;
-}
+    g_uid_map_size = 0;}
 
 /**
  * @brief Computes detailed per-period statistics for a single game.
  *
  * Uses utils_get_timestamp() (PSP RTC via sceRtcGetCurrentTick) for all
- * time boundaries instead of time()/mktime(), which may be unreliable on
- * PSP hardware. All timestamp arithmetic is done in u32 UNIX seconds,
- * consistent with SessionEntry.timestamp in the database schema.
+ * time boundaries. Sessions that cross a calendar boundary are SPLIT so each
+ * period only counts the seconds that genuinely fell within its window.
  *
- * Period accounting:
- *  - playtime_week  = sessions in the last 7 calendar days
- *  - playtime_month = sessions from start of current month (cumulative, includes week)
- *  - playtime_year  = sessions from start of current year  (cumulative, includes month)
+ * Example: a 2-hour session starting at 23:00 on day 25 contributes 1 hour
+ * to day 25 and 1 hour to day 26 — not 2 hours to either day alone.
+ *
+ * Period accounting (all independent, all inclusive of sub-periods):
+ *  - playtime_week  = seconds played in the rolling last-7-calendar-days window
+ *  - playtime_month = seconds played since the 1st of the current calendar month
+ *  - playtime_year  = seconds played since Jan 1st of the current calendar year
  *
  * @param game_uid  UID of the game to compute stats for.
  * @param out       Output struct; zeroed by this function before filling.
@@ -156,53 +161,60 @@ void data_free(void) {
 void data_compute_game_details(u32 game_uid, GameDetailStats *out) {
     memset(out, 0, sizeof(*out));
 
-    /* Get current time from the PSP RTC — same approach as compute_weekly_data. */
+    /* Get current time from the PSP RTC. */
     u32 now = utils_get_timestamp();
     time_t now_t = (time_t)now;
 
-    /* Strip the time-of-day to get start-of-today. */
+    /* Strip the time-of-day to get start-of-today (local midnight). */
     struct tm today_tm = *localtime(&now_t);
     today_tm.tm_hour = 0; today_tm.tm_min = 0; today_tm.tm_sec = 0;
-    u32 today_start = (u32)mktime(&today_tm);
+    time_t today_start = mktime(&today_tm);
+    time_t today_end   = today_start + 86400; /* exclusive upper bound */
 
-    /* Week boundary: 7 days back from today_start (same as weekly graph: 6 days ago). */
-    u32 week_start = (today_start > 6 * 86400u) ? (today_start - 6 * 86400u) : 0u;
+    /* Week: rolling 7-day window (6 days ago 00:00 → end of today). */
+    time_t week_start  = (today_start > 6 * 86400) ? (today_start - 6 * 86400) : 0;
 
-    /* Month boundary: 1st of current month at 00:00. */
+    /* Month: 1st of the current calendar month at 00:00. */
     struct tm month_tm = today_tm;
     month_tm.tm_mday = 1;
-    u32 month_start = (u32)mktime(&month_tm);
+    time_t month_start = mktime(&month_tm);
 
-    /* Year boundary: January 1st of current year at 00:00. */
+    /* Year: January 1st of the current year at 00:00. */
     struct tm year_tm = today_tm;
     year_tm.tm_mday = 1; year_tm.tm_mon = 0;
-    u32 year_start = (u32)mktime(&year_tm);
+    time_t year_start = mktime(&year_tm);
 
-    /* Accumulate non-overlapping buckets first, then roll up. */
-    u32 bucket_week = 0, bucket_month = 0, bucket_year = 0;
+    u32 total_week = 0, total_month = 0, total_year = 0;
 
     for (u32 i = 0; i < g_session_count; i++) {
         const SessionEntry *s = &g_sessions[i];
         if (s->game_uid != game_uid || s->duration == 0) continue;
 
-        u32 ts = s->timestamp;
+        /* Chronological bookmarks use the session START timestamp. */
+        if (out->first_played == 0 || s->timestamp < out->first_played)
+            out->first_played = s->timestamp;
+        /* last_played tracks the END of the most recent session so that a
+         * session crossing midnight shows the correct next-day date. */
+        u32 sess_end = s->timestamp + s->duration;
+        if (sess_end > out->last_played)
+            out->last_played = sess_end;
 
-        /* Chronological bookmarks. */
-        if (out->first_played == 0 || ts < out->first_played) out->first_played = ts;
-        if (ts > out->last_played) out->last_played = ts;
+        time_t s_start = (time_t)s->timestamp;
+        time_t s_end   = s_start + (time_t)s->duration;
 
-        /* Place each session into its tightest non-overlapping bucket. */
-        if (ts >= week_start)
-            bucket_week += s->duration;
-        else if (ts >= month_start)
-            bucket_month += s->duration;
-        else if (ts >= year_start)
-            bucket_year += s->duration;
+        /* Each period window is queried independently via time overlap.
+         * Month and year windows both extend to today_end so they include
+         * ongoing week activity without double-counting. */
+        total_week  += utils_time_overlap_secs(s_start, s_end, week_start,  today_end);
+        total_month += utils_time_overlap_secs(s_start, s_end, month_start, today_end);
+        total_year  += utils_time_overlap_secs(s_start, s_end, year_start,  today_end);
     }
 
-    /* Roll up: month includes this week; year includes this month (+ week). */
-    out->playtime_week  = bucket_week;
-    out->playtime_month = bucket_month + bucket_week;
-    out->playtime_year  = bucket_year  + bucket_month + bucket_week;
+    /* Each period is independently computed — month includes this week's time. */
+    out->playtime_week  = total_week;
+    out->playtime_month = total_month;
+    out->playtime_year  = total_year;
 }
+
+
 
