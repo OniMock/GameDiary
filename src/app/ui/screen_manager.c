@@ -19,6 +19,7 @@
 #include "app/ui/screen.h"
 #include "app/ui/ui_popup.h"
 #include "app/render/renderer.h"
+#include "app/audio/audio_manager.h"
 
 #define MAX_STACK 8
 
@@ -95,18 +96,21 @@ void screen_manager_update(void) {
     // Global Shortcuts
     if (g_fade_state == 0) {
         if (pressed & PSP_CTRL_START) {
+            audio_play_sfx(SFX_CONFIRM);
             if (g_current_screen != &g_screen_main_menu) {
                 screen_manager_push(&g_screen_main_menu);
             }
             return;
         }
         if (pressed & PSP_CTRL_SELECT) {
+            audio_play_sfx(SFX_CONFIRM);
             if (g_current_screen != &g_screen_settings) {
                 screen_manager_push(&g_screen_settings);
             }
             return;
         }
         if (pressed & PSP_CTRL_CIRCLE) {
+            audio_play_sfx(SFX_CANCEL);
             if (g_stack_top >= 0) {
                 screen_manager_pop();
                 return;

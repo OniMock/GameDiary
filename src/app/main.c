@@ -22,6 +22,7 @@
 #include "app/render/font.h"
 #include "app/ui/screen.h"
 #include "app/data/data_loader.h"
+#include "app/audio/audio_manager.h"
 #include <pspkernel.h>
 #include <pspctrl.h>
 
@@ -76,6 +77,7 @@ int main(int argc, char *argv[]) {
     /* 3. Systems Initialization */
     i18n_init(config_get()->language);
     data_load_all();
+    audio_init();
 
     /* 4. State Manager */
     screen_manager_set(&g_screen_main_menu);
@@ -89,6 +91,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Cleanup */
+    audio_cleanup();
     font_cleanup();
     data_free();
 

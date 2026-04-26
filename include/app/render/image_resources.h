@@ -61,6 +61,8 @@ extern const ImageResource GD_IMG_ICON_MENU_32_PNG;
 extern const ImageResource GD_IMG_ICON_NOT_FOUND_PNG;
 extern const ImageResource GD_IMG_ICON_SETTINGS_128_PNG;
 extern const ImageResource GD_IMG_ICON_SETTINGS_32_PNG;
+extern const ImageResource GD_IMG_ICON_SOUND_ACTIVE_32_PNG;
+extern const ImageResource GD_IMG_ICON_SOUND_INACTIVE_32_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_128_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_32_PNG;
 extern const ImageResource GD_IMG_ICON_SUPPORT_32_PNG;

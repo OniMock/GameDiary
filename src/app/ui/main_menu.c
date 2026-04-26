@@ -21,6 +21,7 @@
 #include "app/render/renderer.h"
 #include "app/render/font.h"
 #include "app/render/texture.h"
+#include "app/audio/audio_manager.h"
 #include <pspctrl.h>
 #include <math.h>
 #include <stdio.h>
@@ -106,10 +107,15 @@ static void main_menu_update(u32 buttons, u32 pressed) {
     last_dir = current_dir;
 
     if (move != 0) {
+        float prev_target = g_target_index;
         g_target_index += move;
         // Clamp to valid range
         if (g_target_index < 0) g_target_index = 0;
         if (g_target_index >= MENU_ITEM_COUNT) g_target_index = MENU_ITEM_COUNT - 1;
+        
+        if (g_target_index != prev_target) {
+            audio_play_sfx(SFX_NAVIGATE);
+        }
     }
 
     // Lerp
@@ -119,6 +125,7 @@ static void main_menu_update(u32 buttons, u32 pressed) {
     if (pressed & PSP_CTRL_CROSS) {
         int idx = (int)(g_target_index + 0.5f);
         if (idx >= 0 && idx < MENU_ITEM_COUNT) {
+            audio_play_sfx(SFX_CONFIRM);
             screen_manager_push(g_menu_items[idx].target_screen);
         }
     }

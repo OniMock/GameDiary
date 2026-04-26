@@ -18,7 +18,7 @@
 
 typedef struct {
     int language; // -1 for AUTO, or index (LANG_EN, etc)
-    // Add other settings here as needed (e.g., theme, auto-save)
+    int sfx_enabled; // 1 for ON, 0 for OFF
 } AppConfig;
 
 /**

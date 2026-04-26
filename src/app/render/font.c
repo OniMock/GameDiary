@@ -30,12 +30,12 @@ static intraFont *g_fallback_font = NULL;
 
 int font_init(void) {
     int res = sdf_font_init();
-    
+
     intraFontInit();
-    /* 'INTRAFONT_CACHE_LARGE' is practically mandatory for Japanese glyphs 
+    /* 'INTRAFONT_CACHE_LARGE' is practically mandatory for Japanese glyphs
      * to avoid overflowing the standard 256x256 cache. */
     g_fallback_font = intraFontLoad("flash0:/font/jpn0.pgf", INTRAFONT_CACHE_LARGE | INTRAFONT_STRING_UTF8);
-    
+
     return res;
 }
 
@@ -64,7 +64,7 @@ void font_draw_game_name(float x, float y, const char *str, uint32_t color, floa
             int intra_align = INTRAFONT_ALIGN_LEFT;
             if (align == 1) intra_align = INTRAFONT_ALIGN_CENTER;
             else if (align == 2) intra_align = INTRAFONT_ALIGN_RIGHT;
-            
+
             intraFontSetStyle(g_fallback_font, scale, color, 0, 0.0f, intra_align | INTRAFONT_STRING_UTF8);
             intraFontPrint(g_fallback_font, x, y, str);
         } else {
@@ -92,7 +92,7 @@ void font_draw_game_name(float x, float y, const char *str, uint32_t color, floa
 
 float font_get_game_name_width(const char *str, float size) {
     if (!str || !*str) return 0.0f;
-    
+
     if (g_fallback_font && sdf_font_has_missing_glyphs(str)) {
         float scale = INTRAFONT_SCALE_TO_PX(size);
         intraFontSetStyle(g_fallback_font, scale, 0xFFFFFFFF, 0, 0.0f, INTRAFONT_ALIGN_LEFT | INTRAFONT_STRING_UTF8);

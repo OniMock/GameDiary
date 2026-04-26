@@ -40,6 +40,7 @@ int config_load(void) {
     if (fd < 0) {
         // Default settings: Auto-detect language
         g_config.language = -1;
+        g_config.sfx_enabled = 1;
         return config_save(); // Create with defaults
     }
 
@@ -48,6 +49,7 @@ int config_load(void) {
 
     if (res != (int)sizeof(AppConfig)) {
         g_config.language = -1;
+        g_config.sfx_enabled = 1;
         return -1;
     }
 

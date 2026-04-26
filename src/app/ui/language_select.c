@@ -21,6 +21,7 @@
 #include "app/config/config.h"
 #include "app/render/renderer.h"
 #include "app/render/font.h"
+#include "app/audio/audio_manager.h"
 #include <pspctrl.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -83,6 +84,7 @@ static void language_select_update(u32 buttons, u32 pressed) {
     int menu_count = LANG_COUNT + 1;
 
     if (pressed & PSP_CTRL_UP) {
+        audio_play_sfx(SFX_NAVIGATE);
         g_selection = (g_selection - 1 + menu_count) % menu_count;
         // Scroll up if selection goes above view
         if (g_selection < g_scroll_offset) {
@@ -95,6 +97,7 @@ static void language_select_update(u32 buttons, u32 pressed) {
     }
 
     if (pressed & PSP_CTRL_DOWN) {
+        audio_play_sfx(SFX_NAVIGATE);
         g_selection = (g_selection + 1) % menu_count;
         // Scroll down if selection goes below view
         if (g_selection >= g_scroll_offset + MAX_VISIBLE_ITEMS) {
@@ -106,6 +109,7 @@ static void language_select_update(u32 buttons, u32 pressed) {
     }
 
     if (pressed & PSP_CTRL_CROSS) {
+        audio_play_sfx(SFX_CONFIRM);
         /* Map visual A-Z position back to the real LanguageId enum value */
         int target_lang = (g_selection == 0)
             ? LANG_AUTO

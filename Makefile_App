@@ -70,7 +70,7 @@ PSP_EBOOT_SND0 = assets-src/SND0.AT3
 # -----------------------------------------------------------------------
 LIBS = -lintrafont -lpspgu -lpspgum \
        -lpng -lz -lm \
-       -lpsprtc -lpsppower -lpspvshbridge \
+       -lpsprtc -lpsppower -lpspvshbridge -lpspaudio \
        -lstdc++
 
 LIBS += -Llib/ark4

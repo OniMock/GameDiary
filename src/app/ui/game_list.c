@@ -43,6 +43,7 @@
 #include "app/data/data_loader.h"
 #include "app/data/stats_calculator.h"
 #include "app/data/game_category.h"
+#include "app/audio/audio_manager.h"
 #include "common/utils.h"
 #include <pspctrl.h>
 #include <pspgu.h>
@@ -281,6 +282,7 @@ static void game_list_update(u32 buttons, u32 pressed) {
 
     /* Handle Toggle Filter (Square) */
     if (pressed & PSP_CTRL_SQUARE) {
+        audio_play_sfx(SFX_NAVIGATE);
         s_filter_pos++;
         if (s_filter_pos >= s_available_count) {
             s_filter_pos = -1;
@@ -316,12 +318,14 @@ static void game_list_update(u32 buttons, u32 pressed) {
     int wrap_idx = ((g_cs.current_idx % s_filtered_count) + s_filtered_count) % s_filtered_count;
 
     if (wrap_idx != g_prev_idx) {
+        if (g_prev_idx != -1) audio_play_sfx(SFX_NAVIGATE);
         ui_reset_game_daily_graph_animation();
         g_prev_idx = wrap_idx;
     }
 
     /* Navigate to game details using wrapped index */
     if (mapped_pressed & PSP_CTRL_CROSS) {
+        audio_play_sfx(SFX_CONFIRM);
         GameStats *games = data_get_games();
         int real_idx = s_filtered_indices[wrap_idx];
         s_last_selected_uid = games[real_idx].entry.uid;

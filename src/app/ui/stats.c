@@ -24,6 +24,7 @@
 #include "app/render/texture.h"
 #include "app/data/data_loader.h"
 #include "app/data/stats_calculator.h"
+#include "app/audio/audio_manager.h"
 #include <pspgu.h>
 #include <pspctrl.h>
 #include <stdio.h>
@@ -81,10 +82,12 @@ static void stats_update(u32 buttons, u32 pressed) {
     if ((pressed & PSP_CTRL_LEFT) || (analog_left && joystick_cooldown == 0)) {
         StatsPeriod next = (g_current_query.period + STATS_PERIOD_COUNT - 1) % STATS_PERIOD_COUNT;
         stats_set_mode(next);
+        audio_play_sfx(SFX_NAVIGATE);
         joystick_cooldown = 20; // ~333ms at 60fps
     } else if ((pressed & PSP_CTRL_RIGHT) || (analog_right && joystick_cooldown == 0)) {
         StatsPeriod next = (g_current_query.period + 1) % STATS_PERIOD_COUNT;
         stats_set_mode(next);
+        audio_play_sfx(SFX_NAVIGATE);
         joystick_cooldown = 20;
     }
 }
