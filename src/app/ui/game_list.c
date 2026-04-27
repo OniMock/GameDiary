@@ -155,9 +155,19 @@ static void draw_carousel_icon(int inf_idx, int cx, int cy, float scale,
     if (tex) {
         texture_draw_tinted(tex, x, y, w, h, tint);
     } else {
-        /* Fallback: embedded placeholder. */
-        sceGuColor(tint);
-        texture_draw_resource(&GD_IMG_ICON_NOT_FOUND_PNG, x, y, w, h);
+        CacheSlotState state = carousel_get_icon_state(&g_cs, inf_idx);
+        if (state == CACHE_SLOT_LOADED) {
+            /* Loading finished but no icon found: draw embedded placeholder */
+            sceGuColor(tint);
+            texture_draw_resource(&GD_IMG_ICON_NOT_FOUND_PNG, x, y, w, h);
+        } else {
+            /* Still loading: Draw gray placeholder rectangle */
+            u8 a = (u8)(tint >> 24);
+            u32 fill = (a << 24) | (COLOR_CARD & 0x00FFFFFF);
+            u32 border = (a << 24) | (COLOR_BORDER & 0x00FFFFFF);
+            Rect r = {x, y, w, h};
+            ui_draw_card(r, fill, border);
+        }
     }
 }
 

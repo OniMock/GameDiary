@@ -132,6 +132,11 @@ void carousel_update(CarouselState *cs, u32 buttons, u32 pressed);
 Texture *carousel_get_icon(const CarouselState *cs, int game_idx);
 
 /**
+ * Returns the load state of the icon for the given index.
+ */
+CacheSlotState carousel_get_icon_state(const CarouselState *cs, int game_idx);
+
+/**
  * Returns 1 when the animation has fully settled (offset ≈ 0).
  */
 int carousel_is_settled(const CarouselState *cs);

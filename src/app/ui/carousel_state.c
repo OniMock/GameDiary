@@ -305,6 +305,15 @@ Texture *carousel_get_icon(const CarouselState *cs, int inf_idx) {
     return NULL;
 }
 
+CacheSlotState carousel_get_icon_state(const CarouselState *cs, int inf_idx) {
+    if (cs->total <= 0) return CACHE_SLOT_EMPTY;
+    int s = slot_for(inf_idx);
+    if (cs->cache[s].inf_idx == inf_idx) {
+        return cs->cache[s].state;
+    }
+    return CACHE_SLOT_EMPTY;
+}
+
 void carousel_set_index(CarouselState *cs, int index) {
     if (cs->total <= 0) return;
     cs->current_idx = index;
