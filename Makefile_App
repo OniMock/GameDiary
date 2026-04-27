@@ -3,7 +3,7 @@ TARGET = GameDiaryApp
 APP_NAME := GameDiary
 
 
-PROJECT_VERSION = 0.0.3
+PROJECT_VERSION = 0.1.0
 
 # -----------------------------------------------------------------------
 # Sources (AUTO — sem lista manual de .o)
