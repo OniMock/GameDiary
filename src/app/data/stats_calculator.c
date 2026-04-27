@@ -17,6 +17,7 @@
 #include "app/data/data_loader.h"
 #include "common/utils.h"
 #include "app/i18n/i18n.h"
+#include "app/ui/ui_components.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -121,52 +122,31 @@ static void calc_weekly(const SessionEntry *sessions, int count, StatsQuery quer
 
 static void calc_monthly(const SessionEntry *sessions, int count, StatsQuery query, StatsGraphData *out_data) {
     u32 now_ts = utils_get_timestamp();
-    time_t now_val = (time_t)now_ts;
     
-    struct tm tm_info = *localtime(&now_val);
-    
-    // Apply offset
-    int new_month = tm_info.tm_mon + query.offset;
-    tm_info.tm_year += new_month / 12;
-    tm_info.tm_mon = new_month % 12;
-    if (tm_info.tm_mon < 0) {
-        tm_info.tm_mon += 12;
-        tm_info.tm_year--;
-    }
-    tm_info.tm_mday = 1;
-    tm_info.tm_hour = 0; tm_info.tm_min = 0; tm_info.tm_sec = 0;
-    
-    time_t month_start = mktime(&tm_info);
-    
-    // Calculate days in month
-    int days_in_month = 31;
-    if (tm_info.tm_mon == 3 || tm_info.tm_mon == 5 || tm_info.tm_mon == 8 || tm_info.tm_mon == 10) days_in_month = 30;
-    else if (tm_info.tm_mon == 1) {
-        int year = tm_info.tm_year + 1900;
-        days_in_month = ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) ? 29 : 28;
-    }
-    
-    out_data->column_count = days_in_month;
+    time_t today_val = (time_t)now_ts;
+    struct tm today_tm = *localtime(&today_val);
+    today_tm.tm_hour = 0; today_tm.tm_min = 0; today_tm.tm_sec = 0;
+    time_t today_start = mktime(&today_tm);
+
+    /* For rolling 30-day view, offset applies in steps of 30 days */
+    time_t window_end = today_start + 86400 + (query.offset * (30 * 86400));
+    time_t window_start = window_end - (30 * 86400);
+
+    out_data->column_count = 30;
     memset(out_data->column_values, 0, sizeof(out_data->column_values));
     
-    for (int i = 0; i < days_in_month; i++) {
-        out_data->column_dates[i] = month_start + (i * 86400);
+    for (int i = 0; i < 30; i++) {
+        out_data->column_dates[i] = window_start + (i * 86400);
     }
-    
-    time_t month_end = out_data->column_dates[days_in_month - 1] + 86400;
 
-    /* Split each session's duration across the day columns of this month.
-     * A session starting on the last day of the month and running past midnight
-     * correctly contributes time to the next month's first day when that month
-     * is viewed, instead of over-counting on the last day. */
+    /* Accumulate session time across the 30 columns */
     for (int i = 0; i < count; i++) {
         time_t s_start = (time_t)sessions[i].timestamp;
         time_t s_end   = s_start + (time_t)sessions[i].duration;
 
-        /* Quick cull: skip sessions with no overlap with this month */
-        if (s_end <= month_start || s_start >= month_end) continue;
+        if (s_end <= window_start || s_start >= window_end) continue;
 
-        for (int d = 0; d < days_in_month; d++) {
+        for (int d = 0; d < 30; d++) {
             time_t day_start = (time_t)out_data->column_dates[d];
             time_t day_end   = day_start + 86400;
             out_data->column_values[d] += utils_time_overlap_secs(s_start, s_end, day_start, day_end);
@@ -174,22 +154,56 @@ static void calc_monthly(const SessionEntry *sessions, int count, StatsQuery que
     }
     
     u32 total_time = 0;
+    u32 total_m1 = 0, total_m2 = 0;
+    int m1 = -1, m2 = -1;
+    int year1 = -1, year2 = -1;
+
     u32 max_time = 3600; 
-    for (int i = 0; i < days_in_month; i++) {
+    for (int i = 0; i < 30; i++) {
         total_time += out_data->column_values[i];
         if (out_data->column_values[i] > max_time) max_time = out_data->column_values[i];
+
+        /* Calculate split totals for subtitle */
+        struct tm dtm = *localtime(&out_data->column_dates[i]);
+        if (m1 == -1) { 
+            m1 = dtm.tm_mon; 
+            year1 = dtm.tm_year + 1900;
+        } else if (dtm.tm_mon != m1 && m2 == -1) {
+            m2 = dtm.tm_mon;
+            year2 = dtm.tm_year + 1900;
+        }
+
+        if (dtm.tm_mon == m1) total_m1 += out_data->column_values[i];
+        else if (dtm.tm_mon == m2) total_m2 += out_data->column_values[i];
     }
     out_data->max_value = max_time;
 
-    snprintf(out_data->context_title, sizeof(out_data->context_title), "%s %d",
-             i18n_get(MSG_MONTH_JAN + tm_info.tm_mon),
-             tm_info.tm_year + 1900);
+    /* Context Title: Handle single month or overlapping months (e.g. Apr/May 2026) */
+    if (m2 == -1) {
+        snprintf(out_data->context_title, sizeof(out_data->context_title), "%s %d",
+                 i18n_get(MSG_MONTH_JAN + m1), year1);
+    } else {
+        snprintf(out_data->context_title, sizeof(out_data->context_title), "%s/%s %d",
+                 i18n_get(MSG_MONTH_JAN + m1), i18n_get(MSG_MONTH_JAN + m2), year2);
+    }
     
-    char dur_buf[32];
-    u32 h = total_time / 3600;
-    u32 m = (total_time % 3600) / 60;
-    if (h > 0) snprintf(dur_buf, sizeof(dur_buf), "%s: %uh %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)h, (unsigned int)m);
-    else snprintf(dur_buf, sizeof(dur_buf), "%s: %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)m);
+    char dur_buf[96];
+    if (m2 == -1) {
+        char total_str[32];
+        ui_format_duration(total_time, total_str, sizeof(total_str));
+        snprintf(dur_buf, sizeof(dur_buf), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), total_str);
+    } else {
+        char s1[32], s2[32];
+        ui_format_duration(total_m1, s1, sizeof(s1));
+        ui_format_duration(total_m2, s2, sizeof(s2));
+
+        const char *mn1 = i18n_get(MSG_MONTH_JAN + m1);
+        const char *mn2 = i18n_get(MSG_MONTH_JAN + m2);
+        
+        /* Format: "Total: (Apr) 5h 20m (May) 10h 5m" */
+        snprintf(dur_buf, sizeof(dur_buf), "%s: (%s) %s (%s) %s", 
+                 i18n_get(MSG_STATS_TOTAL_PLAYTIME), mn1, s1, mn2, s2);
+    }
 
     snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", dur_buf);
 }

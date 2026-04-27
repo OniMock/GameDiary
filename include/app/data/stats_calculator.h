@@ -35,8 +35,8 @@ typedef struct {
     u32 max_value;
     
     // Quick strings for context
-    char context_title[64];
-    char context_subtitle[64]; 
+    char context_title[128];
+    char context_subtitle[128]; 
 } StatsGraphData;
 
 /**

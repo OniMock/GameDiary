@@ -297,7 +297,8 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     if (h > 0) {
         bool show_v = false;
         if (count <= 10) show_v = true;
-        else if (i == peak_idx || i == count - 1) show_v = true;
+        // Show peak, last and every 5 columns
+        else if (i == peak_idx || i == count - 1 || i % 5 == 0) show_v = true;
 
         if (show_v) {
             ui_format_duration(data->column_values[i], time_buf, sizeof(time_buf));
