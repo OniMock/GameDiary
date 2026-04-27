@@ -21,6 +21,7 @@
 #define GDIARY_BASE_DIR "/PSP/COMMON/GameDiary"
 #define GDIARY_ICON_DIR "icons"
 #define GDIARY_DB_DIR "db"
+#define GDIARY_SELF_ID "HBX7F0342D8"
 
 // Database files
 #define GAMES_DAT "games.dat"

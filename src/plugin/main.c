@@ -13,10 +13,11 @@
  * @brief Main plugin entry point.
  */
 
-#include "plugin/apitype.h"
-#include "plugin/detector.h"
+#include "common/common.h"
 #include "common/storage.h"
 #include "common/db_schema.h"
+#include "plugin/apitype.h"
+#include "plugin/detector.h"
 #include "plugin/tracker.h"
 #include "common/utils.h"
 #include <pspsdk/systemctrl.h>
@@ -46,6 +47,12 @@ int module_start(SceSize args, void *argp) {
 
   // Grab game info right at boot before the buffer clears
   detector_init();
+
+  // Self-exclusion: Don't track GameDiary itself to avoid database pollution
+  const GameMetadata *meta = detector_get_metadata();
+  if (strcmp(meta->game_id, GDIARY_SELF_ID) == 0) {
+    return 1;
+  }
 
   // Start background tracker thread
   tracker_thread_start();
