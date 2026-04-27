@@ -100,10 +100,12 @@ GameDiary operates in two layers:
 Ensure you have the latest release downloaded from the [Releases](https://github.com/OniMock/GameDiary/releases) page. The release contains two main components: the App and the Plugin.
 
 ### 1. Installing the Plugin (Tracker)
-1. Copy the `gamediary.prx` file to your `seplugins` folder on your memory stick (`ms0:/seplugins/` or `ef0:/seplugins/` for PSP Go).
-2. Open `ms0:/seplugins/game.txt` in a text editor.
-3. Enable plugin:
+1. Copy the `GameDiary.prx` file to your `SEPLUGINS` folder on your memory stick (`ms0:/SEPLUGINS/` or `ef0:/SEPLUGINS/` for PSP Go).
+2. Enable plugin:
     - For ARK-4:
+        > ⚠️ **PSP Go Users**
+        > If you are using the PSP Go internal storage, replace `ms0:/` with `ef0:/` in all paths.
+        + Open `ms0:/SEPLUGINS/plugins.txt` in a text editor.
         + Add the following line to enable tracking for PSP games:
         ```text
         psp, GameDiary.prx, on
@@ -112,15 +114,26 @@ Ensure you have the latest release downloaded from the [Releases](https://github
         ```text
         ps1, GameDiary.prx, on
         ```
-    - For other CFWs:
-        + Add the following line to enable tracking for PSP games:
+        + To enable Homebrew tracking also add the following line:
         ```text
-        ms0:/seplugins/gamediary.prx 1
+        game, GameDiary.prx, on
         ```
-        *(Use `ef0:/seplugins/gamediary.prx 1` if using a PSP Go's internal storage).*
-        + Do the same for `ms0:/seplugins/pops.txt` to enable PS1 tracking
-4. Do the same for `ms0:/seplugins/pops.txt` to enable PS1 tracking.
-5. Restart your PSP (or reset VSH).
+    - For other CFWs:
+        > ⚠️ **PSP Go Users**
+        > If you are using the PSP Go internal storage, replace `ms0:/` with `ef0:/` in all paths.
+        + Enable for PSP games and Homebrew:
+          Add to `ms0:/seplugins/game.txt`:
+          ```
+          ms0:/seplugins/GameDiary.prx 1
+          ```
+
+        + Enable for PS1 games:
+          Add to `ms0:/seplugins/pops.txt`:
+          ```
+          ms0:/seplugins/GameDiary.prx 1
+          ```
+
+3. Restart your PSP (or reset VSH).
 
 ### 2. Installing the Application (Viewer)
 1. Extract the `GameDiary` app folder.
@@ -231,6 +244,9 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 - [x] Multi-language support (EN, PT, ES, RU, JP, CN).
 - [x] Auto-extraction of `ICON0.PNG` for PS1/POPS Eboots.
 - [x] Context-sensitive help and standardized Helper popups.
+- [x] Support Homebrew / Ports.
+- [x] Beep sound effects.
+- [x] Support older CFWs. (Tested in 6.61 PRO C2, 6.60 PRO B9....)
 - [ ] Expand UI features with thematic templates.
 - [ ] Export stats to JSON/CSV for external use.
 
