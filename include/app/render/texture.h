@@ -73,4 +73,13 @@ void texture_free(Texture* tex);
  */
 void texture_draw_tinted(Texture* tex, int x, int y, int w, int h, u32 color);
 
+/**
+ * @brief Draws an embedded ImageResource with a custom tint/alpha color.
+ * @param res   Pointer to the ImageResource.
+ * @param x,y   Top-left screen position.
+ * @param w,h   Draw dimensions.
+ * @param color ABGR color (0xAABBGGRR) used as tint/alpha.
+ */
+void texture_draw_resource_tinted(const ImageResource* res, int x, int y, int w, int h, u32 color);
+
 #endif // GAMEDIARY_TEXTURE_H

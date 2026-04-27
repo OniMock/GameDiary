@@ -36,6 +36,7 @@ void screen_manager_draw(void);
 void game_details_set_idx(int idx);
 
 // Screens
+extern Screen g_screen_splash;
 extern Screen g_screen_main_menu;
 extern Screen g_screen_stats;
 extern Screen g_screen_activity;

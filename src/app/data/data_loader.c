@@ -48,8 +48,26 @@ int data_load_all(void) {
     g_game_count = header.num_entries;
     g_games = (GameStats*)calloc(g_game_count, sizeof(GameStats));
 
-    for (u32 i = 0; i < g_game_count; i++) {
-        sceIoRead(fd, &g_games[i].entry, sizeof(GameEntry));
+    /**
+    * Block Read:
+    * On PSP (Memory Stick), reading the entire file in a single sceIoRead call
+    * is hundreds of times faster than looping and calling sceIoRead for each
+    * individual GameEntry.
+    */
+    if (g_game_count > 0) {
+        GameEntry *temp_entries = (GameEntry*)malloc(g_game_count * sizeof(GameEntry));
+        if (temp_entries) {
+            sceIoRead(fd, temp_entries, g_game_count * sizeof(GameEntry));
+            for (u32 i = 0; i < g_game_count; i++) {
+                g_games[i].entry = temp_entries[i];
+            }
+            free(temp_entries);
+        } else {
+            /* Fallback seguro caso não haja RAM suficiente no momento */
+            for (u32 i = 0; i < g_game_count; i++) {
+                sceIoRead(fd, &g_games[i].entry, sizeof(GameEntry));
+            }
+        }
     }
     sceIoClose(fd);
 
@@ -138,7 +156,8 @@ void data_free(void) {
     g_games = NULL;
     g_sessions = NULL;
     g_uid_map = NULL;
-    g_uid_map_size = 0;}
+    g_uid_map_size = 0;
+}
 
 /**
  * @brief Computes detailed per-period statistics for a single game.

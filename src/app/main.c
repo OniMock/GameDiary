@@ -21,6 +21,7 @@
 #include "app/render/renderer.h"
 #include "app/render/font.h"
 #include "app/ui/screen.h"
+#include "app/ui/splash.h"
 #include "app/data/data_loader.h"
 #include "app/audio/audio_manager.h"
 #include <pspkernel.h>
@@ -55,7 +56,6 @@ int main(int argc, char *argv[]) {
      * Font data is embedded in the binary via font_*_embed.c — no file I/O needed.
      * Works identically on real PSP and PPSSPP without copying any extra files. */
     renderer_init();
-    font_init();
 
     /* 2. Storage & Configuration
      * Use argv[0] to determine application root for local config.dat. */
@@ -67,23 +67,16 @@ int main(int argc, char *argv[]) {
         config_init(fallback_path);
     }
 
-    config_load();
-
-    /* Initialize storage with dynamic device prefix (ms0: vs ef0:) */
-    char base_path[128];
-    snprintf(base_path, sizeof(base_path), "%s" GDIARY_BASE_DIR, utils_get_device_prefix());
-    storage_init(base_path);
-
-    /* 3. Systems Initialization */
-    i18n_init(config_get()->language);
-    data_load_all();
-    audio_init();
-
     /* 4. State Manager */
-    screen_manager_set(&g_screen_main_menu);
+    screen_manager_set(&g_screen_splash);
 
     /* 5. Main Loop */
     while (1) {
+        if (splash_is_loading()) {
+            splash_do_load_tasks();
+            continue;
+        }
+
         renderer_start_frame();
         screen_manager_update();
         screen_manager_draw();
