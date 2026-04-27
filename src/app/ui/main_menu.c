@@ -203,8 +203,15 @@ static void main_menu_draw(void) {
         u32 tint = ((u32)a << 24) | 0x00FFFFFFu;
 
         if (g_menu_items[idx].icon) {
-            sceGuColor(tint); // Setting global GU color for simple tinting
+            // 1. Draw Shadow (Black tint, offset 2px)
+            u32 shadow_tint = ((u32)a << 24) | 0x00000000u;
+            sceGuColor(shadow_tint);
+            texture_draw_resource(g_menu_items[idx].icon, x + 2, y + 2, w, h);
+
+            // 2. Draw Main Icon (White tint, original position)
+            sceGuColor(tint); 
             texture_draw_resource(g_menu_items[idx].icon, x, y, w, h);
+            
             sceGuColor(0xFFFFFFFF); // Reset
         }
 
