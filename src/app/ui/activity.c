@@ -128,7 +128,7 @@ static void activity_draw(void) {
       ui_draw_text(i18n_get(MSG_STATS_LAST_PLAYED), (Rect){focus_padded.x, focus_padded.y, focus_padded.w, 15}, COLOR_ACCENT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
 
       // Title
-      ui_draw_game_name(last_g->entry.game_name, (Rect){focus_padded.x, focus_padded.y + 18, focus_padded.w, 20}, COLOR_TEXT, UI_FONT_SIZE_TITLE_LIST, ALIGN_LEFT);
+      ui_draw_game_name_auto_fit(last_g->entry.game_name, (Rect){focus_padded.x, focus_padded.y + 18, focus_padded.w, 20}, COLOR_TEXT, UI_FONT_SIZE_TITLE_LIST, ALIGN_LEFT);
 
       // Detailed Playtime
       char dur_buf[32];
@@ -187,8 +187,11 @@ static void activity_draw(void) {
       float tag_w = font_get_width(cat_tag, UI_FONT_SIZE_TINY);
       ui_draw_text(cat_tag, (Rect){30, row_y, (int)tag_w, 20}, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
 
-      // Game Name
-      ui_draw_game_name(g->entry.game_name, (Rect){30 + (int)tag_w + 5, row_y, 240, 20}, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
+      // Game Name - calculate remaining space before date starts at x=330
+      int name_x = 30 + (int)tag_w + 5;
+      int name_w = 325 - name_x; // leave 5px gap before date
+      if (name_w < 50) name_w = 50;
+      ui_draw_game_name_auto_fit(g->entry.game_name, (Rect){name_x, row_y, name_w, 20}, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_LEFT);
 
       // Last Played Date (Full)
       time_t item_ts = (time_t)g->last_played_ts;
