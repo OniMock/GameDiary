@@ -30,10 +30,14 @@ static int get_next_power_of_two(int n) {
     return x;
 }
 
+/**
+ * @brief Loads a PNG image from a file.
+ * @param filename The path to the PNG file.
+ * @return A pointer to the loaded texture, or NULL if loading failed.
+ */
 Texture* texture_load_png(const char* filename) {
     png_structp png_ptr;
     png_infop info_ptr;
-    unsigned int sig_read = 0;
     FILE *fp;
 
     if ((fp = fopen(filename, "rb")) == NULL) return NULL;
@@ -51,6 +55,13 @@ Texture* texture_load_png(const char* filename) {
         return NULL;
     }
 
+    uint8_t sig[8];
+    if (fread(sig, 1, 8, fp) != 8 || png_sig_cmp(sig, 0, 8)) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        fclose(fp);
+        return NULL;
+    }
+
     if (setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
         fclose(fp);
@@ -58,19 +69,38 @@ Texture* texture_load_png(const char* filename) {
     }
 
     png_init_io(png_ptr, fp);
-    png_set_sig_bytes(png_ptr, sig_read);
+    png_set_sig_bytes(png_ptr, 8);
+
     png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND, NULL);
 
     int width = png_get_image_width(png_ptr, info_ptr);
     int height = png_get_image_height(png_ptr, info_ptr);
 
+    if (width > PSP_MAX_TEXTURE_SIZE || height > PSP_MAX_TEXTURE_SIZE) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        fclose(fp);
+        return NULL;
+    }
+
     Texture* texture = (Texture*)malloc(sizeof(Texture));
+    if (!texture) {
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        fclose(fp);
+        return NULL;
+    }
+
     texture->width = width;
     texture->height = height;
     texture->textureWidth = get_next_power_of_two(width);
     texture->textureHeight = get_next_power_of_two(height);
 
     texture->data = memalign(16, texture->textureWidth * texture->textureHeight * 4);
+    if (!texture->data) {
+        free(texture);
+        png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+        fclose(fp);
+        return NULL;
+    }
 
     int channels = png_get_channels(png_ptr, info_ptr);
 
@@ -92,7 +122,8 @@ Texture* texture_load_png(const char* filename) {
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     fclose(fp);
 
-    sceKernelDcacheWritebackAll();
+    u32 data_size = texture->textureWidth * texture->textureHeight * 4;
+    sceKernelDcacheWritebackRange(texture->data, data_size);
     return texture;
 }
 
@@ -104,6 +135,10 @@ void texture_draw(Texture* tex, int x, int y, int w, int h) {
         unsigned int color;
         float x, y, z;
     };
+
+    sceGuEnable(GU_TEXTURE_2D);
+    sceGuEnable(GU_BLEND);
+    sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
     sceGuTexMode(GU_PSM_8888, 0, 0, 0);
     sceGuTexImage(0, tex->textureWidth, tex->textureHeight, tex->textureWidth, tex->data);

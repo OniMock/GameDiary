@@ -17,6 +17,8 @@
  */
 #include "app/render/image_resources.h"
 
+#define PSP_MAX_TEXTURE_SIZE 512
+
 typedef struct {
     int width;
     int height;
