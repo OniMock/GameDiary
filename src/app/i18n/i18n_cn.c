@@ -63,8 +63,10 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_DURATION_MINS]        = "%d分",
     [MSG_DURATION_H_M]         = "%d時%d分",
     [MSG_DURATION_D_H_M]       = "%d日%d時%d分",
+
     [MSG_STATS_MODE_WEEKLY]    = "周",
     [MSG_STATS_MODE_MONTHLY]   = "月",
+    [MSG_STATS_MODE_MONTHS]    = "按月",
     [MSG_STATS_MODE_YEARLY]    = "年",
 
     [MSG_MONTH_JAN]            = "1月",
@@ -98,7 +100,7 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_CONTROLS]            = "操作:",
     [MSG_HELP_INFO_LABEL]          = "信息:",
     [MSG_HELP_DESC_GAMES]          = "可按类别筛选，查看总时间和最近游玩记录。",
-    [MSG_HELP_DESC_STATS]          = "通过图表分析游戏时间，可切换周、月、年。",
+    [MSG_HELP_DESC_STATS]          = "通过图表查看你的游戏时间。在周、月、按月和年之间切换，看看哪些游戏占用了你最多的时间。",
     [MSG_HELP_DESC_ACTIVITY]       = "按时间顺序显示最近的游玩记录。",
     [MSG_HELP_DESC_SETTINGS]       = "调整语言和其他设置。",
     [MSG_HELP_DESC_DETAILS]        = "查看游戏详细信息和完整记录。",

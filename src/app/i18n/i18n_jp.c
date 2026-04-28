@@ -65,6 +65,7 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
 
     [MSG_STATS_MODE_WEEKLY]    = "週",
     [MSG_STATS_MODE_MONTHLY]   = "月",
+    [MSG_STATS_MODE_MONTHS]    = "月別",
     [MSG_STATS_MODE_YEARLY]    = "年",
 
     [MSG_MONTH_JAN]            = "1月",
@@ -98,7 +99,7 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_HELP_CONTROLS]            = "操作:",
     [MSG_HELP_INFO_LABEL]          = "情報:",
     [MSG_HELP_DESC_GAMES]          = "カテゴリで絞り込み、合計プレイ時間や最近の記録を確認できます。",
-    [MSG_HELP_DESC_STATS]          = "プレイ時間をグラフで確認。週・月・年で切替できます。",
+    [MSG_HELP_DESC_STATS]          = "グラフでプレイ時間を確認できます。週・月・月別・年を切り替えて、どのゲームに一番時間を使っているかを見てみましょう。",
     [MSG_HELP_DESC_ACTIVITY]       = "最近のプレイ履歴を時系列で表示します。",
     [MSG_HELP_DESC_SETTINGS]       = "言語や設定を変更できます。",
     [MSG_HELP_DESC_DETAILS]        = "ゲームの詳細情報やプレイ履歴を確認できます。",

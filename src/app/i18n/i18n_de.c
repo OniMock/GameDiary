@@ -65,9 +65,10 @@ const char* g_lang_de_entries[MSG_COUNT] = {
     [MSG_DURATION_H_M]         = "%dh %dm",
     [MSG_DURATION_D_H_M]       = "%dt %dh %dm",
 
-    [MSG_STATS_MODE_WEEKLY]    = "Wöchentlich",
-    [MSG_STATS_MODE_MONTHLY]   = "Monatlich",
-    [MSG_STATS_MODE_YEARLY]    = "Jährlich",
+    [MSG_STATS_MODE_WEEKLY]    = "Woche",
+    [MSG_STATS_MODE_MONTHLY]   = "Monat",
+    [MSG_STATS_MODE_MONTHS]    = "Monate",
+    [MSG_STATS_MODE_YEARLY]    = "Jahre",
 
     [MSG_MONTH_JAN]            = "Januar",
     [MSG_MONTH_FEB]            = "Februar",
@@ -100,7 +101,7 @@ const char* g_lang_de_entries[MSG_COUNT] = {
     [MSG_HELP_CONTROLS]            = "Steuerung:",
     [MSG_HELP_INFO_LABEL]          = "Info:",
     [MSG_HELP_DESC_GAMES]          = "Hier kannst du nach Kategorien filtern, die Gesamtspielzeit anzeigen und letzte Sitzungen pro Spiel verfolgen.",
-    [MSG_HELP_DESC_STATS]          = "Analysiere deine Spielzeit mit detaillierten Diagrammen. Wechsle zwischen wöchentlich, monatlich und jährlich, um deine Gewohnheiten zu verstehen.",
+    [MSG_HELP_DESC_STATS]          = "Verfolge deine Spielzeit mit Grafiken. Wechsle zwischen Woche, Monat, Monaten und Jahren, um zu sehen, welche Spiele die meiste Zeit einnehmen.",
     [MSG_HELP_DESC_ACTIVITY]       = "Chronologische Übersicht deiner letzten Sitzungen. Sieh genau, wann und wie lange du gespielt hast.",
     [MSG_HELP_DESC_SETTINGS]       = "Passe die Sprache und andere Einstellungen an.",
     [MSG_HELP_DESC_DETAILS]        = "Detaillierte Infos zu einem Spiel. Zeigt den Sitzungsverlauf, das Datum, an dem du das Spiel zum ersten und letzten Mal gespielt hast, und deine Gesamtspielzeiten an.",

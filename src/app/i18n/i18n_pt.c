@@ -60,9 +60,10 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_DURATION_H_M]         = "%dh %dm",
     [MSG_DURATION_D_H_M]       = "%dd %dh %dm",
 
-    [MSG_STATS_MODE_WEEKLY]    = "Semanal",
-    [MSG_STATS_MODE_MONTHLY]   = "Mensal",
-    [MSG_STATS_MODE_YEARLY]    = "Anual",
+    [MSG_STATS_MODE_WEEKLY]    = "Semana",
+    [MSG_STATS_MODE_MONTHLY]   = "Mês",
+    [MSG_STATS_MODE_MONTHS]    = "Meses",
+    [MSG_STATS_MODE_YEARLY]    = "Anos",
 
     [MSG_MONTH_JAN]            = "Janeiro",
     [MSG_MONTH_FEB]            = "Fevereiro",
@@ -95,7 +96,7 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_HELP_CONTROLS]            = "Controle:",
     [MSG_HELP_INFO_LABEL]          = "Informação:",
     [MSG_HELP_DESC_GAMES]          = "Aqui você pode filtrar por categoria, ver seu tempo total de jogo e acompanhar as últimas sessões de cada título.",
-    [MSG_HELP_DESC_STATS]          = "Analise seu tempo de jogo com gráficos detalhados. Alterne entre os modos Semanal, Mensal e Anual para entender seus hábitos e ver quais jogos dominam seu tempo.",
+    [MSG_HELP_DESC_STATS]          = "Acompanhe seu tempo de jogo com gráficos. Alterne entre Semana, Mês, Meses e Anos e veja quais jogos ocupam mais do seu tempo.",
     [MSG_HELP_DESC_ACTIVITY]       = "Histórico cronológico de todas as suas sessões de jogo recentes. Acompanhe exatamente quando e por quanto tempo você jogou cada título da sua biblioteca.",
     [MSG_HELP_DESC_SETTINGS]       = "Ajuste o idioma da interface e outras preferências globais do aplicativo.",
     [MSG_HELP_DESC_DETAILS]        = "Informações detalhadas sobre um jogo específico. Veja o histórico completo de sessões, data da primeira e última partida, e o total acumulado de horas.",

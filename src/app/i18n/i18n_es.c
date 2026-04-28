@@ -60,9 +60,10 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_DURATION_H_M]         = "%dh %dm",
     [MSG_DURATION_D_H_M]       = "%dd %dh %dm",
 
-    [MSG_STATS_MODE_WEEKLY]    = "Semanal",
-    [MSG_STATS_MODE_MONTHLY]   = "Mensual",
-    [MSG_STATS_MODE_YEARLY]    = "Anual",
+    [MSG_STATS_MODE_WEEKLY]    = "Semana",
+    [MSG_STATS_MODE_MONTHLY]   = "Mes",
+    [MSG_STATS_MODE_MONTHS]    = "Meses",
+    [MSG_STATS_MODE_YEARLY]    = "Años",
 
     [MSG_MONTH_JAN]            = "Enero",
     [MSG_MONTH_FEB]            = "Febrero",
@@ -95,7 +96,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_HELP_CONTROLS]            = "Controles:",
     [MSG_HELP_INFO_LABEL]          = "Info:",
     [MSG_HELP_DESC_GAMES]          = "Filtra por categoría, consulta el tiempo total y las sesiones recientes.",
-    [MSG_HELP_DESC_STATS]          = "Analiza tu tiempo con gráficos. Cambia entre semanal, mensual y anual.",
+    [MSG_HELP_DESC_STATS]          = "Sigue tu tiempo de juego con gráficos. Cambia entre Semana, Mes, Meses y Años para ver qué juegos ocupan la mayor parte de tu tiempo.",
     [MSG_HELP_DESC_ACTIVITY]       = "Historial cronológico de tus sesiones recientes.",
     [MSG_HELP_DESC_SETTINGS]       = "Ajusta el idioma y preferencias generales.",
     [MSG_HELP_DESC_DETAILS]        = "Información detallada del juego y su historial.",

@@ -60,9 +60,10 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_DURATION_H_M]         = "%dч %dм",
     [MSG_DURATION_D_H_M]       = "%dд %dч %dм",
 
-    [MSG_STATS_MODE_WEEKLY]    = "За неделю",
-    [MSG_STATS_MODE_MONTHLY]   = "За месяц",
-    [MSG_STATS_MODE_YEARLY]    = "За год",
+    [MSG_STATS_MODE_WEEKLY]    = "Неделя",
+    [MSG_STATS_MODE_MONTHLY]   = "Месяц",
+    [MSG_STATS_MODE_MONTHS]    = "Месяцы",
+    [MSG_STATS_MODE_YEARLY]    = "Годы",
 
     [MSG_MONTH_JAN]            = "Январь",
     [MSG_MONTH_FEB]            = "Февраль",
@@ -95,7 +96,7 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_HELP_CONTROLS]            = "Управление:",
     [MSG_HELP_INFO_LABEL]          = "Инфо:",
     [MSG_HELP_DESC_GAMES]          = "Фильтр по категориям, просмотр общего времени и последних сессий.",
-    [MSG_HELP_DESC_STATS]          = "Анализируйте время игры с графиками. Переключайтесь между неделей, месяцем и годом.",
+    [MSG_HELP_DESC_STATS]          = "Отслеживайте своё игровое время с помощью графиков. Переключайтесь между Неделя, Месяц, Месяцы и Годы, чтобы увидеть, какие игры занимают больше всего времени.",
     [MSG_HELP_DESC_ACTIVITY]       = "Хронология последних игровых сессий.",
     [MSG_HELP_DESC_SETTINGS]       = "Настройка языка и параметров интерфейса.",
     [MSG_HELP_DESC_DETAILS]        = "Подробная информация об игре и история сессий.",

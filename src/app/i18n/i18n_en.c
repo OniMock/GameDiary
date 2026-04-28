@@ -59,9 +59,10 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_DURATION_H_M]         = "%dh %dm",
     [MSG_DURATION_D_H_M]       = "%dd %dh %dm",
 
-    [MSG_STATS_MODE_WEEKLY]    = "Weekly",
-    [MSG_STATS_MODE_MONTHLY]   = "Monthly",
-    [MSG_STATS_MODE_YEARLY]    = "Yearly",
+    [MSG_STATS_MODE_WEEKLY]    = "Week",
+    [MSG_STATS_MODE_MONTHLY]   = "Month",
+    [MSG_STATS_MODE_MONTHS]    = "Months",
+    [MSG_STATS_MODE_YEARLY]    = "Years",
 
     [MSG_MONTH_JAN]            = "January",
     [MSG_MONTH_FEB]            = "February",
@@ -94,7 +95,7 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_CONTROLS]            = "Controls:",
     [MSG_HELP_INFO_LABEL]          = "Info:",
     [MSG_HELP_DESC_GAMES]          = "Here you can filter by category, view total playtime, and track recent sessions for each game.",
-    [MSG_HELP_DESC_STATS]          = "Analyze your playtime with detailed charts. Switch between Weekly, Monthly, and Yearly modes to understand your habits and see which games dominate your time.",
+    [MSG_HELP_DESC_STATS]          = "Track your playtime with graphs. Switch between Week, Month, Months and Years to see which games take up most of your time.",
     [MSG_HELP_DESC_ACTIVITY]       = "Chronological history of your recent sessions. Track exactly when and how long you played each game.",
     [MSG_HELP_DESC_SETTINGS]       = "Adjust interface language and other global preferences.",
     [MSG_HELP_DESC_DETAILS]        = "Detailed information about a game. View session history, first and last played dates, and total time.",
