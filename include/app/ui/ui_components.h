@@ -44,6 +44,7 @@
 #define UI_FONT_SIZE_SMALL       12.0f    // Secondary text & wrapped body
 #define UI_FONT_SIZE_TINY        11.0f    // Indicators, Footers & Dates
 #define UI_FONT_SIZE_NANO        10.0f    // Detailed graph data values
+#define UI_FONT_SIZE_PICO        9.0f     // Micro labels for dense graphs
 
 // --- Icon Sizes (Values in pixels) ---
 #define UI_ICON_SIZE_LOGO        32

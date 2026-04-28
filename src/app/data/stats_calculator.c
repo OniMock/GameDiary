@@ -274,6 +274,84 @@ static void calc_yearly(const SessionEntry *sessions, int count, StatsQuery quer
     snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", dur_buf);
 }
 
+static void calc_last_12_months(const SessionEntry *sessions, int count, StatsQuery query, StatsGraphData *out_data) {
+    u32 now_ts = utils_get_timestamp();
+    time_t now_val = (time_t)now_ts;
+
+    // Apply offset (in steps of 12 months)
+    struct tm cur_tm = *localtime(&now_val);
+    cur_tm.tm_year += query.offset;
+    cur_tm.tm_hour = 0; cur_tm.tm_min = 0; cur_tm.tm_sec = 0; cur_tm.tm_mday = 1;
+
+    int cm = cur_tm.tm_mon;
+    int cy = cur_tm.tm_year;
+
+    out_data->column_count = 12;
+    memset(out_data->column_values, 0, sizeof(out_data->column_values));
+
+    time_t month_starts[12];
+    time_t month_ends[12];
+
+    for (int i = 0; i < 12; i++) {
+        int rm = (cm - 11) + i;
+        int target_m = rm;
+        int target_y = cy;
+
+        if (rm < 0) {
+            target_m = rm + 12;
+            target_y = cy - 1;
+        }
+
+        struct tm stm = {0};
+        stm.tm_mon = target_m;
+        stm.tm_year = target_y;
+        stm.tm_mday = 1;
+        month_starts[i] = mktime(&stm);
+        out_data->column_dates[i] = month_starts[i];
+
+        // End is start of next month
+        struct tm etm = stm;
+        etm.tm_mon++;
+        if (etm.tm_mon > 11) {
+            etm.tm_mon = 0;
+            etm.tm_year++;
+        }
+        month_ends[i] = mktime(&etm);
+    }
+
+    /* Accumulate session time across the 12 columns */
+    for (int i = 0; i < count; i++) {
+        time_t s_start = (time_t)sessions[i].timestamp;
+        time_t s_end   = s_start + (time_t)sessions[i].duration;
+
+        if (s_end <= month_starts[0] || s_start >= month_ends[11]) continue;
+
+        for (int m = 0; m < 12; m++) {
+            out_data->column_values[m] += utils_time_overlap_secs(s_start, s_end, month_starts[m], month_ends[m]);
+        }
+    }
+
+    u32 total_time = 0;
+    u32 max_time = 3600 * 5; // 5 hour min scale
+    for (int i = 0; i < 12; i++) {
+        total_time += out_data->column_values[i];
+        if (out_data->column_values[i] > max_time) max_time = out_data->column_values[i];
+    }
+    out_data->max_value = max_time;
+
+    /* Context Title: "May 2025 - Apr 2026" */
+    struct tm start_tm = *localtime(&month_starts[0]);
+    struct tm end_tm = *localtime(&month_starts[11]);
+    snprintf(out_data->context_title, sizeof(out_data->context_title), "%s %d - %s %d",
+             i18n_get(MSG_MONTH_JAN + start_tm.tm_mon), start_tm.tm_year + 1900,
+             i18n_get(MSG_MONTH_JAN + end_tm.tm_mon), end_tm.tm_year + 1900);
+
+    char total_str[32];
+    ui_format_duration(total_time, total_str, sizeof(total_str));
+    snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), total_str);
+}
+
+
 void stats_calc_query(const SessionEntry *sessions, int count, StatsQuery query, StatsGraphData *out_data) {
     memset(out_data, 0, sizeof(StatsGraphData));
     out_data->query = query;
@@ -285,6 +363,9 @@ void stats_calc_query(const SessionEntry *sessions, int count, StatsQuery query,
             break;
         case STATS_PERIOD_MONTHLY:
             calc_monthly(sessions, count, query, out_data);
+            break;
+        case STATS_PERIOD_LAST_12_MONTHS:
+            calc_last_12_months(sessions, count, query, out_data);
             break;
         case STATS_PERIOD_YEARLY:
             calc_yearly(sessions, count, query, out_data);

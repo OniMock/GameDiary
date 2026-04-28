@@ -27,6 +27,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <stdlib.h>
 
 static float g_graph_anim_h[MAX_GRAPH_COLS] = {0.0f};
 static float g_graph_anim_x[MAX_GRAPH_COLS] = {0.0f};
@@ -210,12 +211,14 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
   if (count > MAX_GRAPH_COLS) count = MAX_GRAPH_COLS;
 
   int bar_w = 20;
-  if (count > 10) {
+  if (count <= 7) {
+      bar_w = 26; // Weekly
+  } else if (count <= 12) {
+      bar_w = 18; // Last 12 Months - narrower bars to avoid overlap
+  } else {
       // Monthly view needs thinner bars
       bar_w = total_w / count - 2;
       if (bar_w < 4) bar_w = 4;
-  } else {
-      bar_w = 26; // Weekly/Yearly
   }
 
   int spacing = (total_w - (count * bar_w)) / (count > 1 ? count - 1 : 1);
@@ -297,8 +300,10 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     if (h > 0) {
         bool show_v = false;
         if (count <= 10) show_v = true;
-        // Show peak, last and every 5 columns
-        else if (i == peak_idx || i == count - 1 || i % 5 == 0) show_v = true;
+        // Show peak and last column values always
+        else if (i == peak_idx || i == count - 1) show_v = true;
+        // Show more values: every 3rd column if not adjacent to peak/last
+        else if (i % 3 == 0 && abs(i - peak_idx) > 1 && abs(i - (count - 1)) > 1) show_v = true;
 
         if (show_v) {
             ui_format_duration(data->column_values[i], time_buf, sizeof(time_buf));
@@ -315,6 +320,23 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
         if (i == 0 || bar_tm.tm_mday % 5 == 0 || i == count - 1) {
             snprintf(label_buf, sizeof(label_buf), "%d", bar_tm.tm_mday);
         }
+    } else if (data->query.period == STATS_PERIOD_LAST_12_MONTHS) {
+        struct tm bar_tm = *localtime(&data->column_dates[i]);
+        const char* full_name = i18n_get(MSG_MONTH_JAN + bar_tm.tm_mon);
+        // Shorten to first 3 characters (approx 3-6 bytes)
+        strncpy(label_buf, full_name, 15);
+        label_buf[15] = '\0';
+        .
+        if (strlen(label_buf) > 3) {
+            // Find 3rd character boundary (simple check for ASCII/Latin)
+            int bytes = 0;
+            int chars = 0;
+            while (label_buf[bytes] && chars < 3) {
+                if ((label_buf[bytes] & 0xC0) != 0x80) chars++;
+                bytes++;
+            }
+            label_buf[bytes] = '\0';
+        }
     } else if (data->query.period == STATS_PERIOD_YEARLY) {
         struct tm bar_tm = *localtime(&data->column_dates[i]);
         int y = bar_tm.tm_year + 1900;
@@ -322,7 +344,7 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     }
 
     draw_bar_column(x, gy, bar_w, h, bar_color, fade_gloss,
-                    time_buf[0] != '\0' ? time_buf : NULL, UI_FONT_SIZE_NANO, fade_label,
+                    time_buf[0] != '\0' ? time_buf : NULL, UI_FONT_SIZE_PICO, fade_label,
                     label_buf[0] != '\0' ? label_buf : NULL, UI_FONT_SIZE_TINY, fade_label);
   }
 }
@@ -495,7 +517,7 @@ void ui_draw_game_daily_graph(const SessionEntry *sessions, int count,
              &ts_tm);
 
     draw_bar_column(bx, baseline_y, bar_w, h, bar_color, gloss_a,
-                    h > 0 ? dur_buf : NULL, UI_FONT_SIZE_SMALL, lbl_color, date_buf, UI_FONT_SIZE_SMALL,
+                    h > 0 ? dur_buf : NULL, UI_FONT_SIZE_PICO, lbl_color, date_buf, UI_FONT_SIZE_PICO,
                     COLOR_SUBTEXT);
   }
 }

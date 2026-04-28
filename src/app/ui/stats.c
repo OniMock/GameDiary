@@ -105,6 +105,7 @@ static void stats_draw(void) {
     const char *mode_str = "";
     if (g_current_query.period == STATS_PERIOD_WEEKLY) mode_str = i18n_get(MSG_STATS_MODE_WEEKLY);
     else if (g_current_query.period == STATS_PERIOD_MONTHLY) mode_str = i18n_get(MSG_STATS_MODE_MONTHLY);
+    else if (g_current_query.period == STATS_PERIOD_LAST_12_MONTHS) mode_str = i18n_get(MSG_STATS_MODE_MONTHS);
     else if (g_current_query.period == STATS_PERIOD_YEARLY) mode_str = i18n_get(MSG_STATS_MODE_YEARLY);
 
     char filter_buf[64];
