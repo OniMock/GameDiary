@@ -326,7 +326,6 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
         // Shorten to first 3 characters (approx 3-6 bytes)
         strncpy(label_buf, full_name, 15);
         label_buf[15] = '\0';
-        .
         if (strlen(label_buf) > 3) {
             // Find 3rd character boundary (simple check for ASCII/Latin)
             int bytes = 0;
