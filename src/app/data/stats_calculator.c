@@ -88,6 +88,7 @@ static void calc_weekly(const SessionEntry *sessions, int count, StatsQuery quer
 
         /* Quick cull: skip sessions with no overlap with the 7-day window */
         if (s_end <= window_start || s_start >= window_end) continue;
+        if (query.filter_uid != 0 && sessions[i].game_uid != query.filter_uid) continue;
 
         for (int col = 0; col < 7; col++) {
             time_t day_start = (time_t)out_data->column_dates[col];
@@ -145,6 +146,7 @@ static void calc_monthly(const SessionEntry *sessions, int count, StatsQuery que
         time_t s_end   = s_start + (time_t)sessions[i].duration;
 
         if (s_end <= window_start || s_start >= window_end) continue;
+        if (query.filter_uid != 0 && sessions[i].game_uid != query.filter_uid) continue;
 
         for (int d = 0; d < 30; d++) {
             time_t day_start = (time_t)out_data->column_dates[d];
@@ -248,6 +250,7 @@ static void calc_yearly(const SessionEntry *sessions, int count, StatsQuery quer
 
         /* Quick cull: outside the entire 10-year range */
         if (s_end <= out_data->column_dates[0] || s_start >= year_ends[9]) continue;
+        if (query.filter_uid != 0 && sessions[i].game_uid != query.filter_uid) continue;
 
         for (int col = 0; col < 10; col++) {
             out_data->column_values[col] += utils_time_overlap_secs(
@@ -325,6 +328,7 @@ static void calc_last_12_months(const SessionEntry *sessions, int count, StatsQu
         time_t s_end   = s_start + (time_t)sessions[i].duration;
 
         if (s_end <= month_starts[0] || s_start >= month_ends[11]) continue;
+        if (query.filter_uid != 0 && sessions[i].game_uid != query.filter_uid) continue;
 
         for (int m = 0; m < 12; m++) {
             out_data->column_values[m] += utils_time_overlap_secs(s_start, s_end, month_starts[m], month_ends[m]);

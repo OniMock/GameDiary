@@ -26,6 +26,7 @@ typedef enum {
 typedef struct {
     StatsPeriod period;
     int offset; // 0 = current, -1 = previous, etc.
+    u32 filter_uid; // 0 = all games, else specific game uid
 } StatsQuery;
 
 typedef struct {

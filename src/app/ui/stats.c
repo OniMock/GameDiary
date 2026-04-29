@@ -29,7 +29,7 @@
 #include <pspctrl.h>
 #include <stdio.h>
 
-static StatsQuery g_current_query = {STATS_PERIOD_WEEKLY, 0};
+static StatsQuery g_current_query = {STATS_PERIOD_WEEKLY, 0, 0};
 static StatsGraphData g_cached_graph_data;
 
 static const char* s_helper_lines[8];
