@@ -87,12 +87,12 @@ def build_charsets(characters, out_dir, forced_symbols=None):
         groups["cjk"].add(chr(cp))
 
     # Include curated Kanji list (Jōyō Kanji)
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    kanji_file = os.path.join(script_dir, "joyo_kanji.txt")
-    extra_chars = load_extra_chars(kanji_file)
-    groups["cjk"].update(extra_chars)
-    if extra_chars:
-        print(f"[JP] Loaded {len(extra_chars)} Kanji from file")
+    #script_dir = os.path.dirname(os.path.abspath(__file__))
+    #kanji_file = os.path.join(script_dir, "joyo_kanji.txt")
+    #extra_chars = load_extra_chars(kanji_file)
+    #groups["cjk"].update(extra_chars)
+    #if extra_chars:
+    #    print(f"[JP] Loaded {len(extra_chars)} Kanji from file")
 
     # Pin explicit symbols directly into the symbols group regardless of their
     # Unicode block. Characters like (R) (0x00AE) or degree (0x00B0) live in
@@ -111,31 +111,31 @@ def build_charsets(characters, out_dir, forced_symbols=None):
 
     # Write to files (handle multi-page splitting)
     final_group_manifest = {} # group_name -> list of charset files
- 
+
     for group_name, chars in groups.items():
         if not chars:
             continue
- 
+
         sorted_chars = sorted(list(chars))
-        
+
         # Split into chunks if necessary
         chunks = [sorted_chars[i:i + MAX_CHARS_PER_PAGE] for i in range(0, len(sorted_chars), MAX_CHARS_PER_PAGE)]
         manifest_files = []
- 
+
         for i, chunk in enumerate(chunks):
             # If multiple pages, add suffix, otherwise keep original name
             page_suffix = f"_{i}" if len(chunks) > 1 else ""
             filename = f"{group_name}{page_suffix}.txt"
             filepath = os.path.join(out_dir, filename)
-            
+
             with open(filepath, "w", encoding="utf-8") as f:
                 hex_list = [f"0x{ord(c):X}" for c in chunk]
                 f.write(", ".join(hex_list))
-            
+
             manifest_files.append(filename)
-        
+
         final_group_manifest[group_name] = manifest_files
- 
+
     return final_group_manifest
 
 if __name__ == '__main__':
