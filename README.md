@@ -173,11 +173,19 @@ A clean, modular architecture separating kernel plugin operations from user-mode
 ```
 GameDiary/
 ├── Makefile                # Build orchestration
+├── assets/                 # Icons, backgrounds, and font source files. Used resources for the application
+├── assets-src/             # Editable source assets (e.g., SVGs, ICON0.png) used to build and export final application resources
+├── lib/                    # Third-party libraries and external dependencies
+├── obj/                    # Intermediate build files (.o) generated during compilation (not committed to the repository)
 ├── include/                # Shared headers and public APIs
 ├── src/
 │   ├── app/                # User-mode UI Application (EBOOT)
+│   │   ├── audio/          # Audio management
+│   │   ├── config/         # Configuration management
+│   │   ├── data/           # Data management
 │   │   ├── i18n/           # Internationalization routines and language logic
 │   │   ├── render/         # Graphics, font rendering (MSDF), and components
+│   │   ├── ui/             # UI components and screens
 │   │   └── main.c          # Application entry point
 │   │
 │   ├── plugin/             # Kernel-mode Tracking Plugin (PRX)
@@ -185,7 +193,7 @@ GameDiary/
 │   │   └── main.c          # Plugin entry point
 │   │
 │   └── common/             # Shared logic (Data logging, parser utilities)
-└── assets/                 # Icons, backgrounds, and font source files
+└── tools/                  # Build and asset processing tools (e.g., resource and font converters)
 ```
 
 ---
@@ -214,8 +222,10 @@ GameDiary is built using the standard [pspdev implementation of the PSPSDK](http
    ```
 3. Run `make` to compile both the PRX and EBOOT:
    ```bash
-   make clean all
+   make
    ```
+4. The output will be in the `obj` folder.
+5. EBOOT.PBP and GameDiary.prx will be in the root folder.
 
 ### 🐳 Docker
 Alternatively, use the official Docker image to compile without setting up local tools:
@@ -259,7 +269,9 @@ We welcome contributions! Please adhere to the following guidelines:
 
 1. **Architecture First**: Respect the separation between `app/` and `plugin/`. Avoid kernel functions in the user-mode app unless specifically bridged.
 2. **Memory Mindful**: The PSP has limited RAM (32MB/64MB). Avoid unnecessary deep copies and dynamic allocation (`malloc`). Prefer stack allocation where safe.
-3. **Open a PR**: State clearly what your pull request fixes or implements. Ensure your code merges cleanly and builds under `pspdev`.
+3. **No C++**: The project is written in C, not C++. Please keep it that way.
+4. **Design**: Design and code must be simple and efficient.
+5. **Open a PR**: State clearly what your pull request fixes or implements. Ensure your code merges cleanly and builds under `pspdev`.
 
 ---
 
