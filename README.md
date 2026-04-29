@@ -6,6 +6,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/OniMock/GameDiary?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
 ![Last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
+![Download](https://img.shields.io/github/downloads/OniMock/GameDiary/total)
 
 # 🎮 GameDiary
 
@@ -232,7 +233,7 @@ The user-mode application can be tested using [PPSSPP](https://www.ppsspp.org/).
 The tracking system relies on kernel thread manipulation and syscall hooks to calculate precise uptime accurately.
 
 * **Tracking**: On game boot, the plugin initializes a monitor thread that synchronizes with the `sceKernelGetSystemTime` API, appending delta-time entries to disk upon shutdown or hibernation.
-* **Isolation**: All file I/O operations inside `gamediary.prx` use low-level `sceIo*` functions guarded by thread-safe mutexes to prevent crashes when interacting with active game threads.
+* **Isolation**: All file I/O operations inside `GameDiary.prx` use low-level `sceIo*` functions guarded by thread-safe mutexes to prevent crashes when interacting with active game threads.
 * **Limitations**: Some homebrew that aggressively overwrites RAM boundaries or custom interrupts may temporarily pause tracking intervals.
 
 ---
@@ -247,7 +248,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 - [x] Support Homebrew / Ports.
 - [x] Beep sound effects.
 - [x] Support older CFWs. (Tested in 6.61 PRO C2, 6.60 PRO B9....)
-- [ ] Expand UI features with thematic templates.
+- [ ] Expand UI features with Dark/Light Theme.
 - [ ] Export stats to JSON/CSV for external use.
 
 ---
@@ -289,6 +290,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 * [pspdev](https://github.com/pspdev/pspdev) SDK and community for maintaining modern PSP toolchains.
 * Developers of PRO / ARK-4 CFW for mapping the boundaries of modern PSP kernel development.
+* Members of the  Reddit [PSP](https://www.reddit.com/r/PSP/) community for testing, feedback, and support throughout development.
 
 ## 👤 Author
 
