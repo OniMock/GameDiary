@@ -103,7 +103,7 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_STATS]          = "通过图表查看你的游戏时间。在周、月、按月和年之间切换，看看哪些游戏占用了你最多的时间。",
     [MSG_HELP_DESC_ACTIVITY]       = "按时间顺序显示最近的游玩记录。",
     [MSG_HELP_DESC_SETTINGS]       = "调整语言和其他设置。",
-    [MSG_HELP_DESC_DETAILS]        = "查看游戏详细信息和完整记录。",
+    [MSG_HELP_DESC_DETAILS]        = "查看特定游戏的详细信息。追踪完整的游戏会话记录，查看首次和最后一次游玩的时间，以及累计游戏时长。此外，还可以按周、月、月份和年份查看图表，更好地了解你的游戏时间。",
     [MSG_HELP_DESC_MAIN_MENU]      = "主菜单，可进入游戏、统计、记录或设置。",
     [MSG_HELP_DESC_LANG_SELECT]    = "选择界面语言，立即生效。",
 

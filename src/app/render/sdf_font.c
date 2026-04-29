@@ -179,25 +179,24 @@ static void *decode_png(const unsigned char *png_data, unsigned int png_size,
     int tw       = next_pow2(w);
     int th       = next_pow2(h);
 
-    /* Allocate with 16-byte alignment for DMA / GE safety */
-    uint32_t *buf = (uint32_t *)memalign(16, (unsigned int)(tw * th) * 4u);
+    /* Allocate with 16-byte alignment for DMA / GE safety.
+     * We use GU_PSM_T8 (8-bit texture) instead of 32-bit RGBA to save 75% RAM.
+     * This makes CJK loading possible on the 24MB limit of PSP 1000. */
+    uint8_t *buf = (uint8_t *)memalign(16, (unsigned int)(tw * th));
     if (!buf) {
         png_destroy_read_struct(&png, &info, NULL);
         return NULL;
     }
-    memset(buf, 0, (unsigned int)(tw * th) * 4u);
+    memset(buf, 0, (unsigned int)(tw * th));
 
     png_bytep *rows = png_get_rows(png, info);
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             png_bytep p = &rows[y][x * channels];
             uint8_t  r = p[0];
-            /*
-             * SDF distance is stored in the Red channel.
-             * Format: AABBGGRR in PSP memory (little-endian RGBA in struct).
-             * We want: alpha = distance, RGB = 0xFFFFFF.
-             */
-            buf[y * tw + x] = ((uint32_t)r << 24) | 0x00FFFFFFu;
+            /* SDF distance is stored in the first channel.
+             * We save it as an 8-bit index. The CLUT will map it to alpha. */
+            buf[y * tw + x] = r;
         }
     }
 
@@ -268,6 +267,53 @@ static int load_atlas_from_embed(int slot, const EmbeddedAtlas *embed, int group
 }
 
 /* -----------------------------------------------------------------------
+ * Dynamic Atlas Management
+ * ----------------------------------------------------------------------- */
+
+static int get_free_atlas_slot(void) {
+    for (int i = 0; i < g_atlas_count; i++) {
+        if (!g_atlases[i].loaded) return i;
+    }
+    if (g_atlas_count < MAX_ATLASES) {
+        return g_atlas_count++;
+    }
+    return -1;
+}
+
+static void unload_atlas_group(int group_id) {
+    for (int i = 0; i < g_atlas_count; i++) {
+        if (g_atlases[i].loaded && g_atlases[i].group_id == group_id) {
+            free(g_atlases[i].tex_data);
+            free(g_atlases[i].glyphs);
+            memset(&g_atlases[i], 0, sizeof(SDFAtlas));
+        }
+    }
+}
+
+static void load_atlas_group(int group_id) {
+    if (group_id < 0 || group_id >= NUM_GROUPS) return;
+    
+    /* Check if already loaded to prevent duplicate loading */
+    for (int i = 0; i < g_atlas_count; i++) {
+        if (g_atlases[i].loaded && g_atlases[i].group_id == group_id) {
+            return; 
+        }
+    }
+    
+    const GroupDesc *grp = &g_group_descs[group_id];
+    for (int p = 0; p < grp->page_count; p++) {
+        int slot = get_free_atlas_slot();
+        if (slot >= 0) {
+            if (load_atlas_from_embed(slot, &grp->pages[p], group_id) == 0) {
+                printf("sdf_font: loaded group %d page %d -> slot %d\n", group_id, p, slot);
+            } else {
+                printf("sdf_font: group %d page %d failed, skipping\n", group_id, p);
+            }
+        }
+    }
+}
+
+/* -----------------------------------------------------------------------
  * Public API
  * ----------------------------------------------------------------------- */
 
@@ -280,8 +326,8 @@ void sdf_font_set_assets_path(const char *path) {
 }
 
 /**
- * sdf_font_init — wire up page_count fields, then iterate every group and
- * every page, loading each into the flat g_atlases[] registry.
+ * sdf_font_init — wire up page_count fields, then load base fonts. Language
+ * specific fonts are handled dynamically when rebuilding the glyph map.
  */
 int sdf_font_init(void) {
     /* Fill in the live page counts from the generated extern vars */
@@ -293,26 +339,11 @@ int sdf_font_init(void) {
     memset(g_atlases, 0, sizeof(g_atlases));
     g_atlas_count = 0;
 
-    for (int g = 0; g < NUM_GROUPS; g++) {
-        const GroupDesc *grp = &g_group_descs[g];
-        for (int p = 0; p < grp->page_count; p++) {
-            if (g_atlas_count >= MAX_ATLASES) {
-                printf("sdf_font: too many atlas pages (max %d)\n", MAX_ATLASES);
-                break;
-            }
-            int slot = g_atlas_count;
-            if (load_atlas_from_embed(slot, &grp->pages[p], g) == 0) {
-                printf("sdf_font: loaded group %d page %d -> slot %d\n", g, p, slot);
-                g_atlas_count++;
-            } else {
-                printf("sdf_font: group %d page %d failed, skipping\n", g, p);
-            }
-        }
-    }
+    /* Base fonts: Latin & Symbols are ALWAYS loaded */
+    load_atlas_group(0);
+    load_atlas_group(1);
 
     sdf_font_rebuild_glyph_map();
-
-    /* Return 0 even if some pages failed — fallback chain still works */
     return 0;
 }
 
@@ -332,8 +363,17 @@ static int is_kana_block(uint32_t cp) {
 }
 
 void sdf_font_rebuild_glyph_map(void) {
-    memset(g_glyph_map, 0xFF, sizeof(g_glyph_map));
     int lang = i18n_current_lang();
+
+    /* Unload unneeded CJK fonts to save RAM */
+    if (lang != LANG_JP) unload_atlas_group(2);
+    if (lang != LANG_CN) unload_atlas_group(3);
+
+    /* Load needed CJK fonts */
+    if (lang == LANG_JP) load_atlas_group(2);
+    if (lang == LANG_CN) load_atlas_group(3);
+
+    memset(g_glyph_map, 0xFF, sizeof(g_glyph_map));
 
     /* Priority Groups based on language */
     int primary_cjk   = (lang == LANG_CN) ? 3 : 2;
@@ -346,7 +386,7 @@ void sdf_font_rebuild_glyph_map(void) {
         if (is_kana_block(cp)) {
             /* Kanas ALWAYS prefer JP */
             for (int i = 0; i < g_atlas_count; i++) {
-                if (g_atlases[i].group_id == 2 && g_atlases[i].lookup[cp] > 0) {
+                if (g_atlases[i].loaded && g_atlases[i].group_id == 2 && g_atlases[i].lookup[cp] > 0) {
                     best_slot = i; break;
                 }
             }
@@ -354,13 +394,13 @@ void sdf_font_rebuild_glyph_map(void) {
         else if (is_cjk_block(cp)) {
             /* CJK priority chain: Primary -> Secondary -> Universal */
             for (int i = 0; i < g_atlas_count; i++) {
-                if (g_atlases[i].group_id == primary_cjk && g_atlases[i].lookup[cp] > 0) {
+                if (g_atlases[i].loaded && g_atlases[i].group_id == primary_cjk && g_atlases[i].lookup[cp] > 0) {
                     best_slot = i; break;
                 }
             }
             if (best_slot == -1) {
                 for (int i = 0; i < g_atlas_count; i++) {
-                    if (g_atlases[i].group_id == secondary_cjk && g_atlases[i].lookup[cp] > 0) {
+                    if (g_atlases[i].loaded && g_atlases[i].group_id == secondary_cjk && g_atlases[i].lookup[cp] > 0) {
                         best_slot = i; break;
                     }
                 }
@@ -371,14 +411,14 @@ void sdf_font_rebuild_glyph_map(void) {
         if (best_slot == -1) {
             /* Pass A: Latin (0) & Symbols (1) */
             for (int i = 0; i < g_atlas_count; i++) {
-                if (g_atlases[i].group_id <= 1 && g_atlases[i].lookup[cp] > 0) {
+                if (g_atlases[i].loaded && g_atlases[i].group_id <= 1 && g_atlases[i].lookup[cp] > 0) {
                     best_slot = i; break;
                 }
             }
             /* Pass B: Any script as desperate fallback */
             if (best_slot == -1) {
                 for (int i = 0; i < g_atlas_count; i++) {
-                    if (g_atlases[i].lookup[cp] > 0) {
+                    if (g_atlases[i].loaded && g_atlases[i].lookup[cp] > 0) {
                         best_slot = i; break;
                     }
                 }
@@ -456,10 +496,21 @@ static SDFGlyph *get_glyph(uint32_t cp, SDFAtlas **out) {
  * UV are 0..1 normalised; sceGu with GU_TEXTURE_32BITF expects pixel coords,
  * so we multiply by atlas pixel dimensions.
  * ----------------------------------------------------------------------- */
+static uint32_t s_font_clut[256] __attribute__((aligned(16)));
+static int s_clut_initialized = 0;
+
 static void draw_string_internal(float x, float y, const char *str,
                                   uint32_t color, float px_size, int centered)
 {
     if (!str || !*str) return;
+
+    if (!s_clut_initialized) {
+        for (int i = 0; i < 256; i++) {
+            s_font_clut[i] = (i << 24) | 0x00FFFFFFu;
+        }
+        sceKernelDcacheWritebackAll();
+        s_clut_initialized = 1;
+    }
 
     /* --- GU state -------------------------------------------------------- */
     sceGuEnable(GU_BLEND);
@@ -467,7 +518,10 @@ static void draw_string_internal(float x, float y, const char *str,
     sceGuEnable(GU_ALPHA_TEST);
     sceGuAlphaFunc(GU_GREATER, 64, 255); /* 64–128 is a good SDF threshold */
 
-    sceGuTexMode(GU_PSM_8888, 0, 0, 0);
+    sceGuTexMode(GU_PSM_T8, 0, 0, 0);
+    sceGuClutMode(GU_PSM_8888, 0, 0xFF, 0);
+    sceGuClutLoad(32, s_font_clut);
+
     sceGuTexFilter(GU_LINEAR, GU_LINEAR);
     sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 
@@ -502,7 +556,6 @@ static void draw_string_internal(float x, float y, const char *str,
 
             /* Rebind texture only when switching to a different atlas page */
             if (at->tex_data != last_tex_ptr) {
-                sceGuTexMode(GU_PSM_8888, 0, 0, 0);
                 sceGuTexImage(0, at->tex_w, at->tex_h, at->tex_w, at->tex_data);
                 last_tex_ptr = at->tex_data;
             }

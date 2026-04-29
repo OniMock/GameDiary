@@ -99,7 +99,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_STATS]          = "Sigue tu tiempo de juego con gráficos. Cambia entre Semana, Mes, Meses y Años para ver qué juegos ocupan la mayor parte de tu tiempo.",
     [MSG_HELP_DESC_ACTIVITY]       = "Historial cronológico de tus sesiones recientes.",
     [MSG_HELP_DESC_SETTINGS]       = "Ajusta el idioma y preferencias generales.",
-    [MSG_HELP_DESC_DETAILS]        = "Información detallada del juego y su historial.",
+    [MSG_HELP_DESC_DETAILS]        = "Información detallada sobre un juego específico. Consulta el historial completo de sesiones, la fecha de la primera y la última vez que jugaste, y el total de horas acumuladas. Además, visualiza gráficos por semana, mes, meses y año para entender mejor tu tiempo de juego.",
     [MSG_HELP_DESC_MAIN_MENU]      = "Menú principal para acceder a juegos, estadísticas y ajustes.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Elige el idioma de la interfaz. Se aplica al instante.",
 

@@ -102,7 +102,7 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_STATS]          = "グラフでプレイ時間を確認できます。週・月・月別・年を切り替えて、どのゲームに一番時間を使っているかを見てみましょう。",
     [MSG_HELP_DESC_ACTIVITY]       = "最近のプレイ履歴を時系列で表示します。",
     [MSG_HELP_DESC_SETTINGS]       = "言語や設定を変更できます。",
-    [MSG_HELP_DESC_DETAILS]        = "ゲームの詳細情報やプレイ履歴を確認できます。",
+    [MSG_HELP_DESC_DETAILS]        = "特定のゲームに関する詳細情報を表示します。セッション履歴の確認、初回および最終プレイ日時、合計プレイ時間を確認できます。さらに、週・月・複数月・年ごとのグラフでプレイ時間の傾向を把握できます。",
     [MSG_HELP_DESC_MAIN_MENU]      = "メインメニュー。ゲーム、統計、履歴、設定に移動します。",
     [MSG_HELP_DESC_LANG_SELECT]    = "表示言語を選択します。すぐに反映されます。",
 
