@@ -78,6 +78,19 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "Ноябрь",
     [MSG_MONTH_DEC]            = "Декабрь",
 
+    [MSG_MONTH_SHORT_JAN]      = "Янв",
+    [MSG_MONTH_SHORT_FEB]      = "Фев",
+    [MSG_MONTH_SHORT_MAR]      = "Мар",
+    [MSG_MONTH_SHORT_APR]      = "Апр",
+    [MSG_MONTH_SHORT_MAY]      = "Май",
+    [MSG_MONTH_SHORT_JUN]      = "Июн",
+    [MSG_MONTH_SHORT_JUL]      = "Июл",
+    [MSG_MONTH_SHORT_AUG]      = "Авг",
+    [MSG_MONTH_SHORT_SEP]      = "Сен",
+    [MSG_MONTH_SHORT_OCT]      = "Окт",
+    [MSG_MONTH_SHORT_NOV]      = "Ноя",
+    [MSG_MONTH_SHORT_DEC]      = "Дек",
+
     [MSG_FILTER]               = "Фильтр",
 
     [MSG_HINT_HELPER]              = "[ L ]: Помощь",

@@ -82,6 +82,19 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "11月",
     [MSG_MONTH_DEC]            = "12月",
 
+    [MSG_MONTH_SHORT_JAN]      = "1月",
+    [MSG_MONTH_SHORT_FEB]      = "2月",
+    [MSG_MONTH_SHORT_MAR]      = "3月",
+    [MSG_MONTH_SHORT_APR]      = "4月",
+    [MSG_MONTH_SHORT_MAY]      = "5月",
+    [MSG_MONTH_SHORT_JUN]      = "6月",
+    [MSG_MONTH_SHORT_JUL]      = "7月",
+    [MSG_MONTH_SHORT_AUG]      = "8月",
+    [MSG_MONTH_SHORT_SEP]      = "9月",
+    [MSG_MONTH_SHORT_OCT]      = "10月",
+    [MSG_MONTH_SHORT_NOV]      = "11月",
+    [MSG_MONTH_SHORT_DEC]      = "12月",
+
     [MSG_FILTER]               = "筛选",
 
     [MSG_HINT_HELPER]              = "[ L ]: 帮助",

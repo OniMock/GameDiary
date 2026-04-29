@@ -248,8 +248,8 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
 
   // Draw Total Playtime (above graph, near title)
   if (data->context_subtitle[0] != '\0') {
-      Rect total_rect = {gx, gy - max_bar_h - 40, graph_w, 20};
-      ui_draw_text(data->context_subtitle, total_rect, COLOR_ACCENT, UI_FONT_SIZE_MEDIUM, ALIGN_CENTER);
+      Rect total_rect = {gx + 8, gy - max_bar_h - 40, graph_w, 20};
+      ui_draw_text(data->context_subtitle, total_rect, COLOR_ACCENT, UI_FONT_SIZE_MEDIUM, ALIGN_LEFT);
   }
 
   // Draw Context String (e.g. "Apr 2026")
@@ -322,20 +322,7 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
         }
     } else if (data->query.period == STATS_PERIOD_LAST_12_MONTHS) {
         struct tm bar_tm = *localtime(&data->column_dates[i]);
-        const char* full_name = i18n_get(MSG_MONTH_JAN + bar_tm.tm_mon);
-        // Shorten to first 3 characters (approx 3-6 bytes)
-        strncpy(label_buf, full_name, 15);
-        label_buf[15] = '\0';
-        if (strlen(label_buf) > 3) {
-            // Find 3rd character boundary (simple check for ASCII/Latin)
-            int bytes = 0;
-            int chars = 0;
-            while (label_buf[bytes] && chars < 3) {
-                if ((label_buf[bytes] & 0xC0) != 0x80) chars++;
-                bytes++;
-            }
-            label_buf[bytes] = '\0';
-        }
+        snprintf(label_buf, sizeof(label_buf), "%s", i18n_get(MSG_MONTH_SHORT_JAN + bar_tm.tm_mon));
     } else if (data->query.period == STATS_PERIOD_YEARLY) {
         struct tm bar_tm = *localtime(&data->column_dates[i]);
         int y = bar_tm.tm_year + 1900;

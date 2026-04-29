@@ -77,6 +77,19 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_MONTH_NOV]            = "November",
     [MSG_MONTH_DEC]            = "December",
 
+    [MSG_MONTH_SHORT_JAN]      = "Jan",
+    [MSG_MONTH_SHORT_FEB]      = "Feb",
+    [MSG_MONTH_SHORT_MAR]      = "Mar",
+    [MSG_MONTH_SHORT_APR]      = "Apr",
+    [MSG_MONTH_SHORT_MAY]      = "May",
+    [MSG_MONTH_SHORT_JUN]      = "Jun",
+    [MSG_MONTH_SHORT_JUL]      = "Jul",
+    [MSG_MONTH_SHORT_AUG]      = "Aug",
+    [MSG_MONTH_SHORT_SEP]      = "Sep",
+    [MSG_MONTH_SHORT_OCT]      = "Oct",
+    [MSG_MONTH_SHORT_NOV]      = "Nov",
+    [MSG_MONTH_SHORT_DEC]      = "Dec",
+
     [MSG_FILTER]               = "Filter",
 
     [MSG_HINT_HELPER]              = "[ L ]: Help",
