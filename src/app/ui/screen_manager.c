@@ -94,7 +94,7 @@ void screen_manager_update(void) {
     s_current_pressed = pressed;
 
     // Global Shortcuts
-    if (g_fade_state == 0) {
+    if (g_fade_state == 0 && g_current_screen != &g_screen_splash) {
         if (pressed & PSP_CTRL_START) {
             audio_play_sfx(SFX_CONFIRM);
             if (g_current_screen != &g_screen_main_menu) {
