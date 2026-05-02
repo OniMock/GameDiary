@@ -7,12 +7,16 @@
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
 ![Last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
 ![Download](https://img.shields.io/github/downloads/OniMock/GameDiary/total)
+[![Website](https://img.shields.io/badge/Website-GameDiary-black?style=flat&logo=vercel)](https://game-diary-app.vercel.app/)
 
 # 🎮 GameDiary
+### 🌐 [Official Website](https://game-diary-app.vercel.app/) | 📺 [Video Introduction & Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
 
 > Your handheld gaming history, beautifully tracked.
 
 **GameDiary** is a seamless background playtime tracker and stats visualizer for the PlayStation Portable. It bridges the gap between retro hardware and modern ecosystems by automatically building a premium, localized dashboard of your gaming habits.
+
+
 
 <p align="center">
   <img src="./assets-src/logo.png" width="380" />
@@ -73,6 +77,10 @@ from EBOOTs and ISOs for a rich visual diary without manual scraping.
 ---
 
 ## 🖼️ Screenshots / UI
+
+<p align="center">
+  <img src="./.github/sources/output.gif" width="360" />
+</p>
 
 | Home / Carousel | Session Statistics |
 | :---: | :---: |
