@@ -597,3 +597,54 @@ void ui_format_duration(u32 seconds, char *out, size_t size) {
     snprintf(out, size, i18n_get(MSG_DURATION_MINS), m);
   }
 }
+
+void ui_draw_nav_indicators(int y, bool show_left, bool show_right, bool animate_left, bool animate_right, u32 last_nav_ms, u32 color) {
+    if (!show_left && !show_right) return;
+
+    // --- Animation Settings ---
+    const float scale_min = 0.48f; // Min scale
+    const float scale_max = 0.51f; // Max scale
+    const float alpha_min = 0.70f; // Min opacity
+    const float alpha_max = 0.90f; // Max opacity
+    // --------------------------
+
+    u32 time_ms = utils_get_time_ms();
+
+    // Animation pulse: 0.0 to 1.0 using cos for smooth ease-in-out loop of 1000ms
+    float pulse = 0.5f - 0.5f * cosf((time_ms % 1000) * 0.00628318f); // 2 * PI / 1000 = 0.00628318f
+
+    // Pause animation during rapid navigation
+    if (time_ms - last_nav_ms < 300) {
+        pulse = 0.0f;
+    }
+
+    // Colors & Scale
+    u8 pulse_alpha = (u8)(255.0f * (alpha_min + ((alpha_max - alpha_min) * pulse)));
+    u32 animated_color = (color & 0x00FFFFFF) | ((u32)pulse_alpha << 24);
+
+    float scale = scale_min + ((scale_max - scale_min) * pulse);
+    float size_base = UI_FONT_SIZE_TITLE_MAIN;
+
+    // To pulse from the center, we need to compensate for the font height.
+    // intraFont draws from baseline, so as scale increases, it grows upwards.
+    // We adjust Y by half the visual height difference.
+    float base_height = size_base * scale_min;
+    float current_height = size_base * scale;
+    float y_offset = (current_height - base_height) * 0.4f; // 0.4f is a magic number for centering '◀▶' symbols vertically
+
+    // Left Indicator (◀)
+    if (show_left) {
+        float s = animate_left ? scale : scale_min;
+        float dy = animate_left ? y_offset : 0;
+        u32 c = animate_left ? animated_color : ((color & 0x00FFFFFF) | (200 << 24));
+        font_draw_string_centered(20, y + dy, "◀", c, size_base * s);
+    }
+
+    // Right Indicator (▶)
+    if (show_right) {
+        float s = animate_right ? scale : scale_min;
+        float dy = animate_right ? y_offset : 0;
+        u32 c = animate_right ? animated_color : ((color & 0x00FFFFFF) | (200 << 24));
+        font_draw_string_centered(460, y + dy, "▶", c, size_base * s);
+    }
+}

@@ -45,6 +45,12 @@ u32 utils_get_timestamp(void) {
   return (u32)((tick / 1000000ULL) - 62135596800ULL);
 }
 
+u32 utils_get_time_ms(void) {
+    u64 tick;
+    sceRtcGetCurrentTick(&tick);
+    return (u32)(tick / (sceRtcGetTickResolution() / 1000));
+}
+
 u32 utils_time_overlap_secs(time_t a_start, time_t a_end, time_t b_start, time_t b_end) {
   /* Returns the length of the intersection of [a_start, a_end) and [b_start, b_end).
    * Both intervals are half-open (start inclusive, end exclusive).

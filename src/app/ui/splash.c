@@ -41,15 +41,9 @@ static u64 s_start_time;
 static u64 s_state_start_time;
 static u8 s_alpha;
 
-static u64 get_time_ms(void) {
-    u64 tick;
-    sceRtcGetCurrentTick(&tick);
-    return tick / (sceRtcGetTickResolution() / 1000);
-}
-
 static void splash_init(void) {
     s_state = SPLASH_STATE_FADE_IN;
-    s_start_time = get_time_ms();
+    s_start_time = utils_get_time_ms();
     s_state_start_time = s_start_time;
     s_alpha = 0;
 }
@@ -72,12 +66,12 @@ void splash_do_load_tasks(void) {
     
     s_state = SPLASH_STATE_HOLD;
     /* Reset the holding time so we still see the logo briefly if loading was somewhat fast */
-    s_state_start_time = get_time_ms();
+    s_state_start_time = utils_get_time_ms();
 }
 
 static void splash_update(u32 buttons, u32 pressed) {
     (void)buttons; (void)pressed;
-    u64 now = get_time_ms();
+    u64 now = utils_get_time_ms();
     u64 elapsed = now - s_state_start_time;
 
     switch (s_state) {

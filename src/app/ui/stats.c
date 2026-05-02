@@ -25,12 +25,14 @@
 #include "app/data/data_loader.h"
 #include "app/data/stats_calculator.h"
 #include "app/audio/audio_manager.h"
+#include "common/utils.h"
 #include <pspgu.h>
 #include <pspctrl.h>
 #include <stdio.h>
 
 static StatsQuery g_current_query = {STATS_PERIOD_WEEKLY, 0, 0};
 static StatsGraphData g_cached_graph_data;
+static u32 s_last_nav_ms = 0;
 
 static const char* s_helper_lines[8];
 static PopupData s_helper_data;
@@ -83,11 +85,13 @@ static void stats_update(u32 buttons, u32 pressed) {
         StatsPeriod next = (g_current_query.period + STATS_PERIOD_COUNT - 1) % STATS_PERIOD_COUNT;
         stats_set_mode(next);
         audio_play_sfx(SFX_NAVIGATE);
+        s_last_nav_ms = utils_get_time_ms();
         joystick_cooldown = 20; // ~333ms at 60fps
     } else if ((pressed & PSP_CTRL_RIGHT) || (analog_right && joystick_cooldown == 0)) {
         StatsPeriod next = (g_current_query.period + 1) % STATS_PERIOD_COUNT;
         stats_set_mode(next);
         audio_play_sfx(SFX_NAVIGATE);
+        s_last_nav_ms = utils_get_time_ms();
         joystick_cooldown = 20;
     }
 }
@@ -134,6 +138,8 @@ static void stats_draw(void) {
     // 3. Main Content: Cached Graph Area
     ui_draw_stats_graph(&g_cached_graph_data, 240, 190, 360, 80);
 
+    // Provide clear navigation symbols to indicate page changing is possible
+    ui_draw_nav_indicators(136, true, true, true, true, s_last_nav_ms, COLOR_ACCENT);
 
     ui_draw_standard_hints();
 }

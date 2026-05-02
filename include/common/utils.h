@@ -46,6 +46,12 @@ u32 utils_get_u32_le(const u8 *p);
 u32 utils_get_timestamp(void);
 
 /**
+ * @brief Gets the current time in milliseconds using the PSP RTC.
+ * @return Current time in milliseconds.
+ */
+u32 utils_get_time_ms(void);
+
+/**
  * @brief Returns the overlap in seconds between two half-open time intervals.
  *
  * Computes the intersection of [a_start, a_end) and [b_start, b_end), expressed

@@ -32,6 +32,7 @@
 
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
+#include "common/utils.h"
 #include "app/ui/ui_text.h"
 #include "app/ui/ui_layout.h"
 #include "app/ui/carousel_state.h"
@@ -100,6 +101,7 @@ static CarouselState g_cs;
 static int           g_prev_idx = -1; /* Tracks game changes for graph reset */
 static u32           s_last_selected_uid = 0; /* Save selection on screen transitions */
 static int           s_analog_held_x = 0;     /* Analog held state (-1 left, 1 right, 0 neutral) */
+static u32           s_last_nav_ms = 0;       /* Animation pause tracking */
 
 /* Filtering state */
 static u8  s_available_filters[CAT_UNKNOWN];
@@ -330,7 +332,10 @@ static void game_list_update(u32 buttons, u32 pressed) {
     int wrap_idx = ((g_cs.current_idx % s_filtered_count) + s_filtered_count) % s_filtered_count;
 
     if (wrap_idx != g_prev_idx) {
-        if (g_prev_idx != -1) audio_play_sfx(SFX_NAVIGATE);
+        if (g_prev_idx != -1) {
+            audio_play_sfx(SFX_NAVIGATE);
+            s_last_nav_ms = utils_get_time_ms();
+        }
         ui_reset_game_daily_graph_animation();
         g_prev_idx = wrap_idx;
     }
@@ -519,6 +524,13 @@ static void game_list_draw(void) {
                              360,          /* center_x */
                              228,          /* baseline_y */
                              55);          /* max_height */
+
+    /* ----------------------------------------------------------------
+     * Dynamic Navigation Indicators
+     * ---------------------------------------------------------------- */
+    bool show_arrows = (s_filtered_count > 1);
+    // Align with the carousel visual center
+    ui_draw_nav_indicators(CAROUSEL_CENTER_Y + 7, show_arrows, show_arrows, show_arrows, show_arrows, s_last_nav_ms, COLOR_ACCENT);
 
     /* ----------------------------------------------------------------
      * Control hints

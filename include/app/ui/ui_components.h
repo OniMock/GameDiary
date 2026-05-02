@@ -155,4 +155,17 @@ void ui_reset_game_daily_graph_animation(void);
  */
 void ui_format_duration(u32 seconds, char *out, size_t size);
 
+/**
+ * @brief Draws animated navigation indicators (◀ / ▶) at the left and right screen edges.
+ *
+ * @param y             Y coordinate (baseline) for the indicators.
+ * @param show_left     Whether to show the left indicator.
+ * @param show_right    Whether to show the right indicator.
+ * @param animate_left  Whether the left indicator should pulse.
+ * @param animate_right Whether the right indicator should pulse.
+ * @param last_nav_ms   System timestamp of the last rapid navigation (to pause animation briefly).
+ * @param color         Color to use for the indicators (e.g., COLOR_ACCENT or COLOR_TEXT).
+ */
+void ui_draw_nav_indicators(int y, bool show_left, bool show_right, bool animate_left, bool animate_right, u32 last_nav_ms, u32 color);
+
 #endif // GAMEDIARY_UI_COMPONENTS_H

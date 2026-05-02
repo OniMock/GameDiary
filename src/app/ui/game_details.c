@@ -29,6 +29,7 @@
 #include "app/data/game_category.h"
 #include "app/data/stats_calculator.h"
 #include "app/audio/audio_manager.h"
+#include "common/utils.h"
 #include <pspctrl.h>
 #include <stdio.h>
 #include <string.h>
@@ -45,6 +46,7 @@ static PopupData s_helper_data;
 static int s_details_page = 0;
 static StatsQuery g_current_query = {STATS_PERIOD_WEEKLY, 0, 0};
 static StatsGraphData g_cached_graph_data;
+static u32 s_last_nav_ms = 0;
 
 void game_details_set_idx(int idx) {
     g_game_idx = idx;
@@ -106,6 +108,7 @@ static void game_details_update(u32 buttons, u32 pressed) {
         s_details_page--;
         if (s_details_page < 0) s_details_page = 4;
         audio_play_sfx(SFX_NAVIGATE);
+        s_last_nav_ms = utils_get_time_ms();
         joystick_cooldown = 20;
 
         if (s_details_page > 0) {
@@ -117,6 +120,7 @@ static void game_details_update(u32 buttons, u32 pressed) {
         s_details_page++;
         if (s_details_page > 4) s_details_page = 0;
         audio_play_sfx(SFX_NAVIGATE);
+        s_last_nav_ms = utils_get_time_ms();
         joystick_cooldown = 20;
 
         if (s_details_page > 0) {
@@ -277,6 +281,9 @@ static void game_details_draw(void) {
         texture_draw_resource(&GD_IMG_ICON_FILTER_32_PNG, filter_x, filter_y - (icon_size/2), icon_size, icon_size);
         font_draw_string(filter_x + icon_size + filter_spacing, filter_y + 4, filter_buf, COLOR_SUBTEXT, UI_FONT_SIZE_SMALL);
     }
+
+    // Always show navigation indicators for context switching, vertically centered.
+    ui_draw_nav_indicators(136, true, true, true, true, s_last_nav_ms, COLOR_ACCENT);
 
     ui_draw_standard_hints();
 }

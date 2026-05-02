@@ -22,6 +22,7 @@
 #include "app/render/font.h"
 #include "app/render/texture.h"
 #include "app/audio/audio_manager.h"
+#include "common/utils.h"
 #include <pspctrl.h>
 #include <math.h>
 #include <stdio.h>
@@ -30,6 +31,7 @@
 
 static float g_current_index = 0.0f;
 static float g_target_index = 0.0f;
+static u32 s_last_nav_ms = 0;
 
 static const char* s_helper_lines[8];
 static PopupData s_helper_data;
@@ -115,6 +117,7 @@ static void main_menu_update(u32 buttons, u32 pressed) {
         
         if (g_target_index != prev_target) {
             audio_play_sfx(SFX_NAVIGATE);
+            s_last_nav_ms = utils_get_time_ms();
         }
     }
 
@@ -224,6 +227,13 @@ static void main_menu_draw(void) {
             }
         }
     }
+
+    int current_idx = (int)(g_target_index + 0.5f);
+    bool show_left = (current_idx > 0);
+    bool show_right = (current_idx < MENU_ITEM_COUNT - 1);
+    
+    // Center indicators vertically with the icons (-10 is the icon Y offset)
+    ui_draw_nav_indicators(center_y - 10, show_left, show_right, show_left, show_right, s_last_nav_ms, COLOR_TEXT);
 
     // Standardized hints
     ui_draw_standard_hints();
