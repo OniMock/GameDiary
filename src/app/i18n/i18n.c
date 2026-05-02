@@ -26,6 +26,7 @@ extern const char *g_lang_ru_entries[MSG_COUNT];
 extern const char *g_lang_jp_entries[MSG_COUNT];
 extern const char *g_lang_cn_entries[MSG_COUNT];
 extern const char *g_lang_de_entries[MSG_COUNT];
+extern const char *g_lang_it_entries[MSG_COUNT];
 
 /* --- Global Pointer --- */
 const char **g_i18n_msg = NULL;
@@ -44,6 +45,7 @@ static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
     [LANG_CN] = {"Chinese",  g_lang_cn_entries, &GD_IMG_FLAG_CN_PNG},
     [LANG_EN] = {"English",  g_lang_en_entries, &GD_IMG_FLAG_EN_PNG},
     [LANG_DE] = {"German",   g_lang_de_entries, &GD_IMG_FLAG_DE_PNG},
+    [LANG_IT] = {"Italian",  g_lang_it_entries, &GD_IMG_FLAG_IT_PNG},
     [LANG_JP] = {"Japanese", g_lang_jp_entries, &GD_IMG_FLAG_JP_PNG},
     [LANG_PT] = {"Portuguese", g_lang_pt_entries, &GD_IMG_FLAG_PT_PNG},
     [LANG_RU] = {"Russian",  g_lang_ru_entries, &GD_IMG_FLAG_RU_PNG},
@@ -82,6 +84,8 @@ static int i18n_detect_system_lang(void) {
     return LANG_CN;
   case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
     return LANG_DE;
+  case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
+    return LANG_IT;
   case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
   default:
     return LANG_EN;
@@ -140,10 +144,11 @@ const char *i18n_get_lang_name(int index) {
  *   0 Chinese  (LANG_CN)
  *   1 English  (LANG_EN)
  *   2 German   (LANG_DE)
- *   3 Japanese (LANG_JP)
- *   4 Portuguese (LANG_PT)
- *   5 Russian  (LANG_RU)
- *   6 Spanish  (LANG_ES)
+ *   3 Italian  (LANG_IT)
+ *   4 Japanese (LANG_JP)
+ *   5 Portuguese (LANG_PT)
+ *   6 Russian  (LANG_RU)
+ *   7 Spanish  (LANG_ES)
  *
  * When adding a new language: insert it here in the correct A-Z slot.
  * The enum value in LanguageId never changes — only this table grows.
@@ -152,6 +157,7 @@ static const LanguageId g_lang_sorted_order[LANG_COUNT] = {
     LANG_CN,  /* Chinese    */
     LANG_EN,  /* English    */
     LANG_DE,  /* German     */
+    LANG_IT,  /* Italian    */
     LANG_JP,  /* Japanese   */
     LANG_PT,  /* Portuguese */
     LANG_RU,  /* Russian    */
