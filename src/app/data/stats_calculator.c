@@ -112,11 +112,10 @@ static void calc_weekly(const SessionEntry *sessions, int count, StatsQuery quer
     strftime(b2, sizeof(b2), i18n_get(MSG_DATE_FORMAT_SHORT), &end_d);
     snprintf(out_data->context_title, sizeof(out_data->context_title), "%s - %s %d", b1, b2, end_d.tm_year + 1900);
 
-    char dur_buf[32];
-    u32 h = total_time / 3600;
-    u32 m = (total_time % 3600) / 60;
-    if (h > 0) snprintf(dur_buf, sizeof(dur_buf), "%s: %uh %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)h, (unsigned int)m);
-    else snprintf(dur_buf, sizeof(dur_buf), "%s: %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)m);
+    char dur_buf[64];
+    char total_str[32];
+    ui_format_duration(total_time, total_str, sizeof(total_str));
+    snprintf(dur_buf, sizeof(dur_buf), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), total_str);
 
     snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", dur_buf);
 }
@@ -268,11 +267,10 @@ static void calc_yearly(const SessionEntry *sessions, int count, StatsQuery quer
 
     snprintf(out_data->context_title, sizeof(out_data->context_title), "%d - %d", start_year, current_year);
 
-    char dur_buf[32];
-    u32 h = total_time / 3600;
-    u32 m = (total_time % 3600) / 60;
-    if (h > 0) snprintf(dur_buf, sizeof(dur_buf), "%s: %uh %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)h, (unsigned int)m);
-    else snprintf(dur_buf, sizeof(dur_buf), "%s: %um", i18n_get(MSG_STATS_TOTAL_PLAYTIME), (unsigned int)m);
+    char dur_buf[64];
+    char total_str[32];
+    ui_format_duration(total_time, total_str, sizeof(total_str));
+    snprintf(dur_buf, sizeof(dur_buf), "%s: %s", i18n_get(MSG_STATS_TOTAL_PLAYTIME), total_str);
 
     snprintf(out_data->context_subtitle, sizeof(out_data->context_subtitle), "%s", dur_buf);
 }
