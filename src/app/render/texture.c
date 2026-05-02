@@ -137,6 +137,7 @@ void texture_draw(Texture* tex, int x, int y, int w, int h) {
     };
 
     sceGuEnable(GU_TEXTURE_2D);
+    sceGuDisable(GU_DEPTH_TEST);
     sceGuEnable(GU_BLEND);
     sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
@@ -161,6 +162,7 @@ void texture_draw(Texture* tex, int x, int y, int w, int h) {
     vertices[1].y = y + h;
     vertices[1].z = 0;
 
+    sceKernelDcacheWritebackRange(vertices, 2 * sizeof(struct Vertex));
     sceGuDrawArray(GU_SPRITES, GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 }
 
@@ -196,6 +198,7 @@ void texture_draw_resource(const ImageResource* res, int x, int y, int w, int h)
     vertices[0] = (Vertex){0, 0, (float)x, (float)y, 0};
     vertices[1] = (Vertex){u, v, (float)(x + w), (float)(y + h), 0};
 
+    sceKernelDcacheWritebackRange(vertices, 2 * sizeof(Vertex));
     sceGuDrawArray(GU_SPRITES, GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 }
 
@@ -233,6 +236,7 @@ void texture_draw_tinted(Texture* tex, int x, int y, int w, int h, u32 color) {
     v[1].u = tex->width;  v[1].v = tex->height;
     v[1].color = color;   v[1].x = (float)(x + w); v[1].y = (float)(y + h); v[1].z = 0;
 
+    sceKernelDcacheWritebackRange(v, 2 * sizeof(struct Vertex));
     sceGuDrawArray(GU_SPRITES,
                    GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF |
                    GU_TRANSFORM_2D,
@@ -272,5 +276,6 @@ void texture_draw_resource_tinted(const ImageResource* res, int x, int y, int w,
     vertices[0] = (Vertex){0, 0, color, (float)x, (float)y, 0};
     vertices[1] = (Vertex){u, v, color, (float)(x + w), (float)(y + h), 0};
 
+    sceKernelDcacheWritebackRange(vertices, 2 * sizeof(Vertex));
     sceGuDrawArray(GU_SPRITES, GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 }

@@ -119,11 +119,20 @@ void screen_manager_update(void) {
     }
 
     // 2. State & Transitions
+    static int s_fade_wait_frames = 0;
+
     if (g_fade_state == 1) { // Fading OUT
         g_fade_alpha += (1.0f / 60.0f) * FADE_SPEED;
         if (g_fade_alpha >= 1.0f) {
             g_fade_alpha = 1.0f;
-
+            s_fade_wait_frames = 2; // Guarantee double buffering commits fully black frames to LCD
+            g_fade_state = 3; 
+        }
+    } else if (g_fade_state == 3) {
+        if (s_fade_wait_frames > 0) {
+            s_fade_wait_frames--;
+        } else {
+            // The black screen was drawn. Now we can do heavy operations (I/O, parsing) without glitches.
             if (g_current_screen && g_current_screen->destroy) g_current_screen->destroy();
             g_current_screen = g_next_screen;
             if (g_current_screen && g_current_screen->init) g_current_screen->init();
@@ -138,13 +147,23 @@ void screen_manager_update(void) {
         }
     }
 
-    // 3. Screen Update (only when not in middle of fade out)
-    if (g_current_screen && g_current_screen->update && g_fade_state != 1) {
+    // 3. Screen Update (only when not in middle of fade transition)
+    if (g_current_screen && g_current_screen->update && g_fade_state == 0) {
         g_current_screen->update(pad.Buttons, pressed);
     }
 }
 
 void screen_manager_draw(void) {
+    /* Optimization & Artifact Prevention: 
+     * If the fade has completely enveloped the screen (Pitch Black state), 
+     * fully abort drawing the complex UI layers beneath it. 
+     * This physically prevents the GE (Graphics Engine) from tearing or 
+     * flashing stale buffers / old geometry when switching the heavy screens. */
+    if (g_fade_alpha >= 1.0f || g_fade_state == 3) {
+        renderer_clear(0xFF000000); // Pure Pitch Black
+        return;
+    }
+
     if (g_current_screen && g_current_screen->draw) {
         g_current_screen->draw();
     }

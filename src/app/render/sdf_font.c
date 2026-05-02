@@ -594,6 +594,7 @@ static void draw_string_internal(float x, float y, const char *str,
             v[1].u = u1;  v[1].v = v1;  v[1].color = color;
             v[1].x = sx + sw;  v[1].y = sy + sh;  v[1].z = 0;
 
+            sceKernelDcacheWritebackRange(v, 2 * sizeof(VertexSDF));
             sceGuDrawArray(GU_SPRITES,
                 GU_TEXTURE_32BITF | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
                 2, NULL, v);

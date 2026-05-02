@@ -455,10 +455,19 @@ void ui_draw_game_daily_graph(const SessionEntry *sessions, int count,
   if (max_bars <= 0 || max_bars > MAX_SESSION_BARS)
     max_bars = MAX_SESSION_BARS;
 
-  DailyPlayData daily_data[MAX_SESSION_BARS];
-  u32 max_dur;
-  int day_count = compute_game_daily_data(sessions, count, game_uid, max_bars,
-                                          daily_data, &max_dur);
+  static u32 s_cached_game_uid = 0;
+  static int s_cached_day_count = 0;
+  static u32 s_cached_max_dur = 0;
+  static DailyPlayData s_cached_daily_data[MAX_SESSION_BARS];
+
+  if (s_cached_game_uid != game_uid) {
+    s_cached_day_count = compute_game_daily_data(sessions, count, game_uid, max_bars, s_cached_daily_data, &s_cached_max_dur);
+    s_cached_game_uid = game_uid;
+  }
+
+  int day_count = s_cached_day_count;
+  u32 max_dur = s_cached_max_dur;
+  DailyPlayData *daily_data = s_cached_daily_data;
 
   if (day_count == 0)
     return; /* No activity — draw nothing. */

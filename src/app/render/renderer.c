@@ -106,21 +106,29 @@ void renderer_clear(uint32_t color) {
 void renderer_draw_rect(int x, int y, int w, int h, uint32_t color) {
     struct Vertex {
         unsigned int color;
-        short x, y, z;
+        float x, y, z;
     };
 
     struct Vertex* vertices = (struct Vertex*)sceGuGetMemory(2 * sizeof(struct Vertex));
     vertices[0].color = color;
-    vertices[0].x = x;
-    vertices[0].y = y;
-    vertices[0].z = 0;
+    vertices[0].x = (float)x;
+    vertices[0].y = (float)y;
+    vertices[0].z = 0.0f;
 
     vertices[1].color = color;
-    vertices[1].x = x + w;
-    vertices[1].y = y + h;
-    vertices[1].z = 0;
+    vertices[1].x = (float)(x + w);
+    vertices[1].y = (float)(y + h);
+    vertices[1].z = 0.0f;
 
     sceGuDisable(GU_TEXTURE_2D);
-    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_VERTEX_16BIT | GU_TRANSFORM_2D, 2, 0, vertices);
+    
+    // Explicitly enforce state to guarantee clean overlay rendering
+    sceGuEnable(GU_BLEND);
+    sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+    sceGuDisable(GU_DEPTH_TEST);
+
+    sceKernelDcacheWritebackRange(vertices, 2 * sizeof(struct Vertex));
+    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
+    
     sceGuEnable(GU_TEXTURE_2D);
 }
