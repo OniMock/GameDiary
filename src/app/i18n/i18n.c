@@ -27,6 +27,7 @@ extern const char *g_lang_jp_entries[MSG_COUNT];
 extern const char *g_lang_cn_entries[MSG_COUNT];
 extern const char *g_lang_de_entries[MSG_COUNT];
 extern const char *g_lang_it_entries[MSG_COUNT];
+extern const char *g_lang_fr_entries[MSG_COUNT];
 
 /* --- Global Pointer --- */
 const char **g_i18n_msg = NULL;
@@ -44,6 +45,7 @@ const ImageResource* i18n_get_lang_flag(int index);
 static const LanguageRegistry g_lang_registry[LANG_COUNT] = {
     [LANG_CN] = {"Chinese",  g_lang_cn_entries, &GD_IMG_FLAG_CN_PNG},
     [LANG_EN] = {"English",  g_lang_en_entries, &GD_IMG_FLAG_EN_PNG},
+    [LANG_FR] = {"French",   g_lang_fr_entries, &GD_IMG_FLAG_FR_PNG},
     [LANG_DE] = {"German",   g_lang_de_entries, &GD_IMG_FLAG_DE_PNG},
     [LANG_IT] = {"Italian",  g_lang_it_entries, &GD_IMG_FLAG_IT_PNG},
     [LANG_JP] = {"Japanese", g_lang_jp_entries, &GD_IMG_FLAG_JP_PNG},
@@ -86,6 +88,8 @@ static int i18n_detect_system_lang(void) {
     return LANG_DE;
   case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
     return LANG_IT;
+  case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
+    return LANG_FR;
   case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
   default:
     return LANG_EN;
@@ -144,11 +148,12 @@ const char *i18n_get_lang_name(int index) {
  *   0 Chinese  (LANG_CN)
  *   1 English  (LANG_EN)
  *   2 German   (LANG_DE)
- *   3 Italian  (LANG_IT)
- *   4 Japanese (LANG_JP)
- *   5 Portuguese (LANG_PT)
- *   6 Russian  (LANG_RU)
- *   7 Spanish  (LANG_ES)
+ *   3 French   (LANG_FR)
+ *   4 Italian  (LANG_IT)
+ *   5 Japanese (LANG_JP)
+ *   6 Portuguese (LANG_PT)
+ *   7 Russian  (LANG_RU)
+ *   8 Spanish  (LANG_ES)
  *
  * When adding a new language: insert it here in the correct A-Z slot.
  * The enum value in LanguageId never changes — only this table grows.
@@ -157,6 +162,7 @@ static const LanguageId g_lang_sorted_order[LANG_COUNT] = {
     LANG_CN,  /* Chinese    */
     LANG_EN,  /* English    */
     LANG_DE,  /* German     */
+    LANG_FR,  /* French     */
     LANG_IT,  /* Italian    */
     LANG_JP,  /* Japanese   */
     LANG_PT,  /* Portuguese */

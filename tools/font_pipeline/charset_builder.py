@@ -23,6 +23,7 @@ RANGES = {
         (0x0000, 0x03FF), # Basic Latin, Latin-1, Latin Ext-A, Latin Ext-B, IPA, Spacing Modifiers, Comb. Diacritics, Greek
         (0x0400, 0x052F), # Cyrillic & Cyrillic Supplement
         (0x1E00, 0x1EFF), # Latin Extended Additional
+        (0x2000, 0x206F), # General Punctuation (apostrophes, quotes, ellipsis, etc.)
     ],
     "cjk": [
         (0x3000, 0x303F), # CJK Symbols
@@ -34,7 +35,7 @@ RANGES = {
         (0xFF00, 0xFFEF), # Halfwidth / Fullwidth Forms
     ],
     "symbols": [
-        (0x2000, 0x2BFF), # Gen Punc, Currency, Box Drawing, Math, etc.
+        (0x2070, 0x2BFF), # Superscripts/Subscripts, Currency, Box Drawing, Math, etc.
     ]
 }
 
