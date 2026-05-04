@@ -8,8 +8,6 @@ on:
       - 'src/**'
       - 'Makefile*'
       - '.github/workflows/**'
-    paths-ignore:
-      - 'CHANGELOG.md'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
