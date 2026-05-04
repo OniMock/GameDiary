@@ -12,6 +12,12 @@ app:
 	$(MAKE) -f Makefile_App clean
 	$(MAKE) -f Makefile_App
 
+debug:
+	$(MAKE) -f Makefile_Plugin clean
+	$(MAKE) -f Makefile_Plugin DEBUG=1
+	$(MAKE) -f Makefile_App clean
+	$(MAKE) -f Makefile_App DEBUG=1
+
 clean:
 	$(MAKE) -f Makefile_Plugin clean
 	$(MAKE) -f Makefile_App clean

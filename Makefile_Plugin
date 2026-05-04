@@ -42,6 +42,10 @@ CFLAGS = -O2 -Os -G0 -Wall -Wextra -D_PSP_FW_VERSION=661 -DGDIARY_PLUGIN \
          -Ilib \
          -I/usr/local/pspdev/psp/include \
          -I/usr/local/pspdev/psp/sdk/include
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DGDIARY_DEBUG
+endif
 CXXFLAGS = $(CFLAGS)
 ASFLAGS = $(CFLAGS)
 
