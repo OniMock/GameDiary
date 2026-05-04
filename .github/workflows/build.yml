@@ -145,6 +145,39 @@ jobs:
           fi
 
       # -------------------------------------------------------
+      # 📝 Generate gamediary.json (VERSION for site)
+      # -------------------------------------------------------
+      - name: Generate gamediary.json (VERSION for site)
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          echo "{\"version\":\"${{ steps.get_version.outputs.version }}\"}" > gamediary.json
+
+          echo "📄 gamediary.json:"
+          cat gamediary.json
+
+      # -------------------------------------------------------
+      # 📤 Prepare FTP upload
+      # -------------------------------------------------------
+      - name: Prepare FTP upload
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          mkdir ftp_upload
+          cp gamediary.json ftp_upload/
+
+      # -------------------------------------------------------
+      # 📤 Upload gamediary.json to InfinityFree
+      # -------------------------------------------------------
+      - name: Upload gamediary.json to InfinityFree
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ftp_upload/
+          server-dir: /htdocs/
+
+      # -------------------------------------------------------
       # 📥 Download artifact
       # -------------------------------------------------------
       - name: Download artifact
@@ -198,7 +231,7 @@ jobs:
 
           git commit -m "chore(release): update changelog ${{ steps.get_version.outputs.tag }} [skip cliff]" || echo "No changes"
 
-          git push
+          git push origin HEAD:${{ github.ref_name }}
 
 
       # -------------------------------------------------------
@@ -231,7 +264,7 @@ jobs:
             ## 📦 Download
 
             * GameDiary.zip (PRX + EBOOT)
-              https://github.com/OniMock/GameDiary/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.zip
+              https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.zip
 
             ---
 
