@@ -57,8 +57,9 @@ def run_msdf_gen(charset_file, font_file, out_png, out_json, pxrange="2", dimens
     if dimensions:
         cmd += ["-dimensions", str(dimensions[0]), str(dimensions[1])]
     else:
-        # Default to PSP max texture size
-        cmd += ["-dimensions", "512", "512"]
+        # Omitting dimensions allows msdf-atlas-gen to calculate the smallest
+        # possible image dimensions needed to fit the glyphs.
+        pass
 
     print(f"Running msdf-atlas-gen for {os.path.basename(charset_file)}...")
     try:

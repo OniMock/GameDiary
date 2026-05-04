@@ -561,12 +561,12 @@ static void draw_string_internal(float x, float y, const char *str,
             }
 
             /* UV in PIXEL coordinates (required by GU_TEXTURE_32BITF) */
-            float tw = (float)at->tex_w;
-            float th = (float)at->tex_h;
-            float u0 = g->u * tw;
-            float v0 = g->v * th;
-            float u1 = u0 + g->w * tw;
-            float v1 = v0 + g->h * th;
+            float iw = (float)at->img_w;
+            float ih = (float)at->img_h;
+            float u0 = g->u * iw;
+            float v0 = g->v * ih;
+            float u1 = u0 + g->w * iw;
+            float v1 = v0 + g->h * ih;
 
             /*
              * Screen rect:

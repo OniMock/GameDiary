@@ -106,7 +106,7 @@ def next_power_of_2(n):
     return p
 
 
-def merge_atlases(partial_results, final_png, final_json, max_width=512):
+def merge_atlases(partial_results, final_png, final_json, max_width_limit=512):
     """
     Stacks partial PNG atlases vertically into one image and produces a merged
     JSON with re-mapped UV coordinates.
@@ -114,7 +114,7 @@ def merge_atlases(partial_results, final_png, final_json, max_width=512):
     partial_results: list of (png_path, json_data) for each font subset.
     final_png: output PNG path.
     final_json: output JSON path.
-    max_width: must match -dimensions passed to msdf-atlas-gen (512).
+    max_width_limit: hardware limit (512 for PSP).
 
     Returns a merged JSON data dict or None on failure.
     """
@@ -124,13 +124,20 @@ def merge_atlases(partial_results, final_png, final_json, max_width=512):
 
     images = []
     partial_heights = []
+    partial_widths = []
 
     for png_path, _json in partial_results:
         img = Image.open(png_path).convert("RGBA")
         images.append(img)
         partial_heights.append(img.height)
+        partial_widths.append(img.width)
 
     total_height = sum(partial_heights)
+    max_needed_width = max(partial_widths) if partial_widths else 1
+    final_width = next_power_of_2(max_needed_width)
+
+    if final_width > max_width_limit:
+        final_width = max_width_limit
 
     # PSP hardware limit: textures cannot exceed 512x512.
     # If the combined height of all partial atlases exceeds 512, we have a problem.
@@ -147,7 +154,7 @@ def merge_atlases(partial_results, final_png, final_json, max_width=512):
     final_height = next_power_of_2(total_height)
 
     # Compose the merged image
-    merged = Image.new("RGBA", (max_width, final_height), (0, 0, 0, 0))
+    merged = Image.new("RGBA", (final_width, final_height), (0, 0, 0, 0))
     y_cursor = 0
     for img in images:
         merged.paste(img, (0, y_cursor))
@@ -186,7 +193,7 @@ def merge_atlases(partial_results, final_png, final_json, max_width=512):
     merged_json = {
         "atlas": {
             "type": "sdf",
-            "width": max_width,
+            "width": final_width,
             "height": final_height,
             "size": base_json["atlas"].get("size", 24.0),
             "pxRange": 2,
