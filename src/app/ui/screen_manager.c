@@ -18,6 +18,7 @@
 #include <psprtc.h>
 #include "app/ui/screen.h"
 #include "app/ui/ui_popup.h"
+#include "app/ui/ui_loading.h"
 #include "app/render/renderer.h"
 #include "app/audio/audio_manager.h"
 
@@ -151,6 +152,10 @@ void screen_manager_update(void) {
     if (g_current_screen && g_current_screen->update && g_fade_state == 0) {
         g_current_screen->update(pad.Buttons, pressed);
     }
+
+    /* Always tick loading animation, even during screen transitions.
+     * This keeps the spinner smooth while heavy I/O runs under a black fade. */
+    ui_loading_update();
 }
 
 void screen_manager_draw(void) {
@@ -177,6 +182,12 @@ void screen_manager_draw(void) {
 
     if (popup_is_open()) {
         popup_render();
+    }
+
+    /* Loading overlay is rendered LAST — it must sit above popup, fade and
+     * all scene content so the user always sees it clearly. */
+    if (ui_loading_is_active()) {
+        ui_loading_render();
     }
 }
 
