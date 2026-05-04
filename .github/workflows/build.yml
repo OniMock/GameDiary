@@ -3,8 +3,13 @@ name: Build GameDiary PSP
 on:
   push:
     branches: [ main, master ]
+    paths:
+      - 'VERSION'
+      - 'src/**'
+      - 'Makefile*'
+      - '.github/workflows/**'
     paths-ignore:
-      - CHANGELOG.md
+      - 'CHANGELOG.md'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -124,7 +129,7 @@ jobs:
       - name: Get project version
         id: get_version
         run: |
-          VERSION=$(grep -E '^PROJECT_VERSION' Makefile_App | cut -d '=' -f2 | xargs)
+          VERSION=$(cat VERSION | tr -d ' \n')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
 
