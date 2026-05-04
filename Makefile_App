@@ -9,11 +9,6 @@ PROJECT_VERSION := $(shell cat VERSION)
 # Sources (AUTO — sem lista manual de .o)
 # -----------------------------------------------------------------------
 APP_SRCS := $(shell find src/app -name "*.c" -o -name "*.cpp")
-COMMON_OBJS = \
-  src/common/storage.o \
-  src/common/sfo_parser.o \
-  src/common/utils.o \
-  src/common/debug.o
 COMMON_SRCS := $(shell find src/common -name "*.c" -o -name "*.cpp")
 
 SRCS := $(APP_SRCS) $(COMMON_SRCS)
