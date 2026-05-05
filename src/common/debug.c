@@ -12,8 +12,6 @@
 #include "common/utils.h"
 #include "common/db_schema.h"
 #include <pspkernel.h>
-#include <pspwlan.h>
-#include <pspnet_apctl.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -43,15 +41,11 @@ void debug_log(const char* module, const char* fmt, ...) {
         vsnprintf(msg_buf, sizeof(msg_buf), fmt, args);
         va_end(args);
 
-        // Capture system context
-        int wlan = sceWlanGetSwitchState();
-        int apctl_state = -1;
-        sceNetApctlGetState(&apctl_state);
         u32 ts = utils_get_timestamp();
 
         int len = snprintf(final_buf, sizeof(final_buf),
-            "[%u] [%s] %s | WLAN: %s | APCTL: %d\r\n",
-            (unsigned int)ts, module, msg_buf, (wlan == 1 ? "ON" : "OFF"), apctl_state);
+            "[%u] [%s] %s\r\n",
+            (unsigned int)ts, module, msg_buf);
 
         sceIoWrite(fd, final_buf, len);
         sceIoClose(fd);

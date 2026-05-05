@@ -76,8 +76,7 @@ LIBS = -lintrafont -lpspgu -lpspgum \
        -lpng -lz -lm \
        -lpsprtc -lpsppower -lpspvshbridge -lpspaudio \
        -lstdc++ \
-       -lpspwlan -lpspnet -lpspnet_inet -lpspnet_apctl \
-       -lpspnet_resolver -lpsphttp -lpsputility
+       -lpsputility
 
 LIBS += -Llib/ark4
 
