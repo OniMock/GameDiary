@@ -17,7 +17,6 @@
 #include "common/utils.h"
 #include "common/models.h"
 #include <pspkernel.h>
-#include <pspsdk/kubridge.h>
 #include <stdio.h>
 #include <string.h>
 

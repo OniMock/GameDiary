@@ -15,12 +15,14 @@
 
 #include "common/common.h"
 #include "common/storage.h"
+#include <pspkernel.h>
 #include "common/db_schema.h"
 #include "plugin/apitype.h"
 #include "plugin/detector.h"
 #include "plugin/tracker.h"
 #include "common/utils.h"
-#include <pspsdk/systemctrl.h>
+
+int sceKernelInitApitype(void);
 
 PSP_MODULE_INFO("GameDiary", 0x1000, 1, 0);
 
