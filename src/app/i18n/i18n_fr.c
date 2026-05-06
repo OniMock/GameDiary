@@ -131,4 +131,11 @@ const char* g_lang_fr_entries[MSG_COUNT] = {
     [MSG_SUPPORT_DESC]             = "Si vous aimez ce projet, vous pouvez soutenir son développement avec un don.",
     [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
     [MSG_SUPPORT_WALLET]           = "Wallet EVM",
+
+    [MSG_INFO_CHECK_VERSION]       = "Vérifier la version",
+    [MSG_INFO_VERSION_LATEST]      = "Vous utilisez la dernière version",
+    [MSG_INFO_VERSION_AVAILABLE]   = "Nouvelle version disponible",
+    [MSG_INFO_VERSION_ERROR]       = "Impossible de vérifier la version",
+    [MSG_INFO_VERSION_CONN_ERROR]  = "Échec de la connexion au serveur",
+    [MSG_INFO_VERSION_PARSE_ERROR] = "Réponse invalide (Version manquante)",
 };

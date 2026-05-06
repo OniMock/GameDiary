@@ -135,4 +135,11 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SUPPORT_DESC]             = "もし私の活動が気に入っていただけたら、プロジェクトの継続のために寄付をご検討ください。必須ではありませんが、大きな支えになります！",
     [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
     [MSG_SUPPORT_WALLET]           = "Wallet EVM",
+
+    [MSG_INFO_CHECK_VERSION]       = "バージョンを確認",
+    [MSG_INFO_VERSION_LATEST]      = "最新バージョンを使用しています",
+    [MSG_INFO_VERSION_AVAILABLE]   = "新しいバージョンがあります",
+    [MSG_INFO_VERSION_ERROR]       = "バージョンを確認できませんでした",
+    [MSG_INFO_VERSION_CONN_ERROR]  = "サーバーへの接続に失敗しました",
+    [MSG_INFO_VERSION_PARSE_ERROR] = "無効な応答（バージョンがありません）",
 };

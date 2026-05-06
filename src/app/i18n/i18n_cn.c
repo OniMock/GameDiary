@@ -136,4 +136,11 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SUPPORT_DESC]             = "如果你喜欢我的作品并希望支持项目的持续开发，可以考虑进行捐赠。这不是必须的，但对项目发展非常有帮助！",
     [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
     [MSG_SUPPORT_WALLET]           = "Wallet EVM",
+
+    [MSG_INFO_CHECK_VERSION]       = "检查版本",
+    [MSG_INFO_VERSION_LATEST]      = "您正在使用最新版本",
+    [MSG_INFO_VERSION_AVAILABLE]   = "有新版本可用",
+    [MSG_INFO_VERSION_ERROR]       = "无法检查版本",
+    [MSG_INFO_VERSION_CONN_ERROR]  = "连接服务器失败",
+    [MSG_INFO_VERSION_PARSE_ERROR] = "无效响应（缺少版本）",
 };

@@ -132,4 +132,11 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SUPPORT_DESC]             = "Если вам нравится моя работа, вы можете поддержать проект пожертвованием. Это не обязательно, но очень помогает!",
     [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
     [MSG_SUPPORT_WALLET]           = "Wallet EVM",
+
+    [MSG_INFO_CHECK_VERSION]       = "Проверить версию",
+    [MSG_INFO_VERSION_LATEST]      = "У вас установлена последняя версия",
+    [MSG_INFO_VERSION_AVAILABLE]   = "Доступна новая версия",
+    [MSG_INFO_VERSION_ERROR]       = "Не удалось проверить версию",
+    [MSG_INFO_VERSION_CONN_ERROR]  = "Не удалось подключиться к серверу",
+    [MSG_INFO_VERSION_PARSE_ERROR] = "Неверный ответ (Версия отсутствует)",
 };
