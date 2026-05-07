@@ -22,6 +22,8 @@
 #include "app/render/font.h"
 #include "app/render/texture.h"
 #include "app/audio/audio_manager.h"
+#include "app/config/config.h"
+#include "app/ui/ui_style.h"
 #include "common/utils.h"
 #include <pspctrl.h>
 #include <math.h>
@@ -207,10 +209,17 @@ static void main_menu_draw(void) {
         u32 tint = UI_COLOR_ALPHA_VAL(0xFFFFFFFFu, a);
 
         if (g_menu_items[idx].icon) {
-            // 1. Draw Shadow (Black tint, offset 2px)
-            u32 shadow_tint = UI_COLOR_ALPHA_VAL(0x00000000u, a);
-            sceGuColor(shadow_tint);
-            texture_draw_resource(g_menu_items[idx].icon, x + 2, y + 2, w, h);
+            // 1. Draw Shadow (Subtle blur with very close offsets)
+            // In Light theme, we use a much more transparent and slightly gray shadow
+            u8 shadow_base_a = (config_get()->theme == 1) ? a / 10 : a / 6;
+            if (shadow_base_a > 0) {
+                u32 shadow_base_col = (config_get()->theme == 1) ? 0x00333333 : 0x00000000;
+                u32 shadow_tint = UI_COLOR_ALPHA_VAL(shadow_base_col, shadow_base_a);
+                sceGuColor(shadow_tint);
+                texture_draw_resource(g_menu_items[idx].icon, x + 1, y + 1, w, h);
+                texture_draw_resource(g_menu_items[idx].icon, x + 2, y + 2, w, h);
+                texture_draw_resource(g_menu_items[idx].icon, x + 1, y + 2, w, h);
+            }
 
             // 2. Draw Main Icon (White tint, original position)
             sceGuColor(tint); 
