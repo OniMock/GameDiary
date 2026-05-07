@@ -259,7 +259,7 @@ void info_check_version_flow(void) {
     g_http_ret = -1;
     memset(g_http_json_buf, 0, sizeof(g_http_json_buf));
 
-    SceUID thid = sceKernelCreateThread("http_worker", http_worker_thread, 0x18, 0x10000, 0, 0);
+    SceUID thid = sceKernelCreateThread("http_worker", http_worker_thread, 0x20, 0x10000, 0, 0);
     if (thid >= 0) {
         debug_log("HTTP", "Worker thread created (ID: 0x%08X)", thid);
         sceKernelStartThread(thid, 0, 0);
@@ -278,6 +278,10 @@ void info_check_version_flow(void) {
         sceGuSync(0, 0);
         sceDisplayWaitVblankStart();
         renderer_swap_buffers();
+        
+        /* Yield execution to other threads (like the http_worker)
+         * to prevent the main loop from starving the network task. */
+        sceKernelDelayThread(0);
     }
 
     /* Release the kernel thread object now that it has finished.
