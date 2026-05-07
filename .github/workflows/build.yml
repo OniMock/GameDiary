@@ -101,8 +101,38 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GameDiary
-          # Pass the folder, NOT the .zip, to avoid zip-within-zip
           path: release/
+
+      # -------------------------------------------------------
+      # 🛠️ Build Debug Version
+      # -------------------------------------------------------
+      - name: Build Debug
+        run: |
+          export PSPSDK=$(psp-config --pspsdk-path)
+          export PSPDEV=$(psp-config --pspdev-path)
+          export PATH=$PATH:$PSPDEV/bin
+
+          make clean || true
+          make debug
+
+      # -------------------------------------------------------
+      # 📦 Prepare Debug artifact
+      # -------------------------------------------------------
+      - name: Prepare Debug artifact
+        run: |
+          mkdir -p release_debug/GameDiary
+          cp GameDiary.prx release_debug/
+          cp EBOOT.PBP release_debug/GameDiary/EBOOT.PBP
+          
+          cd release_debug
+          zip -r ../GameDiaryDebug.zip .
+          cd ..
+
+      - name: Upload Debug artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameDiaryDebug
+          path: GameDiaryDebug.zip
 
   # ===========================================================
   # 🚀 AUTOMATIC RELEASE
