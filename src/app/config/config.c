@@ -41,15 +41,26 @@ int config_load(void) {
         // Default settings: Auto-detect language
         g_config.language = -1;
         g_config.sfx_enabled = 1;
+        g_config.theme = 0;
         return config_save(); // Create with defaults
     }
 
     int res = sceIoRead(fd, &g_config, sizeof(AppConfig));
     sceIoClose(fd);
 
+    if (res > 0 && res < (int)sizeof(AppConfig)) {
+        // It's an older version. Set new fields to default.
+        if (res <= 8) { // 8 is the size of the old struct (language + sfx_enabled)
+            g_config.theme = 0; // Dark theme
+        }
+        config_save(); // Save the updated struct size
+        return 0;
+    }
+
     if (res != (int)sizeof(AppConfig)) {
         g_config.language = -1;
         g_config.sfx_enabled = 1;
+        g_config.theme = 0;
         return -1;
     }
 

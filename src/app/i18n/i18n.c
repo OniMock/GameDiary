@@ -129,6 +129,13 @@ const char *i18n_get(MessageId id) {
   if (id < 0 || id >= MSG_COUNT || !g_i18n_msg) {
     return "<?>";
   }
+  if (!g_i18n_msg[id]) {
+      // Fallback to English if translation is missing
+      if (g_lang_en_entries[id]) {
+          return g_lang_en_entries[id];
+      }
+      return "<?>";
+  }
   return g_i18n_msg[id];
 }
 

@@ -73,6 +73,7 @@ extern const ImageResource GD_IMG_ICON_SPLASH_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_128_PNG;
 extern const ImageResource GD_IMG_ICON_STATS_32_PNG;
 extern const ImageResource GD_IMG_ICON_SUPPORT_32_PNG;
+extern const ImageResource GD_IMG_ICON_THEME_32_PNG;
 extern const ImageResource GD_IMG_QR_COFFEE_128_PNG;
 extern const ImageResource GD_IMG_QR_WALLET_128_PNG;
 

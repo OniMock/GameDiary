@@ -142,4 +142,8 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_INFO_VERSION_ERROR]       = "バージョンを確認できませんでした",
     [MSG_INFO_VERSION_CONN_ERROR]  = "サーバーへの接続に失敗しました",
     [MSG_INFO_VERSION_PARSE_ERROR] = "無効な応答（バージョンがありません）",
+
+    [MSG_SETTINGS_THEME]           = "テーマ",
+    [MSG_THEME_DARK]               = "ダーク",
+    [MSG_THEME_LIGHT]              = "ライト",
 };

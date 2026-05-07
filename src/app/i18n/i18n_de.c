@@ -142,4 +142,8 @@ const char* g_lang_de_entries[MSG_COUNT] = {
     [MSG_INFO_VERSION_ERROR]       = "Version konnte nicht überprüft werden",
     [MSG_INFO_VERSION_CONN_ERROR]  = "Verbindung zum Server fehlgeschlagen",
     [MSG_INFO_VERSION_PARSE_ERROR] = "Ungültige Antwort (Version fehlt)",
+
+    [MSG_SETTINGS_THEME]           = "Design",
+    [MSG_THEME_DARK]               = "Dunkel",
+    [MSG_THEME_LIGHT]              = "Hell",
 };

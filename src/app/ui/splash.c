@@ -56,6 +56,12 @@ bool splash_is_loading(void) {
 void splash_do_load_tasks(void) {
     config_load();
     
+    if (config_get()->theme == 1) {
+        ui_style_set_light();
+    } else {
+        ui_style_set_dark();
+    }
+    
     char base_path[128];
     snprintf(base_path, sizeof(base_path), "%s%s", utils_get_device_prefix(), GDIARY_BASE_DIR);
     storage_init(base_path);

@@ -139,4 +139,8 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_INFO_VERSION_ERROR]       = "Не удалось проверить версию",
     [MSG_INFO_VERSION_CONN_ERROR]  = "Не удалось подключиться к серверу",
     [MSG_INFO_VERSION_PARSE_ERROR] = "Неверный ответ (Версия отсутствует)",
+
+    [MSG_SETTINGS_THEME]           = "Тема",
+    [MSG_THEME_DARK]               = "Темная",
+    [MSG_THEME_LIGHT]              = "Светлая",
 };

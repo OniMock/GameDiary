@@ -19,6 +19,7 @@
 typedef struct {
     int language; // -1 for AUTO, or index (LANG_EN, etc)
     int sfx_enabled; // 1 for ON, 0 for OFF
+    int theme; // 0 for DARK, 1 for LIGHT
 } AppConfig;
 
 /**

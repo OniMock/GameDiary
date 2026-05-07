@@ -25,7 +25,9 @@
 #include <pspctrl.h>
 #include <stdio.h>
 
-#define SETTINGS_MENU_COUNT 2
+#include "app/ui/ui_style.h"
+
+#define SETTINGS_MENU_COUNT 3
 
 static int g_selection = 0;
 
@@ -72,6 +74,17 @@ static void settings_update(u32 buttons, u32 pressed) {
             screen_manager_push(&g_screen_language_select);
         } else if (g_selection == 1) {
             AppConfig* cfg = config_get();
+            cfg->theme = !cfg->theme;
+            config_save();
+
+            if (cfg->theme == 1) {
+                ui_style_set_light();
+            } else {
+                ui_style_set_dark();
+            }
+            audio_play_sfx(SFX_CONFIRM);
+        } else if (g_selection == 2) {
+            AppConfig* cfg = config_get();
             cfg->sfx_enabled = !cfg->sfx_enabled;
             config_save();
             audio_play_sfx(SFX_CONFIRM); // Plays if we just turned it ON
@@ -105,6 +118,10 @@ static void settings_draw(void) {
             left_icon = &GD_IMG_ICON_LANGUAGE_32_PNG;
             right_icon = i18n_get_current_flag();
         } else if (i == 1) {
+            label = i18n_get(MSG_SETTINGS_THEME);
+            left_icon = &GD_IMG_ICON_THEME_32_PNG;
+            right_icon = NULL;
+        } else if (i == 2) {
             label = i18n_get(MSG_SETTINGS_SFX);
             left_icon = config_get()->sfx_enabled ? &GD_IMG_ICON_SOUND_ACTIVE_32_PNG : &GD_IMG_ICON_SOUND_INACTIVE_32_PNG;
             right_icon = NULL;
@@ -114,6 +131,10 @@ static void settings_draw(void) {
                          label, (i == g_selection), left_icon, right_icon);
 
         if (i == 1) {
+           const char* status = config_get()->theme == 1 ? i18n_get(MSG_THEME_LIGHT) : i18n_get(MSG_THEME_DARK);
+           Rect status_rect = { item_rect.x, item_rect.y, item_rect.w - 16, item_rect.h };
+           ui_draw_text(status, status_rect, COLOR_TEXT, UI_FONT_SIZE_MEDIUM, ALIGN_RIGHT);
+        } else if (i == 2) {
            const char* status = config_get()->sfx_enabled ? i18n_get(MSG_SFX_ON) : i18n_get(MSG_SFX_OFF);
            Rect status_rect = { item_rect.x, item_rect.y, item_rect.w - 16, item_rect.h };
            ui_draw_text(status, status_rect, COLOR_TEXT, UI_FONT_SIZE_MEDIUM, ALIGN_RIGHT);

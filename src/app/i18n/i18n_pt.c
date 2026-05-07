@@ -138,4 +138,8 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_INFO_VERSION_ERROR]       = "Não foi possível verificar a versão",
     [MSG_INFO_VERSION_CONN_ERROR]  = "Falha de conexão com o servidor",
     [MSG_INFO_VERSION_PARSE_ERROR] = "Resposta inválida (Versão ausente)",
+
+    [MSG_SETTINGS_THEME]           = "Tema",
+    [MSG_THEME_DARK]               = "Escuro",
+    [MSG_THEME_LIGHT]              = "Claro",
 };

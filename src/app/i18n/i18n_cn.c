@@ -143,4 +143,8 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_INFO_VERSION_ERROR]       = "无法检查版本",
     [MSG_INFO_VERSION_CONN_ERROR]  = "连接服务器失败",
     [MSG_INFO_VERSION_PARSE_ERROR] = "无效响应（缺少版本）",
+
+    [MSG_SETTINGS_THEME]           = "主题",
+    [MSG_THEME_DARK]               = "深色",
+    [MSG_THEME_LIGHT]              = "浅色",
 };
