@@ -193,9 +193,9 @@ static void main_menu_draw(void) {
         if (g_menu_items[idx].icon != NULL) {
             base_w = g_menu_items[idx].icon->width;
             base_h = g_menu_items[idx].icon->height;
-            // Since some are small (24x24), we should scale them up baseline. Let's make base size 80
-            base_w = 80;
-            base_h = 80;
+            // Since some are small (24x24), we should scale them up baseline.
+            base_w = UI_ICON_SIZE_MAIN_MENU;
+            base_h = UI_ICON_SIZE_MAIN_MENU;
         }
 
         int w = (int)(base_w * scale);
@@ -204,11 +204,11 @@ static void main_menu_draw(void) {
         int y = center_y - h / 2 - 10;
 
         u8 a = (u8)(alpha_f * 255.0f);
-        u32 tint = ((u32)a << 24) | 0x00FFFFFFu;
+        u32 tint = UI_COLOR_ALPHA_VAL(0xFFFFFFFFu, a);
 
         if (g_menu_items[idx].icon) {
             // 1. Draw Shadow (Black tint, offset 2px)
-            u32 shadow_tint = ((u32)a << 24) | 0x00000000u;
+            u32 shadow_tint = UI_COLOR_ALPHA_VAL(0x00000000u, a);
             sceGuColor(shadow_tint);
             texture_draw_resource(g_menu_items[idx].icon, x + 2, y + 2, w, h);
 

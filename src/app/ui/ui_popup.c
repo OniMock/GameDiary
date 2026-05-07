@@ -148,9 +148,9 @@ void popup_render(void) {
 
     // --- Backdrop Overlay ---
     // RGB 0x000000, max alpha 153 (60% of 255) for better focus
-    uint32_t bg_alpha = (uint32_t)(153.0f * s_alpha);
+    uint32_t bg_alpha = (uint32_t)(UI_ALPHA(60) * s_alpha);
     if (bg_alpha > 255) bg_alpha = 255;
-    uint32_t background_tint = (bg_alpha << 24) | 0x000000;
+    uint32_t background_tint = UI_COLOR_ALPHA_VAL(0x000000, bg_alpha);
     renderer_draw_rect(0, 0, 480, 272, background_tint);
 
     // --- Box Geometry ---
@@ -161,13 +161,13 @@ void popup_render(void) {
     int y_origin = POPUP_Y_ORIGIN;
 
     uint32_t element_alpha = (uint32_t)(255.0f * s_alpha);
-    uint32_t card_alpha    = (uint32_t)(153.0f * s_alpha); // 0x99 (60% opacity)
+    uint32_t card_alpha    = (uint32_t)(UI_ALPHA(60) * s_alpha); // 0x99 (60% opacity)
 
-    // Mask out original alpha (0x00FFFFFF) and inject our calculated card_alpha
-    uint32_t card_bg     = (card_alpha << 24)    | (0x111111 & 0x00FFFFFF);
-    uint32_t card_border = (card_alpha << 24)    | (0x444444 & 0x00FFFFFF);
-    uint32_t text_color  = (element_alpha << 24) | (0xFFFFFF & 0x00FFFFFF);
-    uint32_t line_color  = (element_alpha << 24) | (0x333333 & 0x00FFFFFF);
+    // Mask out original alpha and inject our calculated card_alpha
+    uint32_t card_bg     = UI_COLOR_ALPHA_VAL(COLOR_CARD, card_alpha);
+    uint32_t card_border = UI_COLOR_ALPHA_VAL(COLOR_BORDER, card_alpha);
+    uint32_t text_color  = UI_COLOR_ALPHA_VAL(COLOR_TEXT, element_alpha);
+    uint32_t line_color  = UI_COLOR_ALPHA_VAL(COLOR_SUBTEXT2, element_alpha);
 
     Rect box_rect = { x_origin, y_origin, popup_w, popup_h };
     ui_draw_card(box_rect, card_bg, card_border);
@@ -206,7 +206,7 @@ void popup_render(void) {
 
     //uint32_t body_alpha = (uint32_t)(170.0f * s_alpha); // 0xAA is 170
     //uint32_t body_color = (body_alpha << 24) | (COLOR_SUBTEXT & 0x00FFFFFF);
-    uint32_t body_color = (0xFF << 24) | (COLOR_SUBTEXT & 0x00FFFFFF);
+    uint32_t body_color = UI_COLOR_ALPHA_VAL(COLOR_SUBTEXT, 0xFF);
 
     // Safety crop loop logic
     for (int i = 0; i < max_visible && (s_scroll_offset + i) < s_wrapped_count; i++) {

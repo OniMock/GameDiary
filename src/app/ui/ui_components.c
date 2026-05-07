@@ -180,7 +180,7 @@ static void ui_graph_draw_bar(int x, int baseline_y, int w, int h, u32 color) {
 
 static void ui_graph_draw_gloss(int x, int baseline_y, int w, int h, u8 gloss_alpha) {
   if (h > 4 && gloss_alpha > 0) {
-    renderer_draw_rect(x, baseline_y - h, w, 2, ((u32)gloss_alpha << 24) | 0x00FFFFFFu);
+    renderer_draw_rect(x, baseline_y - h, w, 2, UI_COLOR_ALPHA_VAL(0xFFFFFFFFu, gloss_alpha));
   }
 }
 
@@ -287,12 +287,12 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
         if (alpha > 255) alpha = 255;
     }
 
-    u32 base_bar_color = (i == count - 1) ? COLOR_ACCENT : (COLOR_ACCENT & 0x44FFFFFF);
+    u32 base_bar_color = (i == count - 1) ? COLOR_ACCENT : UI_COLOR_ALPHA(COLOR_ACCENT, 27);
     u32 label_color = (i == count - 1) ? COLOR_ACCENT : COLOR_SUBTEXT;
     u8 gloss_a = (i == count - 1) ? 0x88 : 0x22;
 
-    u32 bar_color = (base_bar_color & 0x00FFFFFF) | ((((base_bar_color >> 24) * alpha) / 255) << 24);
-    u32 fade_label = (label_color & 0x00FFFFFF) | ((u32)alpha << 24);
+    u32 bar_color = UI_COLOR_ALPHA_VAL(base_bar_color, (((base_bar_color >> 24) * alpha) / 255));
+    u32 fade_label = UI_COLOR_ALPHA_VAL(label_color, alpha);
     u8 fade_gloss = (u8)(((int)gloss_a * alpha) / 255);
 
     // Value text
@@ -496,7 +496,7 @@ void ui_draw_game_daily_graph(const SessionEntry *sessions, int count,
     float recency = (float)(b + 1) / (float)day_count;
     u8 alpha = (u8)(64.0f + 191.0f * recency);
     u8 gloss_a = alpha >> 1;
-    u32 bar_color = ((u32)alpha << 24) | (COLOR_ACCENT & 0x00FFFFFFu);
+    u32 bar_color = UI_COLOR_ALPHA_VAL(COLOR_ACCENT, alpha);
 
     // Value text
     char dur_buf[16] = {0};
@@ -629,7 +629,7 @@ void ui_draw_nav_indicators(int y, bool show_left, bool show_right, bool animate
 
     // Colors & Scale
     u8 pulse_alpha = (u8)(255.0f * (alpha_min + ((alpha_max - alpha_min) * pulse)));
-    u32 animated_color = (color & 0x00FFFFFF) | ((u32)pulse_alpha << 24);
+    u32 animated_color = UI_COLOR_ALPHA_VAL(color, pulse_alpha);
 
     float scale = scale_min + ((scale_max - scale_min) * pulse);
     float size_base = UI_FONT_SIZE_TITLE_MAIN;
@@ -645,7 +645,7 @@ void ui_draw_nav_indicators(int y, bool show_left, bool show_right, bool animate
     if (show_left) {
         float s = animate_left ? scale : scale_min;
         float dy = animate_left ? y_offset : 0;
-        u32 c = animate_left ? animated_color : ((color & 0x00FFFFFF) | (200 << 24));
+        u32 c = animate_left ? animated_color : UI_COLOR_ALPHA_VAL(color, 200);
         font_draw_string_centered(20, y + dy, "◀", c, size_base * s);
     }
 
@@ -653,7 +653,7 @@ void ui_draw_nav_indicators(int y, bool show_left, bool show_right, bool animate
     if (show_right) {
         float s = animate_right ? scale : scale_min;
         float dy = animate_right ? y_offset : 0;
-        u32 c = animate_right ? animated_color : ((color & 0x00FFFFFF) | (200 << 24));
+        u32 c = animate_right ? animated_color : UI_COLOR_ALPHA_VAL(color, 200);
         font_draw_string_centered(460, y + dy, "▶", c, size_base * s);
     }
 }

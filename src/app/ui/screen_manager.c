@@ -19,6 +19,7 @@
 #include "app/ui/screen.h"
 #include "app/ui/ui_popup.h"
 #include "app/ui/ui_loading.h"
+#include "app/ui/ui_style.h"
 #include "app/render/renderer.h"
 #include "app/audio/audio_manager.h"
 
@@ -177,7 +178,7 @@ void screen_manager_draw(void) {
     if (g_fade_alpha > 0.0f) {
         u32 alpha = (u32)(g_fade_alpha * 255.0f);
         if (alpha > 255) alpha = 255;
-        renderer_draw_rect(0, 0, 480, 272, (alpha << 24)); // Black with fade alpha
+        renderer_draw_rect(0, 0, 480, 272, UI_COLOR_ALPHA_VAL(0x000000, alpha)); // Black with fade alpha
     }
 
     if (popup_is_open()) {

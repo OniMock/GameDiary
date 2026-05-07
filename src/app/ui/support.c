@@ -94,8 +94,8 @@ static void support_draw(void) {
     // Reset color to white so QR codes are not tinted (prevents them from staying blue/accent)
     sceGuColor(0xFFFFFFFF);
 
-    // Scaled QR down to 96 to fit well within shorter card
-    int qr_size = 96;
+    // Scaled QR down to fit well within shorter card
+    int qr_size = UI_ICON_SIZE_QR;
     int qr_y_off = 22;
     int qr_x_off = (card_coffee.w - qr_size) / 2;
     texture_draw_resource(&GD_IMG_QR_COFFEE_128_PNG, card_coffee.x + qr_x_off, card_coffee.y + qr_y_off, qr_size, qr_size);

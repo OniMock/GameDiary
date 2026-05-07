@@ -12,6 +12,7 @@
 #include "app/render/renderer.h"
 #include "app/render/texture.h"
 #include "app/render/image_resources.h"
+#include "app/ui/ui_style.h"
 #include "app/data/data_loader.h"
 #include "app/render/font.h"
 #include "app/i18n/i18n.h"
@@ -119,7 +120,7 @@ static void splash_draw(void) {
     int x = (480 - img_w) / 2;
     int y = (272 - img_h) / 2;
 
-    u32 color = (s_alpha << 24) | 0x00FFFFFF;
+    u32 color = UI_COLOR_ALPHA_VAL(0xFFFFFFFF, s_alpha);
 
     texture_draw_resource_tinted(&GD_IMG_ICON_SPLASH_PNG, x, y, img_w, img_h, color);
 }

@@ -21,6 +21,7 @@
 #include "app/render/renderer.h"
 #include "app/render/font.h"
 #include "app/ui/screen.h"
+#include "app/ui/ui_style.h"
 #include "app/ui/splash.h"
 #include "app/data/data_loader.h"
 #include "app/audio/audio_manager.h"
@@ -71,6 +72,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* State Manager */
+    ui_style_init();
     screen_manager_set(&g_screen_splash);
 
     /* Main Loop */

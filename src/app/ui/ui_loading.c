@@ -38,8 +38,8 @@
 
 #define FADE_STEP          0.12f
 
-/* Backdrop alpha (20% black = 51 / 255) */
-#define OVERLAY_MAX_ALPHA  51u
+/* Backdrop alpha (60% black) */
+#define OVERLAY_MAX_ALPHA  UI_ALPHA(60)
 
 /* -----------------------------------------------------------------------
  * State machine
@@ -118,50 +118,50 @@ void ui_loading_update(void) {
 
 static void draw_arc(float cx, float cy, float r, float thickness, float start_angle, float sweep_angle, uint32_t color) {
     if (sweep_angle <= 0.0f) return;
-    
+
     struct VertexColor {
         uint32_t color;
         float x, y, z;
     };
-    
+
     int segments = (int)(sweep_angle / 5.0f);
     if (segments < 4) segments = 4;
     int vertex_count = (segments + 1) * 2;
-    
+
     struct VertexColor *vertices = (struct VertexColor*)sceGuGetMemory(vertex_count * sizeof(struct VertexColor));
     if (!vertices) return;
-    
+
     float r_in = r - thickness / 2.0f;
     float r_out = r + thickness / 2.0f;
-    
+
     float start_rad = start_angle * (3.14159265f / 180.0f);
     float sweep_rad = sweep_angle * (3.14159265f / 180.0f);
     float step = sweep_rad / segments;
-    
+
     for (int i = 0; i <= segments; i++) {
         float angle = start_rad + i * step;
         float c = cosf(angle);
         float s = sinf(angle);
-        
+
         vertices[i*2].color = color;
         vertices[i*2].x = cx + s * r_in;
         vertices[i*2].y = cy - c * r_in;
         vertices[i*2].z = 0.0f;
-        
+
         vertices[i*2+1].color = color;
         vertices[i*2+1].x = cx + s * r_out;
         vertices[i*2+1].y = cy - c * r_out;
         vertices[i*2+1].z = 0.0f;
     }
-    
+
     sceGuDisable(GU_TEXTURE_2D);
     sceGuEnable(GU_BLEND);
     sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
     sceGuDisable(GU_DEPTH_TEST);
-    
+
     sceKernelDcacheWritebackRange(vertices, vertex_count * sizeof(struct VertexColor));
     sceGuDrawArray(GU_TRIANGLE_STRIP, GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, vertex_count, 0, vertices);
-    
+
     sceGuEnable(GU_TEXTURE_2D);
 }
 
@@ -170,8 +170,7 @@ void ui_loading_render(void) {
 
     /* --- 1. Full-screen dim overlay --- */
     uint32_t overlay_alpha = (uint32_t)((float)OVERLAY_MAX_ALPHA * s_alpha);
-    renderer_draw_rect(0, 0, SCREEN_W, SCREEN_H,
-                       (overlay_alpha << 24) | 0x000000u);
+    renderer_draw_rect(0, 0, SCREEN_W, SCREEN_H, UI_COLOR_ALPHA_VAL(0x000000u, overlay_alpha));
 
     /* --- 2. Dynamic Card Size Calculation --- */
     float text_w = 0.0f;
@@ -192,11 +191,11 @@ void ui_loading_render(void) {
     int card_y = (SCREEN_H - LOADING_CARD_H) / 2;
 
     /* --- 3. Card background --- */
-    uint32_t card_alpha  = (uint32_t)(230.0f * s_alpha);
-    uint32_t bdr_alpha   = (uint32_t)(80.0f  * s_alpha);
+    uint32_t card_alpha  = (uint32_t)(UI_ALPHA(90) * s_alpha);
+    uint32_t bdr_alpha   = (uint32_t)(UI_ALPHA(31) * s_alpha);
 
-    uint32_t card_bg  = (card_alpha << 24) | (0x1A1A2E & 0x00FFFFFFu);
-    uint32_t card_bdr = (bdr_alpha  << 24) | (COLOR_ACCENT & 0x00FFFFFFu);
+    uint32_t card_bg  = UI_COLOR_ALPHA_VAL(COLOR_CARD, card_alpha);
+    uint32_t card_bdr = UI_COLOR_ALPHA_VAL(COLOR_ACCENT, bdr_alpha);
 
     Rect card = { card_x, card_y, (int)card_w, LOADING_CARD_H };
     ui_draw_card(card, card_bg, card_bdr);
@@ -210,14 +209,14 @@ void ui_loading_render(void) {
     float start_angle = (float)s_tick * 6.0f;
 
     uint32_t spinner_alpha = (uint32_t)(255.0f * s_alpha);
-    uint32_t spinner_color = (spinner_alpha << 24) | (COLOR_ACCENT & 0x00FFFFFFu);
+    uint32_t spinner_color = UI_COLOR_ALPHA_VAL(COLOR_ACCENT, spinner_alpha);
 
     draw_arc(spinner_center_x, spinner_center_y, SPINNER_RADIUS, SPINNER_THICKNESS, start_angle, sweep, spinner_color);
 
     /* --- 5. Label text --- */
     if (s_label) {
         uint32_t text_alpha = (uint32_t)(255.0f * s_alpha);
-        uint32_t text_color = (text_alpha << 24) | (COLOR_TEXT & 0x00FFFFFFu);
+        uint32_t text_color = UI_COLOR_ALPHA_VAL(COLOR_TEXT, text_alpha);
 
         int text_x = (int)(spinner_center_x + SPINNER_RADIUS + gap);
         Rect text_rect = {

@@ -171,7 +171,7 @@ static void activity_draw(void) {
   ui_draw_card(history_card_rect, COLOR_CARD, COLOR_BORDER);
 
   ui_draw_text(i18n_get(MSG_MENU_ACTIVITY), (Rect){30, list_y + 8, 420, 15}, COLOR_ACCENT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
-  renderer_draw_rect(30, list_y + 24, 420, 1, COLOR_BORDER & 0x66FFFFFF);
+  renderer_draw_rect(30, list_y + 24, 420, 1, UI_COLOR_ALPHA(COLOR_BORDER, 40));
 
   for (int i = 1; i < (int)recent_counts; i++) { // Skip the first one which is prominent above
       int idx = recent_indices[i];

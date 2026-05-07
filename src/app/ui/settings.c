@@ -116,7 +116,7 @@ static void settings_draw(void) {
         if (i == 1) {
            const char* status = config_get()->sfx_enabled ? i18n_get(MSG_SFX_ON) : i18n_get(MSG_SFX_OFF);
            Rect status_rect = { item_rect.x, item_rect.y, item_rect.w - 16, item_rect.h };
-           ui_draw_text(status, status_rect, 0xFFFFFFFF, 14.0f, ALIGN_RIGHT);
+           ui_draw_text(status, status_rect, COLOR_TEXT, UI_FONT_SIZE_MEDIUM, ALIGN_RIGHT);
         }
     }
 

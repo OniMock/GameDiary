@@ -12,44 +12,11 @@
 #define GAMEDIARY_UI_COMPONENTS_H
 
 #include "app/ui/ui_layout.h"
+#include "app/ui/ui_style.h"
 #include "app/data/stats_calculator.h"
 #include "common/db_schema.h"
 #include <psptypes.h>
 #include "app/render/image_resources.h"
-
-// Theme Colors (ABGR - 0xAABBGGRR)
-
-// --- Base ---
-#define COLOR_BG        0xFF0F0F0F // Background - #0F0F0F
-#define COLOR_CARD      0xFF1E1E1E // Card surface - #1E1E1E
-#define COLOR_BORDER    0xFF252525 // Subtle border - #252525 (less harsh)
-#define COLOR_HIGHLIGHT 0xAA444444 // Hover/selection - #444444 (more visible)
-
-// --- Text ---
-#define COLOR_TEXT      0xFFFFFFFF // Primary text - #FFFFFF
-#define COLOR_SUBTEXT   0xFFBBBBBB // Secondary text - #BBBBBB (better readability)
-#define COLOR_SUBTEXT2   0xAA6A6F75 // #6A6F75 (light cool gray, well balanced)
-
-// --- Accent & Feedback ---
-#define COLOR_ACCENT 0xFFFFC040 // #40C0FF
-#define COLOR_SUCCESS   0xFF20B020 // Success (green) - #20B020
-
-// --- Font Sizes (Values in pixels) ---
-#define UI_FONT_SIZE_TITLE_MAIN  22.0f    // Page headers & Branding
-#define UI_FONT_SIZE_TITLE_HUGE  17.0f    // Pop-up headers & Error titles
-#define UI_FONT_SIZE_TITLE_LIST  16.0f    // List item primary focus
-#define UI_FONT_SIZE_PRIMARY     15.0f    // Menu entries & Card titles
-#define UI_FONT_SIZE_MEDIUM      14.0f    // Emphasized stats & secondary titles
-#define UI_FONT_SIZE_NORMAL      13.0f    // Standard labels & UI body
-#define UI_FONT_SIZE_SMALL       12.0f    // Secondary text & wrapped body
-#define UI_FONT_SIZE_TINY        11.0f    // Indicators, Footers & Dates
-#define UI_FONT_SIZE_NANO        10.0f    // Detailed graph data values
-#define UI_FONT_SIZE_PICO        9.0f     // Micro labels for dense graphs
-
-// --- Icon Sizes (Values in pixels) ---
-#define UI_ICON_SIZE_LOGO        32
-#define UI_ICON_SIZE_TITLE       24
-#define UI_ICON_SIZE_MENU        24
 
 
 typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } UIAlign;

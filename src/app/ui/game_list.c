@@ -57,20 +57,14 @@
  * Layout constants — all in screen pixels
  * ----------------------------------------------------------------------- */
 
-/* Carousel icon geometry */
-#define CUR_ICON_W   144
-#define CUR_ICON_H    80
-#define SIDE_ICON_W   80
-#define SIDE_ICON_H   45
-
 /* Horizontal icon positions (left edge of each icon) */
 #define ICON_PREV_X   20
 #define ICON_CUR_X   168
 #define ICON_NEXT_X  376
 
 /* Vertical positions */
-#define ICON_CUR_Y  (CAROUSEL_CENTER_Y - CUR_ICON_H  / 2)  /* 50          */
-#define ICON_SIDE_Y (CAROUSEL_CENTER_Y - SIDE_ICON_H / 2)  /* 67          */
+#define ICON_CUR_Y  (CAROUSEL_CENTER_Y - UI_ICON_SIZE_CAROUSEL_H / 2)  /* 50          */
+#define ICON_SIDE_Y (CAROUSEL_CENTER_Y - UI_ICON_SIZE_SIDE_H / 2)      /* 67          */
 
 /* Center Y of each icon */
 #define CAROUSEL_CENTER_Y  80
@@ -91,7 +85,7 @@
 #define GRAPH_MAX_BAR_H    42
 
 /* Tint colour for side icons (50% opaque white — modulates texture alpha) */
-#define SIDE_ICON_TINT   0x80FFFFFFu
+#define SIDE_ICON_TINT   UI_COLOR_ALPHA_VAL(COLOR_TEXT, UI_ALPHA(50))
 
 /* -----------------------------------------------------------------------
  * Module state
@@ -139,8 +133,8 @@ static void update_filtered_list(void) {
  */
 static void draw_carousel_icon(int inf_idx, int cx, int cy, float scale,
                                 u32 tint) {
-    int base_h = 80;
-    int base_w = 144; /* Default if no texture found */
+    int base_h = UI_ICON_SIZE_CAROUSEL_H;
+    int base_w = UI_ICON_SIZE_CAROUSEL_W; /* Default if no texture found */
 
     Texture *tex = carousel_get_icon(&g_cs, inf_idx);
     if (tex) {
@@ -165,8 +159,8 @@ static void draw_carousel_icon(int inf_idx, int cx, int cy, float scale,
         } else {
             /* Still loading: Draw gray placeholder rectangle */
             u8 a = (u8)(tint >> 24);
-            u32 fill = (a << 24) | (COLOR_CARD & 0x00FFFFFF);
-            u32 border = (a << 24) | (COLOR_BORDER & 0x00FFFFFF);
+            u32 fill = UI_COLOR_ALPHA_VAL(COLOR_CARD, a);
+            u32 border = UI_COLOR_ALPHA_VAL(COLOR_BORDER, a);
             Rect r = {x, y, w, h};
             ui_draw_card(r, fill, border);
         }
@@ -475,14 +469,14 @@ static void game_list_draw(void) {
 
         if (alpha_f <= 0.01f) continue;
         u8 a = (u8)(alpha_f * 255.0f);
-        u32 tint = ((u32)a << 24) | 0x00FFFFFFu;
+        u32 tint = UI_COLOR_ALPHA_VAL(0xFFFFFFFFu, a);
 
         draw_carousel_icon(items[i].inf_idx, draw_x, CAROUSEL_CENTER_Y,
                            scale, tint);
 
         /* Accent border only for the perfectly centered target */
         if (abs_t <= 0.05f) {
-            int w = (int)(144.0f * scale); /* Approximated base width for bar */
+            int w = (int)((float)UI_ICON_SIZE_CAROUSEL_W * scale); /* Approximated base width for bar */
             renderer_draw_rect(draw_x - w/2, CAROUSEL_CENTER_Y + 42,
                                w, 2, COLOR_ACCENT);
         }
