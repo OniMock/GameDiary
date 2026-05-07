@@ -20,8 +20,8 @@
  * Includes timeout limits and cancellation flags using purely `sceHttp`.
  */
 
-// Production endpoint — VPS/Nginx HTTP pure (activate when available)
-#define VERSION_ENDPOINT "http://jsonplaceholder.typicode.com/todos/1"
+// Production endpoint
+#define VERSION_ENDPOINT "http://35.212.193.46/version.json"
 
 // Set true to cancel any ongoing reading/establishing connection
 extern volatile int g_http_cancel;

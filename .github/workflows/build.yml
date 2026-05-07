@@ -145,37 +145,34 @@ jobs:
           fi
 
       # -------------------------------------------------------
-      # 📝 Generate gamediary.json (VERSION for site)
+      # 📝 Generate version.json (for PSP network check)
       # -------------------------------------------------------
-      - name: Generate gamediary.json (VERSION for site)
+      - name: Generate version.json
         if: steps.check_tag.outputs.exists == 'false'
         run: |
-          echo "{\"version\":\"${{ steps.get_version.outputs.version }}\"}" > gamediary.json
-
-          echo "📄 gamediary.json:"
-          cat gamediary.json
+          VERSION="${{ steps.get_version.outputs.version }}"
+          DATE=$(date +'%Y-%m-%d')
+          URL="https://github.com/${{ github.repository }}/releases/download/v$VERSION/GameDiary.zip"
+          
+          echo "{\"version\":\"$VERSION\",\"release_date\":\"$DATE\",\"url\":\"$URL\",\"mandatory\":false}" > version.json
+          
+          mkdir -p deploy_out
+          cp version.json deploy_out/
 
       # -------------------------------------------------------
-      # 📤 Prepare FTP upload
+      # 📤 Upload version.json to Production (GCP VPS via SFTP)
       # -------------------------------------------------------
-      - name: Prepare FTP upload
+      - name: Upload version.json to Production
         if: steps.check_tag.outputs.exists == 'false'
-        run: |
-          mkdir ftp_upload
-          cp gamediary.json ftp_upload/
-
-      # -------------------------------------------------------
-      # 📤 Upload gamediary.json to InfinityFree
-      # -------------------------------------------------------
-      - name: Upload gamediary.json to InfinityFree
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: SamKirkland/FTP-Deploy-Action@v4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ftp_upload/
-          server-dir: /htdocs/
+          server: ${{ secrets.VPS_SSH_HOST }}
+          username: ${{ secrets.VPS_SSH_USERNAME }}
+          password: ${{ secrets.VPS_SSH_PASSWORD }}
+          protocol: sftp
+          port: 22
+          local-dir: ./deploy_out/
+          server-dir: /var/www/html/
 
       # -------------------------------------------------------
       # 📥 Download artifact
