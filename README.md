@@ -271,7 +271,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 - [x] Support older CFWs. (Tested in 6.61 PRO C2, 6.60 PRO B9....)
 - [x] Official Website for tools.
 - [x] Network-based version checker.
-- [ ] Expand UI features with Dark/Light Theme.
+- [x] Expand UI features with Dark/Light Theme.
 - [ ] Export stats to JSON/CSV for external use.
 
 ---
