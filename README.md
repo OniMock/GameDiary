@@ -1,26 +1,27 @@
+<div align="center">
+
 [![Build Status](https://img.shields.io/github/actions/workflow/status/OniMock/GameDiary/build.yml?branch=main)](https://github.com/OniMock/GameDiary/actions)
+[![Version](https://img.shields.io/github/v/tag/OniMock/GameDiary?label=Version)](https://github.com/OniMock/GameDiary/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: PSP](https://img.shields.io/badge/Platform-PSP-informational.svg)](https://en.wikipedia.org/wiki/PlayStation_Portable)
-![Language: C/C++](https://img.shields.io/badge/Language-C%20%2F%20C%2B%2B-orange.svg)
-[![Version](https://img.shields.io/github/v/tag/OniMock/GameDiary?label=Version)](https://github.com/OniMock/GameDiary/releases)
+![Language: C](https://img.shields.io/badge/Language-C-orange.svg)
+[![Official Website](https://img.shields.io/badge/Official_Website-GameDiary-111111?style=flat&logo=firefoxbrowser&logoColor=white)](https://game-diary-app.vercel.app/)
+[![GameBrew Wiki](https://img.shields.io/badge/GameBrew-Wiki-E9711C?style=flat&logo=wikipedia&logoColor=white)](https://www.gamebrew.org/wiki/GameDiary_PSP)
+[![PSPunk](https://img.shields.io/badge/PSPunk-Homebrew-E30016?style=flat&logo=playstation&logoColor=white)](https://www.pspunk.com/psp-homebrew/)
 ![GitHub stars](https://img.shields.io/github/stars/OniMock/GameDiary?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
-![Last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
-![Download](https://img.shields.io/github/downloads/OniMock/GameDiary/total)
-[![Website](https://img.shields.io/badge/Website-GameDiary-black?style=flat&logo=vercel)](https://game-diary-app.vercel.app/)
+![GitHub last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
+![GitHub downloads](https://img.shields.io/github/downloads/OniMock/GameDiary/total)
 
-# 🎮 GameDiary
-### 🌐 [Official Website](https://game-diary-app.vercel.app/) | 📺 [Video Introduction & Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
+  <img src="./assets-src/logo.png" width="400" />
 
-> Your handheld gaming history, beautifully tracked.
+  # 🎮 GameDiary
+  > Your handheld gaming history, beautifully tracked.
+
+  ### 🌐 [Official Website](https://game-diary-app.vercel.app/) | 📺 [Video Introduction & Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
+</div>
 
 **GameDiary** is a seamless background playtime tracker and stats visualizer for the PlayStation Portable. It bridges the gap between retro hardware and modern ecosystems by automatically building a premium, localized dashboard of your gaming habits.
-
-
-
-<p align="center">
-  <img src="./assets-src/logo.png" width="380" />
-</p>
 
 ---
 
@@ -266,6 +267,8 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 - [x] Support Homebrew / Ports.
 - [x] Beep sound effects.
 - [x] Support older CFWs. (Tested in 6.61 PRO C2, 6.60 PRO B9....)
+- [x] Official Website for tools.
+- [x] Network-based version checker.
 - [ ] Expand UI features with Dark/Light Theme.
 - [ ] Export stats to JSON/CSV for external use.
 
@@ -310,7 +313,8 @@ This project is licensed under the [MIT License](LICENSE).
 
 * [pspdev](https://github.com/pspdev/pspdev) SDK and community for maintaining modern PSP toolchains.
 * Developers of PRO / ARK-4 CFW for mapping the boundaries of modern PSP kernel development.
-* Members of the  Reddit [PSP](https://www.reddit.com/r/PSP/) community for testing, feedback, and support throughout development.
+* Members of the Reddit [PSP](https://www.reddit.com/r/PSP/) community for testing, feedback, and support throughout development.
+* [Gamebrew](https://www.gamebrew.org/wiki/GameDiary_PSP) and [PSPunk](https://www.pspunk.com/psp-homebrew/) for hosting and showcasing the project within the PSP homebrew scene.
 
 ## 👤 Author
 
