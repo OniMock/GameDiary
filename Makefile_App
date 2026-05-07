@@ -72,10 +72,26 @@ PSP_EBOOT_SND0 = assets-src/SND0.AT3
 # -----------------------------------------------------------------------
 # Libraries
 # -----------------------------------------------------------------------
-# Sugestão de limpeza
-LIBS = -lintrafont -lpspgu -lpng -lz -lm \
-       -lpsprtc -lpspaudio -lpsputility
+LIBS = \
+	-lintrafont \
+	-lpspgum \
+	-lpspgu \
+	\
+	-lpng \
+	-lz \
+	-lm \
+	-lstdc++ \
+	\
+	-lcurl \
+	-lmbedtls \
+	-lmbedx509 \
+	-lmbedcrypto \
+	-lpspssl \
+	-lpspaudio \
+	-lpspwlan
 
+USE_PSPSDK_NETWVINET = 1
+USE_PSPSDK_LIBC = 1
 
 # -----------------------------------------------------------------------
 # SDK

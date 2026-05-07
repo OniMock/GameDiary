@@ -26,6 +26,8 @@
 #include "app/audio/audio_manager.h"
 #include <pspkernel.h>
 #include <pspctrl.h>
+#include "common/debug.h"
+#include "app/network/network_manager.h"
 
 PSP_MODULE_INFO("GameDiaryApp", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
@@ -51,13 +53,14 @@ void setup_callbacks(void) {
 
 int main(int argc, char *argv[]) {
     setup_callbacks();
+    debug_init(); // Initialize debugger & create directories
 
-    /* 1. Core Rendering & UI
+    /* Core Rendering & UI
      * Font data is embedded in the binary via font_*_embed.c — no file I/O needed.
      * Works identically on real PSP and PPSSPP without copying any extra files. */
     renderer_init();
 
-    /* 2. Storage & Configuration
+    /* Storage & Configuration
      * Use argv[0] to determine application root for local config.dat. */
     if (argc > 0 && argv[0]) {
         config_init(argv[0]);
@@ -67,10 +70,10 @@ int main(int argc, char *argv[]) {
         config_init(fallback_path);
     }
 
-    /* 4. State Manager */
+    /* State Manager */
     screen_manager_set(&g_screen_splash);
 
-    /* 5. Main Loop */
+    /* Main Loop */
     while (1) {
         if (splash_is_loading()) {
             splash_do_load_tasks();

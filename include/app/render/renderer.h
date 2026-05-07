@@ -30,6 +30,11 @@ void renderer_start_frame(void);
 void renderer_end_frame(void);
 
 /**
+ * @brief Manually swap buffers without finishing a frame (used for utility loops).
+ */
+void renderer_swap_buffers(void);
+
+/**
  * @brief Clears the screen with a specific color.
  * @param color The color to clear the screen with.
  */

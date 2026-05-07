@@ -97,6 +97,11 @@ void renderer_end_frame(void) {
     g_draw_buffer = sceGuSwapBuffers();
 }
 
+void renderer_swap_buffers(void) {
+    g_display_buffer = g_draw_buffer;
+    g_draw_buffer = sceGuSwapBuffers();
+}
+
 void renderer_clear(uint32_t color) {
     sceGuClearColor(color);
     sceGuClearDepth(0);
