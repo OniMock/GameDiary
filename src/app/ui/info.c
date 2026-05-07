@@ -261,9 +261,10 @@ void info_check_version_flow(void) {
 
     SceUID thid = sceKernelCreateThread("http_worker", http_worker_thread, 0x18, 0x10000, 0, 0);
     if (thid >= 0) {
+        debug_log("HTTP", "Worker thread created (ID: 0x%08X)", thid);
         sceKernelStartThread(thid, 0, 0);
     } else {
-        // Fallback
+        debug_log("HTTP", "Thread creation failed (0x%08X). Running fallback...", thid);
         g_http_ret = http_client_fetch_version(g_http_json_buf, sizeof(g_http_json_buf));
         g_http_done = 1;
     }
@@ -277,6 +278,16 @@ void info_check_version_flow(void) {
         sceGuSync(0, 0);
         sceDisplayWaitVblankStart();
         renderer_swap_buffers();
+    }
+
+    /* Release the kernel thread object now that it has finished.
+     * sceKernelCreateThread allocates a KID slot that persists until
+     * explicitly deleted — skipping this leaks a thread handle. */
+    if (thid >= 0) {
+        debug_log("HTTP", "Cleaning up thread ID: 0x%08X", thid);
+        sceKernelDeleteThread(thid);
+    } else {
+        debug_log("HTTP", "No thread cleanup needed (fallback was used)");
     }
 
     ui_loading_hide();
