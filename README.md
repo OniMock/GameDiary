@@ -4,10 +4,12 @@
 [![Version](https://img.shields.io/github/v/tag/OniMock/GameDiary?label=Version)](https://github.com/OniMock/GameDiary/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: PSP](https://img.shields.io/badge/Platform-PSP-informational.svg)](https://en.wikipedia.org/wiki/PlayStation_Portable)
+
 ![Language: C](https://img.shields.io/badge/Language-C-orange.svg)
 [![Official Website](https://img.shields.io/badge/Official_Website-GameDiary-111111?style=flat&logo=firefoxbrowser&logoColor=white)](https://game-diary-app.vercel.app/)
 [![GameBrew Wiki](https://img.shields.io/badge/GameBrew-Wiki-E9711C?style=flat&logo=wikipedia&logoColor=white)](https://www.gamebrew.org/wiki/GameDiary_PSP)
 [![PSPunk](https://img.shields.io/badge/PSPunk-Homebrew-E30016?style=flat&logo=playstation&logoColor=white)](https://www.pspunk.com/psp-homebrew/)
+
 ![GitHub stars](https://img.shields.io/github/stars/OniMock/GameDiary?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
 ![GitHub last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
