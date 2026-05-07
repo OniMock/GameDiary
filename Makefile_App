@@ -46,6 +46,10 @@ CFLAGS = -O2 -Os -G0 -Wall -Wextra \
          -Iinclude/app \
          -Ilib
 
+ifneq ($(VERSION_URL),)
+CFLAGS += -DVERSION_ENDPOINT="\"$(VERSION_URL)\""
+endif
+
 ifeq ($(DEBUG), 1)
 CFLAGS += -DGDIARY_DEBUG
 endif

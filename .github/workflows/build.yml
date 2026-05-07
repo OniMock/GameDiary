@@ -43,6 +43,8 @@ jobs:
       # 🛠️ Build
       # -------------------------------------------------------
       - name: Build Project
+        env:
+          VERSION_URL: "http://${{ secrets.VPS_SSH_HOST }}/version.json"
         run: |
           export PSPSDK=$(psp-config --pspsdk-path)
           export PSPDEV=$(psp-config --pspdev-path)
@@ -107,6 +109,8 @@ jobs:
       # 🛠️ Build Debug Version
       # -------------------------------------------------------
       - name: Build Debug
+        env:
+          VERSION_URL: "http://${{ secrets.VPS_SSH_HOST }}/version.json"
         run: |
           export PSPSDK=$(psp-config --pspsdk-path)
           export PSPDEV=$(psp-config --pspdev-path)

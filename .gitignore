@@ -61,5 +61,8 @@ ef0/
 # Temp
 tmp/
 
+# Environment variables
+.env
+
 #pycache
 __pycache__/

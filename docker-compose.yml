@@ -1,0 +1,16 @@
+services:
+  build:
+    image: pspdev/pspdev:latest
+
+    volumes:
+      - .:/workspace
+
+    working_dir: /workspace
+
+    tty: true
+    stdin_open: true
+
+    command: sleep infinity
+
+    environment:
+      VERSION_URL: ${VERSION_URL}

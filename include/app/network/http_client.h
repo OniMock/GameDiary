@@ -20,8 +20,11 @@
  * Includes timeout limits and cancellation flags using purely `sceHttp`.
  */
 
-// Production endpoint
-#define VERSION_ENDPOINT "http://35.212.193.46/version.json"
+// The IP is injected via Makefile to avoid hardcoding secrets.
+// Use: make VERSION_URL="\"http://your-ip/version.json\""
+#ifndef VERSION_ENDPOINT
+#define VERSION_ENDPOINT "http://127.0.0.1/version.json"
+#endif
 
 // Set true to cancel any ongoing reading/establishing connection
 extern volatile int g_http_cancel;

@@ -1,0 +1,15 @@
+{
+  "name": "PSPDEV",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "build",
+  "workspaceFolder": "/workspace",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.makefile-tools"
+      ]
+    }
+  }
+}
