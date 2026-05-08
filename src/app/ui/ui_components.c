@@ -311,28 +311,15 @@ void ui_draw_stats_graph(const StatsGraphData *data, int center_x, int baseline_
     }
 
     // Label text
-    char label_buf[16] = {0};
-    if (data->query.period == STATS_PERIOD_WEEKLY) {
-        struct tm bar_tm = *localtime(&data->column_dates[i]);
-        snprintf(label_buf, sizeof(label_buf), "%s", i18n_get(MSG_DAY_SUN + bar_tm.tm_wday));
-    } else if (data->query.period == STATS_PERIOD_MONTHLY) {
-        struct tm bar_tm = *localtime(&data->column_dates[i]);
-        if (i == 0 || bar_tm.tm_mday % 5 == 0 || i == count - 1) {
-            snprintf(label_buf, sizeof(label_buf), "%d", bar_tm.tm_mday);
-        }
-    } else if (data->query.period == STATS_PERIOD_LAST_12_MONTHS) {
-        struct tm bar_tm = *localtime(&data->column_dates[i]);
-        snprintf(label_buf, sizeof(label_buf), "%s", i18n_get(MSG_MONTH_SHORT_JAN + bar_tm.tm_mon));
-    } else if (data->query.period == STATS_PERIOD_YEARLY) {
-        struct tm bar_tm = *localtime(&data->column_dates[i]);
-        int y = bar_tm.tm_year + 1900;
-        snprintf(label_buf, sizeof(label_buf), "'%02d", y % 100);
-    }
+    const char *label_ptr = (data->column_labels[i][0] != '\0') ? data->column_labels[i] : NULL;
 
     draw_bar_column(x, gy, bar_w, h, bar_color, fade_gloss,
                     time_buf[0] != '\0' ? time_buf : NULL, UI_FONT_SIZE_PICO, fade_label,
-                    label_buf[0] != '\0' ? label_buf : NULL, UI_FONT_SIZE_TINY, fade_label);
+                    label_ptr, UI_FONT_SIZE_TINY, fade_label);
   }
+
+  // Ensure GU color is reset to white to avoid affecting subsequent texture draws
+  sceGuColor(0xFFFFFFFF);
 }
 
 void ui_reset_stats_graph_animation(void) {

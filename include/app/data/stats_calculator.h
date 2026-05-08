@@ -39,6 +39,9 @@ typedef struct {
     // Quick strings for context
     char context_title[128];
     char context_subtitle[128]; 
+
+    // Pre-calculated labels for rendering (avoids slow time conversion in draw loop)
+    char column_labels[MAX_GRAPH_COLS][16];
 } StatsGraphData;
 
 /**

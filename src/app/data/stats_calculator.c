@@ -375,4 +375,25 @@ void stats_calc_query(const SessionEntry *sessions, int count, StatsQuery query,
         default:
             break;
     }
+
+    // Pre-calculate column labels to avoid slow localtime/snprintf in the draw loop
+    for (int i = 0; i < out_data->column_count; i++) {
+        struct tm bar_tm = *localtime(&out_data->column_dates[i]);
+        
+        if (query.period == STATS_PERIOD_WEEKLY) {
+            snprintf(out_data->column_labels[i], sizeof(out_data->column_labels[i]), "%s", 
+                     i18n_get(MSG_DAY_SUN + bar_tm.tm_wday));
+        } else if (query.period == STATS_PERIOD_MONTHLY) {
+            // Show label every 5 days or first/last
+            if (i == 0 || bar_tm.tm_mday % 5 == 0 || i == out_data->column_count - 1) {
+                snprintf(out_data->column_labels[i], sizeof(out_data->column_labels[i]), "%d", bar_tm.tm_mday);
+            }
+        } else if (query.period == STATS_PERIOD_LAST_12_MONTHS) {
+            snprintf(out_data->column_labels[i], sizeof(out_data->column_labels[i]), "%s", 
+                     i18n_get(MSG_MONTH_SHORT_JAN + bar_tm.tm_mon));
+        } else if (query.period == STATS_PERIOD_YEARLY) {
+            int y = bar_tm.tm_year + 1900;
+            snprintf(out_data->column_labels[i], sizeof(out_data->column_labels[i]), "'%02d", y % 100);
+        }
+    }
 }
