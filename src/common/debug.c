@@ -22,17 +22,84 @@ void debug_init(void) {
     utils_ensure_storage_dirs(utils_get_device_prefix());
 }
 
+#ifdef GDIARY_PLUGIN
+// Minimal implementation of itoa with padding support for the plugin
+static char* mini_itoa(unsigned int value, char* str, int width) {
+    char temp[16];
+    int i = 0;
+    if (value == 0) temp[i++] = '0';
+    else {
+        while (value > 0) {
+            temp[i++] = (value % 10) + '0';
+            value /= 10;
+        }
+    }
+    while (i < width && i < 15) temp[i++] = '0';
+    while (i > 0) *str++ = temp[--i];
+    return str;
+}
+
+static int mini_vsnprintf(char* buffer, size_t n, const char* format, va_list arg) {
+    char* p = buffer;
+    char* end = buffer + n - 1;
+    const char* f = format;
+
+    while (*f && p < end) {
+        if (*f == '%') {
+            f++;
+            int width = 0;
+            if (*f == '0') {
+                f++;
+                while (*f >= '0' && *f <= '9') {
+                    width = width * 10 + (*f - '0');
+                    f++;
+                }
+            }
+            if (*f == 's') {
+                char* s = va_arg(arg, char*);
+                if (!s) s = "(null)";
+                while (*s && p < end) *p++ = *s++;
+            } else if (*f == 'd' || *f == 'u') {
+                unsigned int val = va_arg(arg, unsigned int);
+                p = mini_itoa(val, p, width);
+            } else if (*f == '%') {
+                *p++ = '%';
+            }
+        } else {
+            *p++ = *f;
+        }
+        f++;
+    }
+    *p = '\0';
+    return p - buffer;
+}
+
+static int mini_snprintf(char* buffer, size_t n, const char* format, ...) {
+    va_list arg;
+    va_start(arg, format);
+    int ret = mini_vsnprintf(buffer, n, format, arg);
+    va_end(arg);
+    return ret;
+}
+
+#define _snprintf mini_snprintf
+#define _vsnprintf mini_vsnprintf
+#else
+#define _snprintf snprintf
+#define _vsnprintf vsnprintf
+#endif
+
 void debug_log(const char* module, const char* fmt, ...) {
 #ifndef GDIARY_DEBUG
     return;
 #endif
 
     // Get current time for filename
-    pspTime ptime;
+    ScePspDateTime ptime;
     sceRtcGetCurrentClock(&ptime, 0);
 
     char log_path[128];
-    snprintf(log_path, sizeof(log_path), "%s" GDIARY_BASE_DIR "/debug-%02d-%02d-%04d.txt", 
+    _snprintf(log_path, sizeof(log_path), "%s" GDIARY_BASE_DIR "/debug-%02d-%02d-%04d.txt", 
              utils_get_device_prefix(), ptime.day, ptime.month, ptime.year);
 
     SceUID fd = sceIoOpen(log_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
@@ -44,7 +111,7 @@ void debug_log(const char* module, const char* fmt, ...) {
 
         va_list args;
         va_start(args, fmt);
-        vsnprintf(msg_buf, sizeof(msg_buf), fmt, args);
+        _vsnprintf(msg_buf, sizeof(msg_buf), fmt, args);
         va_end(args);
 
         // Use the standard timestamp for log content
@@ -58,7 +125,7 @@ void debug_log(const char* module, const char* fmt, ...) {
 #endif
 
         // [Timestamp] [CONTEXT] [MODULE] Message
-        int len = snprintf(final_buf, sizeof(final_buf),
+        int len = _snprintf(final_buf, sizeof(final_buf),
             "[%u] [%s] [%s] %s\r\n",
             (unsigned int)ts, context, module, msg_buf);
 

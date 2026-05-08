@@ -20,6 +20,7 @@
 #include "common/storage.h"
 #include <psppower.h>
 #include <pspsdk/systemctrl.h>
+#include "common/debug.h"
 
 static SceUID tracker_thid = -1;
 static SceUID cb_thid = -1;
@@ -53,8 +54,10 @@ static int power_callback(int unknown, int power_info, void *arg) {
                              session_start_ts, &current_session_offset);
       pending_seconds = 0;
     }
+    debug_log("tracker", "Power Callback: Suspending (Total: %u s)", session_total_seconds);
     is_suspended = 1;
   } else if (power_info & PSP_POWER_CB_RESUME_COMPLETE) {
+    debug_log("tracker", "Power Callback: Resumed");
     is_suspended = 0;
   }
 
@@ -96,8 +99,11 @@ static int tracker_thread_main(SceSize args, void *argp) {
 
   int st_res = storage_get_or_create_game(metadata, &current_game_uid);
   if (st_res < 0) {
+    debug_log("tracker", "storage_get_or_create_game FAILED (res: %d)", st_res);
     utils_log_error("tracker", "storage_get_or_create_game failed", st_res);
     current_game_uid = 0;
+  } else {
+    debug_log("tracker", "Tracking Session Initialized (UID: %u, ID: %s)", current_game_uid, metadata->game_id);
   }
 
   session_total_seconds = 0;
@@ -121,6 +127,7 @@ static int tracker_thread_main(SceSize args, void *argp) {
            * to the day it started, regardless of when this flush happens. */
           storage_log_session(current_game_uid, session_total_seconds,
                                  session_start_ts, &current_session_offset);
+          debug_log("tracker", "Periodic Flush (Total: %u s)", session_total_seconds);
         }
         pending_seconds = 0;
       }

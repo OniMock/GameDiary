@@ -21,6 +21,7 @@
 #include "plugin/detector.h"
 #include "plugin/tracker.h"
 #include "common/utils.h"
+#include "common/debug.h"
 
 int sceKernelInitApitype(void);
 
@@ -33,6 +34,9 @@ int module_start(SceSize args, void *argp) {
   // Check environment
   int apitype = sceKernelInitApitype();
   int cat = apitype_detect_category(apitype);
+
+  debug_init();
+  debug_log("main", "Plugin starting (APITYPE: 0x%X, CAT: %d)", apitype, cat);
 
   // If it's VSH, we skip loading to not track idle XMB time.
   if (cat == CAT_VSH) {
@@ -52,11 +56,15 @@ int module_start(SceSize args, void *argp) {
 
   // Self-exclusion: Don't track GameDiary itself to avoid database pollution
   const GameMetadata *meta = detector_get_metadata();
+  debug_log("main", "Detected Game: %s", meta->game_id);
+
   if (strcmp(meta->game_id, GDIARY_SELF_ID) == 0) {
+    debug_log("main", "Self-detected (GameDiary), skipping tracker.");
     return 1;
   }
 
   // Start background tracker thread
+  debug_log("main", "Starting tracker thread...");
   tracker_thread_start();
 
   return 0; // Success
