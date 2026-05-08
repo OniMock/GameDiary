@@ -262,7 +262,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 
 - [x] Background play tracking and database mapping.
 - [x] MSDF font rendering with full Latin, Cyrillic, and CJK fallback chains.
-- [x] Multi-language support (EN, PT, ES, RU, JP, CN).
+- [x] Multi-language support (EN, PT, ES, RU, DE, FR, IT, JP, CN).
 - [x] Auto-extraction of `ICON0.PNG` for PS1/POPS Eboots.
 - [x] Context-sensitive help and standardized Helper popups.
 - [x] Support Homebrew / Ports.
