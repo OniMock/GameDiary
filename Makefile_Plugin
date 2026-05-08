@@ -17,7 +17,8 @@ PLUGIN_OBJS = \
 COMMON_OBJS = \
   src/common/storage.o \
   src/common/sfo_parser.o \
-  src/common/utils.o
+  src/common/utils.o \
+  src/common/debug.o
 
 OBJS_RAW = $(PLUGIN_OBJS) $(COMMON_OBJS)
 
