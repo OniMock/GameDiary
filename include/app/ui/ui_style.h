@@ -20,6 +20,16 @@
  */
 #define UI_COLOR_ALPHA_VAL(color, alpha_val) ((((u32)(alpha_val)) << 24) | ((color) & 0x00FFFFFF))
 
+/**
+ * Helper macro to convert a standard 24-bit RGB hex value (0xRRGGBB)
+ * into the 32-bit ABGR format (0xFFBBGGRR) required by the PSP.
+ */
+#define UI_COLOR_HEX(hex) \
+    (0xFF000000 | \
+    (((hex) & 0x0000FF) << 16) | \
+    (((hex) & 0x00FF00)) | \
+    (((hex) & 0xFF0000) >> 16))
+
 // --- Font Sizes (Values in pixels) ---
 #define UI_FONT_SIZE_TITLE_MAIN  22.0f    // Page headers & Branding
 #define UI_FONT_SIZE_TITLE_HUGE  17.0f    // Pop-up headers & Error titles
@@ -63,6 +73,11 @@ typedef struct {
     u32 accent;
     u32 success;
     u32 danger;
+
+    u32 shadow;      // Shadow base color
+    u8  shadow_alpha; // Shadow opacity percentage (0-100)
+
+    u32 icon_tint;   // Base tint color for icons
 } UIStyle;
 
 extern UIStyle g_ui_style;
@@ -80,6 +95,8 @@ extern UIStyle g_ui_style;
 #define COLOR_ACCENT    (g_ui_style.accent)
 #define COLOR_SUCCESS   (g_ui_style.success)
 #define COLOR_DANGER    (g_ui_style.danger)
+#define COLOR_SHADOW    (g_ui_style.shadow)
+#define COLOR_ICON_TINT (g_ui_style.icon_tint)
 
 void ui_style_init(void);
 void ui_style_set_dark(void);

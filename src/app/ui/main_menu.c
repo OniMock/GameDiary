@@ -206,15 +206,13 @@ static void main_menu_draw(void) {
         int y = center_y - h / 2 - 10;
 
         u8 a = (u8)(alpha_f * 255.0f);
-        u32 tint = UI_COLOR_ALPHA_VAL(0xFFFFFFFFu, a);
+        u32 tint = UI_COLOR_ALPHA_VAL(COLOR_ICON_TINT, a);
 
         if (g_menu_items[idx].icon) {
             // 1. Draw Shadow (Subtle blur with very close offsets)
-            // In Light theme, we use a much more transparent and slightly gray shadow
-            u8 shadow_base_a = (config_get()->theme == 1) ? a / 10 : a / 6;
+            u8 shadow_base_a = (u8)((a * g_ui_style.shadow_alpha) / 100);
             if (shadow_base_a > 0) {
-                u32 shadow_base_col = (config_get()->theme == 1) ? 0x00333333 : 0x00000000;
-                u32 shadow_tint = UI_COLOR_ALPHA_VAL(shadow_base_col, shadow_base_a);
+                u32 shadow_tint = UI_COLOR_ALPHA_VAL(COLOR_SHADOW, shadow_base_a);
                 sceGuColor(shadow_tint);
                 texture_draw_resource(g_menu_items[idx].icon, x + 1, y + 1, w, h);
                 texture_draw_resource(g_menu_items[idx].icon, x + 2, y + 2, w, h);

@@ -40,8 +40,8 @@ CFLAGS = -O2 -Os -G0 -Wall -Wextra \
          -DAPP_VERSION=\"$(PROJECT_VERSION)\" \
          -DSDK_VERSION=\"$(shell psp-gcc -dumpversion)\" \
          -DBUILD_YEAR=$(shell date +'%Y') \
-         -DBUILD_MONTH=$(shell date +'%m') \
-         -DBUILD_DAY=$(shell date +'%d') \
+         -DBUILD_MONTH=$(shell date +'%m' | sed 's/^0//') \
+         -DBUILD_DAY=$(shell date +'%d' | sed 's/^0//') \
          -Iinclude \
          -Iinclude/app \
          -Ilib
