@@ -36,7 +36,7 @@ void ui_style_set_light(void) {
     // Core Surfaces: "Nordic Frost" (Cool tones, ice and slate - 0% pure white)
     g_ui_style.bg        = UI_COLOR_HEX(0xD8DEE9); // #D8DEE9 - Icy blue-gray background
     g_ui_style.card      = UI_COLOR_HEX(0xE5E9F0); // #E5E9F0 - Slightly lighter frost for card surfaces
-    g_ui_style.border    = UI_COLOR_HEX(0x85929E); // #85929E - Solid blue-gray for distinct borders
+    g_ui_style.border    = UI_COLOR_HEX(0xB0BDD1); // #B0BDD1 - Cornflower blue for elegant selection highlights
     g_ui_style.highlight = UI_COLOR_HEX(0xB0BDD1); // #B0BDD1 - Cornflower blue for elegant selection highlights
 
     // Typography (Maximum contrast for perfect readability)

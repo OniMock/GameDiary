@@ -124,8 +124,11 @@ static void main_menu_update(u32 buttons, u32 pressed) {
         }
     }
 
-    // Lerp
+    // Lerp with snapping to prevent long-tail float precision jitter
     g_current_index += (g_target_index - g_current_index) * 0.15f;
+    if (fabsf(g_target_index - g_current_index) < 0.001f) {
+        g_current_index = g_target_index;
+    }
 
     // Selection
     if (pressed & PSP_CTRL_CROSS) {
@@ -200,8 +203,9 @@ static void main_menu_draw(void) {
             base_h = UI_ICON_SIZE_MAIN_MENU;
         }
 
-        int w = (int)(base_w * scale);
-        int h = (int)(base_h * scale);
+        // Use +0.5f to round instead of truncating, preventing 1px pop at the end of animation
+        int w = (int)(base_w * scale + 0.5f);
+        int h = (int)(base_h * scale + 0.5f);
         int x = draw_x - w / 2;
         int y = center_y - h / 2 - 10;
 
