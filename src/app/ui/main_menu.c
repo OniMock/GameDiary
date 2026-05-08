@@ -89,8 +89,9 @@ static void main_menu_update(u32 buttons, u32 pressed) {
     // 1. Detect Direction (Discrete & Analog)
     float ax = (pad_ptr->Lx - 128.0f) / 128.0f;
     int current_dir = 0;
-    if ((buttons & PSP_CTRL_RIGHT) || (ax > 0.5f)) current_dir = 1;
-    else if ((buttons & PSP_CTRL_LEFT) || (ax < -0.5f)) current_dir = -1;
+    // Increased deadzone to 0.75f to prevent physical snap-back (ricochet) of the PSP analog stick
+    if ((buttons & PSP_CTRL_RIGHT) || (ax > 0.75f)) current_dir = 1;
+    else if ((buttons & PSP_CTRL_LEFT) || (ax < -0.75f)) current_dir = -1;
 
     int move = 0;
     if (current_dir != 0) {
@@ -117,15 +118,15 @@ static void main_menu_update(u32 buttons, u32 pressed) {
         // Clamp to valid range
         if (g_target_index < 0) g_target_index = 0;
         if (g_target_index >= MENU_ITEM_COUNT) g_target_index = MENU_ITEM_COUNT - 1;
-        
+
         if (g_target_index != prev_target) {
             audio_play_sfx(SFX_NAVIGATE);
             s_last_nav_ms = utils_get_time_ms();
         }
     }
 
-    // Lerp with snapping to prevent long-tail float precision jitter
-    g_current_index += (g_target_index - g_current_index) * 0.15f;
+    // Lerp with snapping to prevent long-tail float precision jitter.
+    g_current_index += (g_target_index - g_current_index) * 0.12f;
     if (fabsf(g_target_index - g_current_index) < 0.001f) {
         g_current_index = g_target_index;
     }
@@ -149,7 +150,7 @@ static void main_menu_draw(void) {
 
     int center_x = 240;
     int center_y = 136;
-    int spacing = 140;
+    float spacing = 140.0f;
 
     // Draw up to 5 items (center, left 2, right 2)
     // We sort them by absolute offset (depth) to render those furthest away first
@@ -191,23 +192,24 @@ static void main_menu_draw(void) {
         float alpha_f = 1.0f - fabsf(offset) * 0.3f;
         if (alpha_f < 0.2f) alpha_f = 0.2f;
 
-        int draw_x = center_x + (int)(offset * spacing);
-
         // Base sizes for icons (e.g. 64x64)
-        int base_w = 64, base_h = 64;
+        float base_w = 64.0f, base_h = 64.0f;
         if (g_menu_items[idx].icon != NULL) {
-            base_w = g_menu_items[idx].icon->width;
-            base_h = g_menu_items[idx].icon->height;
-            // Since some are small (24x24), we should scale them up baseline.
-            base_w = UI_ICON_SIZE_MAIN_MENU;
-            base_h = UI_ICON_SIZE_MAIN_MENU;
+            base_w = (float)UI_ICON_SIZE_MAIN_MENU;
+            base_h = (float)UI_ICON_SIZE_MAIN_MENU;
         }
 
-        // Use +0.5f to round instead of truncating, preventing 1px pop at the end of animation
-        int w = (int)(base_w * scale + 0.5f);
-        int h = (int)(base_h * scale + 0.5f);
-        int x = draw_x - w / 2;
-        int y = center_y - h / 2 - 10;
+        // Calculate exact float positions before converting to int
+        float draw_x_f = (float)center_x + (offset * spacing);
+        float w_f = base_w * scale;
+        float h_f = base_h * scale;
+        
+        // Convert to integer only at the final step using proper rounding (+0.5f)
+        // This eliminates the 1-pixel "vai e volta" (jitter) during animation
+        int w = (int)(w_f + 0.5f);
+        int h = (int)(h_f + 0.5f);
+        int x = (int)(draw_x_f - (w_f / 2.0f) + 0.5f);
+        int y = center_y - (int)(h_f / 2.0f + 0.5f) - 10;
 
         u8 a = (u8)(alpha_f * 255.0f);
         u32 tint = UI_COLOR_ALPHA_VAL(COLOR_ICON_TINT, a);
@@ -224,9 +226,9 @@ static void main_menu_draw(void) {
             }
 
             // 2. Draw Main Icon (White tint, original position)
-            sceGuColor(tint); 
+            sceGuColor(tint);
             texture_draw_resource(g_menu_items[idx].icon, x, y, w, h);
-            
+
             sceGuColor(0xFFFFFFFF); // Reset
         }
 
@@ -235,7 +237,8 @@ static void main_menu_draw(void) {
             float text_alpha = 1.0f - (fabsf(offset) * 10.0f); // fade text quickly
             if (text_alpha > 0.0f) {
                 u32 text_col = COLOR_TEXT; // We don't have alpha easily passing into ui_draw_text without modifications, but we can assume fully opaque for near-center
-                ui_draw_text(i18n_get(g_menu_items[idx].label_msg), (Rect){draw_x - 100, center_y + 45, 200, 20}, text_col, UI_FONT_SIZE_TITLE_HUGE, ALIGN_CENTER);
+                int final_draw_x = (int)(draw_x_f + 0.5f);
+                ui_draw_text(i18n_get(g_menu_items[idx].label_msg), (Rect){final_draw_x - 100, center_y + 45, 200, 20}, text_col, UI_FONT_SIZE_TITLE_HUGE, ALIGN_CENTER);
             }
         }
     }
@@ -243,7 +246,7 @@ static void main_menu_draw(void) {
     int current_idx = (int)(g_target_index + 0.5f);
     bool show_left = (current_idx > 0);
     bool show_right = (current_idx < MENU_ITEM_COUNT - 1);
-    
+
     // Center indicators vertically with the icons (-10 is the icon Y offset)
     ui_draw_nav_indicators(center_y - 10, show_left, show_right, show_left, show_right, s_last_nav_ms, COLOR_TEXT);
 
