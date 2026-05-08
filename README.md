@@ -74,7 +74,7 @@ from EBOOTs and ISOs for a rich visual diary without manual scraping.
 * **Comprehensive Stats**: View total playtime, session history, and detailed graphs.
 
 ### 🧩 System
-* **Global Internationalization (i18n)**: Fully localized in English, Spanish, Portuguese, Russian, Japanese, and Chinese with automatic language detection based on PSP system settings.
+* **Global Internationalization (i18n)**: Fully localized in English, Spanish, Portuguese, Russian, German, French, Italian, Japanese and Chinese with automatic language detection based on PSP system settings.
 * **POPS Compatibility**: Reliable tracking and icon parsing for PlayStation 1 classics running via the official emulator.
 
 ---
@@ -273,6 +273,8 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 - [x] Network-based version checker.
 - [x] Expand UI features with Dark/Light Theme.
 - [ ] Export stats to JSON/CSV for external use.
+- [ ] Fix plugin for UMD games (GTA, etc).
+- [ ] Ongoing maintenance, fixes, and compatibility improvements.
 
 ---
 
