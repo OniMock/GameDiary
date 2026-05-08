@@ -69,10 +69,9 @@ It exists to give PSP power-users modern, console-like play tracking capabilitie
 * **Automatic Icon Management**: Automatically extracts `ICON0.PNG`
 from EBOOTs and ISOs for a rich visual diary without manual scraping.
 ### 🎨 UI / UX
-* **Premium User Interface**: Fluid carousel navigation, smooth transitions, depth-sorted overlapping icons, and dynamic backgrounds built from the ground up to feel like native OS features.
-* **Sharp SDF Font Engine**: Custom Multi-Page MSDF rendering pipeline delivers perfectly crisp text at any font size without pixelation or stair-stepping.
-* **Comprehensive Stats**: View total playtime, session history, and detailed graphs.
-
+- **Premium User Interface**: Fluid carousel navigation, smooth transitions, depth-sorted overlapping icons, and dynamic backgrounds designed to feel like a native PSP OS experience.
+- **Detailed Play Statistics**: View individual playtime for every game, total accumulated playtime across your entire library, session history, and detailed activity graphs.
+- **Clean and Scalable Text Rendering**: Sharp and readable interface text at any size with full support for multiple languages and character sets.
 ### 🧩 System
 * **Global Internationalization (i18n)**: Fully localized in English, Spanish, Portuguese, Russian, German, French, Italian, Japanese and Chinese with automatic language detection based on PSP system settings.
 * **POPS Compatibility**: Reliable tracking and icon parsing for PlayStation 1 classics running via the official emulator.
