@@ -141,4 +141,5 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_SETTINGS_THEME]           = "Theme",
     [MSG_THEME_DARK]               = "Dark",
     [MSG_THEME_LIGHT]              = "Light",
+    [MSG_LOADING]                  = "Loading...",
 };

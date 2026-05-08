@@ -29,6 +29,7 @@
 #include <pspctrl.h>
 #include "common/debug.h"
 #include "app/network/network_manager.h"
+#include "app/ui/ui_loading.h"
 
 PSP_MODULE_INFO("GameDiaryApp", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
@@ -83,8 +84,22 @@ int main(int argc, char *argv[]) {
         }
 
         renderer_start_frame();
-        screen_manager_update();
+        
+        // Update
+        bool was_loading = ui_loading_is_active();
+        ui_loading_update();
+        bool is_loading = ui_loading_is_active();
+
+        if (was_loading && !is_loading) {
+            i18n_reload_font();
+        }
+
+        screen_manager_update(); // Must always run to allow timers to advance
+        
+        // Draw
         screen_manager_draw();
+        ui_loading_render(); // Always render last to be on top
+        
         renderer_end_frame();
     }
 

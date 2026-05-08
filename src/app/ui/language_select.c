@@ -25,11 +25,16 @@
 #include <pspctrl.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "app/ui/ui_loading.h"
+#include "common/utils.h"
 
 #define MAX_VISIBLE_ITEMS 4
 
 static int g_selection = 0;
 static int g_scroll_offset = 0;
+static u32 s_loading_start_ms = 0;
+static bool s_is_changing = false;
+static int s_target_lang = -1;
 
 static const char* s_helper_lines[7];
 static PopupData s_helper_data;
@@ -109,14 +114,42 @@ static void language_select_update(u32 buttons, u32 pressed) {
     }
 
     if (pressed & PSP_CTRL_CROSS) {
-        audio_play_sfx(SFX_CONFIRM);
         /* Map visual A-Z position back to the real LanguageId enum value */
-        int target_lang = (g_selection == 0)
+        int target = (g_selection == 0)
             ? LANG_AUTO
             : (int)i18n_get_sorted_lang_index(g_selection - 1);
-        i18n_init(target_lang);
-        config_get()->language = target_lang;
-        config_save();
+
+        // Optimization: If it's already the current language, do nothing
+        if (target == config_get()->language) {
+            audio_play_sfx(SFX_CANCEL);
+            return;
+        }
+
+        audio_play_sfx(SFX_CONFIRM);
+        s_target_lang = target;
+        
+        ui_loading_show(i18n_get(MSG_LOADING));
+        s_loading_start_ms = utils_get_time_ms();
+        s_is_changing = true;
+    }
+
+    // Handle the timed loading state machine
+    if (s_is_changing) {
+        u32 elapsed = utils_get_time_ms() - s_loading_start_ms;
+
+        // Step 1: Perform the work on the first frame after show
+        if (s_target_lang != -1 && elapsed > 16) {
+            i18n_switch_language(s_target_lang);
+            config_get()->language = s_target_lang;
+            config_save();
+            s_target_lang = -1; // Work done
+        }
+
+        // Step 2: Wait for minimum duration (1000ms)
+        if (s_target_lang == -1 && elapsed >= 1000) {
+            ui_loading_hide();
+            s_is_changing = false;
+        }
     }
 }
 

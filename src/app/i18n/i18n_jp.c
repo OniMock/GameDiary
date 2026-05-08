@@ -146,4 +146,5 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SETTINGS_THEME]           = "テーマ",
     [MSG_THEME_DARK]               = "ダーク",
     [MSG_THEME_LIGHT]              = "ライト",
+    [MSG_LOADING]                  = "読み込み中…",
 };

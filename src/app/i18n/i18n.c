@@ -99,7 +99,12 @@ static int i18n_detect_system_lang(void) {
 /* --- Public API --- */
 
 void i18n_init(int force_lang) {
-  int target_lang = force_lang;
+  i18n_switch_language(force_lang);
+  i18n_reload_font(); // Load initial font on startup
+}
+
+void i18n_switch_language(int lang) {
+  int target_lang = lang;
 
   if (target_lang == LANG_AUTO) {
     target_lang = i18n_detect_system_lang();
@@ -120,9 +125,11 @@ void i18n_set_language(int lang_index) {
 
   g_current_lang_idx = lang_index;
   g_i18n_msg = g_lang_registry[lang_index].entries;
+}
 
-  /* Refresh font priorities to match new language (Han Unification) */
-  sdf_font_rebuild_glyph_map();
+void i18n_reload_font(void) {
+    /* Refresh font priorities to match current language (Han Unification) */
+    sdf_font_rebuild_glyph_map();
 }
 
 const char *i18n_get(MessageId id) {

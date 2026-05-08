@@ -26,10 +26,15 @@
 #include <stdio.h>
 
 #include "app/ui/ui_style.h"
+#include "app/ui/ui_loading.h"
+#include "common/utils.h"
 
 #define SETTINGS_MENU_COUNT 3
 
 static int g_selection = 0;
+static u32 s_loading_start_ms = 0;
+static bool s_is_changing = false;
+static int s_pending_action = -1; // 1: Theme, 2: SFX
 
 static const char* s_helper_lines[8];
 static PopupData s_helper_data;
@@ -73,21 +78,40 @@ static void settings_update(u32 buttons, u32 pressed) {
             audio_play_sfx(SFX_CONFIRM);
             screen_manager_push(&g_screen_language_select);
         } else if (g_selection == 1) {
-            AppConfig* cfg = config_get();
-            cfg->theme = !cfg->theme;
-            config_save();
-
-            if (cfg->theme == 1) {
-                ui_style_set_light();
-            } else {
-                ui_style_set_dark();
-            }
             audio_play_sfx(SFX_CONFIRM);
+            ui_loading_show(i18n_get(MSG_LOADING)); // We'll update the text next frame
+            s_loading_start_ms = utils_get_time_ms();
+            s_is_changing = true;
+            s_pending_action = 1;
         } else if (g_selection == 2) {
+            audio_play_sfx(SFX_CONFIRM);
             AppConfig* cfg = config_get();
             cfg->sfx_enabled = !cfg->sfx_enabled;
             config_save();
-            audio_play_sfx(SFX_CONFIRM); // Plays if we just turned it ON
+        }
+    }
+
+    // Handle the timed loading state machine
+    if (s_is_changing) {
+        u32 elapsed = utils_get_time_ms() - s_loading_start_ms;
+
+        // Step 1: Perform the work on the first frame after show
+        if (s_pending_action != -1 && elapsed > 16) {
+            if (s_pending_action == 1) {
+                AppConfig* cfg = config_get();
+                cfg->theme = !cfg->theme;
+                config_save();
+
+                if (cfg->theme == 1) ui_style_set_light();
+                else ui_style_set_dark();
+            }
+            s_pending_action = -1; // Work done
+        }
+
+        // Step 2: Wait for minimum duration (1000ms)
+        if (s_pending_action == -1 && elapsed >= 1000) {
+            ui_loading_hide();
+            s_is_changing = false;
         }
     }
 

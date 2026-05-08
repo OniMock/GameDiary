@@ -55,14 +55,19 @@ typedef enum {
 static LoadingState s_state       = LOADING_STATE_HIDDEN;
 static float        s_alpha       = 0.0f;
 static int          s_tick        = 0;
-static const char  *s_label       = NULL;
+static char         s_label[128];
 
 /* -----------------------------------------------------------------------
  * Public API
  * ----------------------------------------------------------------------- */
 
 void ui_loading_show(const char *label) {
-    s_label = label;
+    if (label) {
+        strncpy(s_label, label, sizeof(s_label) - 1);
+        s_label[sizeof(s_label) - 1] = '\0';
+    } else {
+        s_label[0] = '\0';
+    }
     s_tick  = 0;
 
     if (s_state == LOADING_STATE_HIDDEN || s_state == LOADING_STATE_FADE_OUT) {
@@ -101,7 +106,7 @@ void ui_loading_update(void) {
         if (s_alpha <= 0.0f) {
             s_alpha  = 0.0f;
             s_state  = LOADING_STATE_HIDDEN;
-            s_label  = NULL;
+            s_label[0] = '\0';
         }
         s_tick++;
         break;
@@ -174,7 +179,7 @@ void ui_loading_render(void) {
 
     /* --- 2. Dynamic Card Size Calculation --- */
     float text_w = 0.0f;
-    if (s_label) {
+    if (s_label[0] != '\0') {
         text_w = font_get_width(s_label, UI_FONT_SIZE_NORMAL);
     }
 
@@ -214,7 +219,7 @@ void ui_loading_render(void) {
     draw_arc(spinner_center_x, spinner_center_y, SPINNER_RADIUS, SPINNER_THICKNESS, start_angle, sweep, spinner_color);
 
     /* --- 5. Label text --- */
-    if (s_label) {
+    if (s_label[0] != '\0') {
         uint32_t text_alpha = (uint32_t)(255.0f * s_alpha);
         uint32_t text_color = UI_COLOR_ALPHA_VAL(COLOR_TEXT, text_alpha);
 

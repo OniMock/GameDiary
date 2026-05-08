@@ -167,6 +167,8 @@ typedef enum {
     MSG_THEME_DARK,
     MSG_THEME_LIGHT,
 
+    MSG_LOADING,
+
     MSG_COUNT
 
 } MessageId;
@@ -185,9 +187,19 @@ extern const char **g_i18n_msg;
 void i18n_init(int force_lang);
 
 /**
+ * Switch language dictionary (handles LANG_AUTO) without rebuilding fonts.
+ */
+void i18n_switch_language(int lang);
+
+/**
  * Change language at runtime.
  */
 void i18n_set_language(int lang_index);
+
+/**
+ * Rebuild font glyph map for the current language.
+ */
+void i18n_reload_font(void);
 
 /**
  * Get translated string with optional safety checks.

@@ -143,4 +143,5 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SETTINGS_THEME]           = "Тема",
     [MSG_THEME_DARK]               = "Темная",
     [MSG_THEME_LIGHT]              = "Светлая",
+    [MSG_LOADING]                  = "Загрузка...",
 };

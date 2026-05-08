@@ -147,4 +147,5 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SETTINGS_THEME]           = "主题",
     [MSG_THEME_DARK]               = "深色",
     [MSG_THEME_LIGHT]              = "浅色",
+    [MSG_LOADING]                  = "加载中…",
 };

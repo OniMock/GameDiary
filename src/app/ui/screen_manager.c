@@ -81,6 +81,14 @@ void screen_manager_update(void) {
     u32 pressed = pad.Buttons & ~g_last_buttons;
     g_last_buttons = pad.Buttons;
 
+    // --- LOADING INTERCEPT ---
+    if (ui_loading_is_active()) {
+        pad.Buttons = 0;
+        pressed = 0;
+        pad.Lx = 128;
+        pad.Ly = 128;
+    }
+
     // --- POPUP INTERCEPT ---
     if (popup_is_open()) {
         popup_update(pad.Buttons, pressed);
@@ -149,14 +157,9 @@ void screen_manager_update(void) {
         }
     }
 
-    // 3. Screen Update (only when not in middle of fade transition)
     if (g_current_screen && g_current_screen->update && g_fade_state == 0) {
         g_current_screen->update(pad.Buttons, pressed);
     }
-
-    /* Always tick loading animation, even during screen transitions.
-     * This keeps the spinner smooth while heavy I/O runs under a black fade. */
-    ui_loading_update();
 }
 
 void screen_manager_draw(void) {
