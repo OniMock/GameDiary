@@ -125,8 +125,15 @@ static void show_version_popup_advanced(MessageId msg_id, NetworkVersionInfo* in
         s_version_result_lines[0] = s_formatted_msg_line;
         s_version_result_lines[1] = s_formatted_version_line;
         s_version_result_lines[2] = s_formatted_date_line;
-        s_version_result_lines[3] = s_formatted_site_line;
-        s_version_result_data.line_count = 4;
+        
+        if (msg_id == MSG_INFO_VERSION_LATEST) {
+            // Up to date: Show Version, Codename, Date. Site not needed.
+            s_version_result_data.line_count = 3;
+        } else {
+            // Update available: Show all including Site URL
+            s_version_result_lines[3] = s_formatted_site_line;
+            s_version_result_data.line_count = 4;
+        }
     } else {
         snprintf(s_formatted_msg_line, sizeof(s_formatted_msg_line), "%s", i18n_get(msg_id));
         s_version_result_lines[0] = s_formatted_msg_line;
