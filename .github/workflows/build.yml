@@ -127,7 +127,7 @@ jobs:
           mkdir -p release_debug/GameDiary
           cp GameDiary.prx release_debug/
           cp EBOOT.PBP release_debug/GameDiary/EBOOT.PBP
-          
+
           cd release_debug
           zip -r ../GameDiaryDebug.zip .
           cd ..
@@ -191,9 +191,9 @@ jobs:
           CODENAME="${{ steps.get_version.outputs.codename }}"
           DATE=$(date +'%Y-%m-%d')
           URL="https://github.com/${{ github.repository }}/releases/download/v$VERSION/GameDiary.zip"
-          
+
           echo "{\"version\":\"$VERSION\",\"codename\":\"$CODENAME\",\"release_date\":\"$DATE\",\"url\":\"$URL\",\"mandatory\":false}" > version.json
-          
+
           mkdir -p deploy_out
           cp version.json deploy_out/
 
@@ -202,16 +202,14 @@ jobs:
       # -------------------------------------------------------
       - name: Upload version.json to Production
         if: steps.check_tag.outputs.exists == 'false'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.VPS_SSH_HOST }}
+          host: ${{ secrets.VPS_SSH_HOST }}
           username: ${{ secrets.VPS_SSH_USERNAME }}
           password: ${{ secrets.VPS_SSH_PASSWORD }}
-          protocol: sftp
           port: 22
-          local-dir: ./deploy_out/
-          server-dir: /var/www/html/
-
+          source: "deploy_out/version.json"
+          target: "/var/www/html/"
       # -------------------------------------------------------
       # 📥 Download artifact
       # -------------------------------------------------------
