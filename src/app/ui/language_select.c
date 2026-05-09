@@ -141,6 +141,7 @@ static void language_select_update(u32 buttons, u32 pressed) {
         if (s_target_lang != -1 && elapsed > 16) {
             i18n_switch_language(s_target_lang);
             i18n_reload_font();
+            ui_loading_update_label(i18n_get(MSG_LOADING));
             config_get()->language = s_target_lang;
             config_save();
             s_target_lang = -1; // Work done

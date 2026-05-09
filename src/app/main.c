@@ -90,13 +90,12 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        renderer_start_frame();
-        
         // Update
         ui_loading_update();
-
         screen_manager_update(); // Must always run to allow timers to advance
         
+        renderer_start_frame();
+
         // Draw
         screen_manager_draw();
         ui_loading_render(); // Always render last to be on top
