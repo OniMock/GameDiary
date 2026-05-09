@@ -210,6 +210,7 @@ jobs:
           port: 22
           source: "deploy_out/version.json"
           target: "/var/www/html/"
+          strip_components: 1
       # -------------------------------------------------------
       # 📥 Download artifact
       # -------------------------------------------------------
