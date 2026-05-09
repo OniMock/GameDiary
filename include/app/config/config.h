@@ -41,6 +41,13 @@ int config_load(void);
 int config_save(void);
 
 /**
+ * @brief Synchronously writes a configuration to disk. Used by worker thread.
+ * @param cfg The configuration to write.
+ * @return 0 on success, negative on error.
+ */
+int config_write_file(const AppConfig* cfg);
+
+/**
  * @brief Gets the current application configuration.
  * @return Pointer to the global configuration structure.
  */

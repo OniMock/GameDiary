@@ -30,9 +30,12 @@
 #include "common/debug.h"
 #include "app/network/network_manager.h"
 #include "app/ui/ui_loading.h"
+#include "app/core/worker_thread.h"
 
 PSP_MODULE_INFO("GameDiaryApp", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
+PSP_MAIN_THREAD_PRIORITY(0x18);
+PSP_MAIN_THREAD_STACK_SIZE_KB(64);
 
 int exit_callback(int arg1, int arg2, void *common) {
     (void)arg1; (void)arg2; (void)common;
@@ -62,6 +65,10 @@ int main(int argc, char *argv[]) {
      * Works identically on real PSP and PPSSPP without copying any extra files. */
     renderer_init();
 
+    /* Worker Thread
+     * Handles background heavy tasks (config_save, parsing, PNG loading). */
+    worker_thread_init();
+
     /* Storage & Configuration
      * Use argv[0] to determine application root for local config.dat. */
     if (argc > 0 && argv[0]) {
@@ -86,13 +93,7 @@ int main(int argc, char *argv[]) {
         renderer_start_frame();
         
         // Update
-        bool was_loading = ui_loading_is_active();
         ui_loading_update();
-        bool is_loading = ui_loading_is_active();
-
-        if (was_loading && !is_loading) {
-            i18n_reload_font();
-        }
 
         screen_manager_update(); // Must always run to allow timers to advance
         
@@ -104,6 +105,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Cleanup */
+    worker_thread_shutdown();
     audio_cleanup();
     font_cleanup();
     data_free();

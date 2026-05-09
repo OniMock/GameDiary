@@ -17,7 +17,7 @@
 #include <string.h>
 #include <pspkernel.h>
 #include "common/db_schema.h"
-
+#include "app/core/worker_thread.h"
 #include "common/utils.h"
 
 static AppConfig g_config;
@@ -42,7 +42,7 @@ int config_load(void) {
         g_config.language = -1;
         g_config.sfx_enabled = 1;
         g_config.theme = 0;
-        return config_save(); // Create with defaults
+        return config_write_file(&g_config); // Create with defaults
     }
 
     int res = sceIoRead(fd, &g_config, sizeof(AppConfig));
@@ -53,7 +53,7 @@ int config_load(void) {
         if (res <= 8) { // 8 is the size of the old struct (language + sfx_enabled)
             g_config.theme = 0; // Dark theme
         }
-        config_save(); // Save the updated struct size
+        config_write_file(&g_config); // Save the updated struct size
         return 0;
     }
 
@@ -67,16 +67,25 @@ int config_load(void) {
     return 0;
 }
 
-int config_save(void) {
+int config_write_file(const AppConfig* cfg) {
     if (g_config_path[0] == '\0') return -1;
 
     SceUID fd = sceIoOpen(g_config_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (fd < 0) return -1;
 
-    int res = sceIoWrite(fd, &g_config, sizeof(AppConfig));
+    int res = sceIoWrite(fd, cfg, sizeof(AppConfig));
     sceIoClose(fd);
 
     return (res == (int)sizeof(AppConfig)) ? 0 : -2;
+}
+
+int config_save(void) {
+    int res = worker_enqueue_save_config(&g_config);
+    if (res < 0) {
+        /* Fallback to synchronous save if worker queue is full or not running */
+        return config_write_file(&g_config);
+    }
+    return 0;
 }
 
 AppConfig* config_get(void) {

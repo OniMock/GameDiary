@@ -35,23 +35,7 @@
 #include <string.h>
 #include <stdio.h>
 
-/* -----------------------------------------------------------------------
- * Module-level singletons (one loader thread shared by all CarouselState
- * instances — only one screen is active at a time on the PSP).
- * ----------------------------------------------------------------------- */
-
-/** Background loader thread handle; -1 when not running. */
-static SceUID s_loader_thid = -1;
-
-/** Non-zero while the loader thread should keep running. */
-static volatile int s_loader_run = 0;
-
-/**
- * Pointer to the currently active carousel state.
- * Written by the main thread under __sync_synchronize(); read by the loader.
- * NULL means the loader should idle.
- */
-static volatile CarouselState *s_active_cs = NULL;
+#include "app/core/worker_thread.h"
 
 /**
  * Mutex protecting every access to cache[] slots.
@@ -62,13 +46,6 @@ static SceLwMutexWorkarea s_cache_mutex;
 
 /** Flag to track if s_cache_mutex has been created. */
 static int s_mutex_init = 0;
-
-/**
- * Synchronous fallback flag.
- * 1 when the loader thread could not be created; carousel_update() then
- * loads at most 1 PNG per frame from the main thread.
- */
-static int s_sync_mode = 0;
 
 /* -----------------------------------------------------------------------
  * Sentinel value for uninitialised / evicted cache slots.
@@ -184,98 +161,25 @@ static void cache_sync(CarouselState *cs) {
         /* Evict any occupant of this slot (may be a different inf_idx). */
         slot_evict_locked(cs, s);
 
-        /* Claim the slot for gi and mark for async/sync load. */
+        /* Claim the slot for gi and mark for async load. */
         cs->cache[s].inf_idx = gi;
         cs->cache[s].state   = CACHE_SLOT_PENDING;
         sceKernelUnlockLwMutex(&s_cache_mutex, 1);
-    }
-}
+        
+        /* Resolve physical index and enqueue */
+        int logical  = wrap_idx(gi, cs->total);
+        int physical = cs->index_map ? cs->index_map[logical] : logical;
+        char path[256];
+        build_icon_path(path, sizeof(path), physical);
 
-/* -----------------------------------------------------------------------
- * Background Loader Thread
- *
- * Priority 0x13 (19 decimal) — lower priority number = higher priority on
- * PSP; 0x13 is intentionally LOWER priority than the main loop (0x20 / 32)
- * to prevent icon loading from starving the UI thread.
- *
- * Stack: 0x8000 (32 KB) — libpng needs ~20–24 KB of stack during decode.
- * ----------------------------------------------------------------------- */
-
-static int carousel_loader_thread(SceSize args, void *argp) {
-    (void)args; (void)argp;
-
-    while (s_loader_run) {
-        /* Memory barrier: ensure we see the latest s_active_cs write. */
-        __sync_synchronize();
-
-        CarouselState *cs = (CarouselState *)s_active_cs;
-        if (!cs || cs->total <= 0) {
-            /* No active carousel — sleep to avoid busy-wait. */
-            sceKernelDelayThread(16000); /* 16 ms */
-            continue;
-        }
-
-        /*
-         * Scan the window from centre outward (dist 0 first) looking for
-         * a slot in PENDING state.  Load at most 1 PNG per iteration so the
-         * main thread is not blocked for more than one decode cycle.
-         */
-        int loaded_any = 0;
-
-        /* Snapshot current_idx once before scanning — avoids reading a value
-        * that the main thread may modify mid-loop (carousel_navigate). */
-        __sync_synchronize();
-        int cur = cs->current_idx;
-
-        for (int dist = 0; dist <= CAROUSEL_CACHE_RADIUS && !loaded_any; dist++) {
-            for (int sign = 1; sign >= -1 && !loaded_any; sign -= 2) {
-                int target_inf = cur + dist * sign;
-                int s          = slot_for(target_inf);
-
-                /* ---- Check state under mutex ---- */
-                sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
-                int is_our_slot = (cs->cache[s].inf_idx == target_inf &&
-                                   cs->cache[s].state   == CACHE_SLOT_PENDING);
-                sceKernelUnlockLwMutex(&s_cache_mutex, 1);
-
-                if (!is_our_slot) {
-                    if (dist == 0) break; /* dist==0: only one sign needed */
-                    continue;
-                }
-
-                /* ---- Resolve physical index (wrap + optional map) ---- */
-                int logical  = wrap_idx(target_inf, cs->total);
-                int physical = cs->index_map ? cs->index_map[logical] : logical;
-
-                char path[256];
-                build_icon_path(path, sizeof(path), physical);
-
-                /* ---- Load PNG (I/O outside the mutex) ---- */
-                Texture *tex = texture_load_png(path);
-
-                /* ---- Write result under mutex; validate slot is still ours ---- */
-                sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
-                if (cs->cache[s].inf_idx == target_inf &&
-                    cs->cache[s].state   == CACHE_SLOT_PENDING) {
-                    cs->cache[s].tex   = tex;
-                    cs->cache[s].state = CACHE_SLOT_LOADED;
-                } else {
-                    /* Slot was reassigned while we were loading — discard. */
-                    if (tex) texture_free(tex);
-                }
-                sceKernelUnlockLwMutex(&s_cache_mutex, 1);
-
-                loaded_any = 1;
-
-                if (dist == 0) break; /* dist==0: sign loop is irrelevant */
+        if (worker_enqueue_load_icon(cs, s, gi, path) == 0) {
+            sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
+            if (cs->cache[s].inf_idx == gi && cs->cache[s].state == CACHE_SLOT_PENDING) {
+                cs->cache[s].state = CACHE_SLOT_QUEUED;
             }
+            sceKernelUnlockLwMutex(&s_cache_mutex, 1);
         }
-
-        /* Yield between loads to keep the UI responsive. */
-        sceKernelDelayThread(loaded_any ? 2000 : 16000); /* 2 ms / 16 ms */
     }
-
-    return 0;
 }
 
 /* -----------------------------------------------------------------------
@@ -312,8 +216,6 @@ void carousel_init(CarouselState *cs, int total_games, const int *index_map) {
         int res = sceKernelCreateLwMutex(&s_cache_mutex, "carousel_cache", 0, 0, NULL);
         if (res == 0) {
             s_mutex_init = 1;
-        } else {
-            s_sync_mode = 1;
         }
     }
 
@@ -324,11 +226,7 @@ void carousel_init(CarouselState *cs, int total_games, const int *index_map) {
      */
     if (s_mutex_init) sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
 
-    /* Disconnect loader from this state temporarily while we wipe it. */
-    if (s_active_cs == cs) {
-        s_active_cs = NULL;
-        __sync_synchronize();
-    }
+    /* (Removed loader disconnect logic as the new worker checks slot pending state) */
 
     /* Free any previous content to avoid memory leaks. */
     for (int s = 0; s < CAROUSEL_CACHE_SIZE; s++) {
@@ -352,51 +250,11 @@ void carousel_init(CarouselState *cs, int total_games, const int *index_map) {
 
     if (s_mutex_init) sceKernelUnlockLwMutex(&s_cache_mutex, 1);
 
-    /* -------- Register active carousel (barrier before the write) ----- */
-    __sync_synchronize();
-    s_active_cs = cs;
-    __sync_synchronize();
-
-    /* -------- Spin up the loader thread if not already running -------- */
-    if (!s_sync_mode && s_loader_thid < 0) {
-        s_loader_run  = 1;
-        int stack = (is_psp_1000()) ? 0x6000 : 0x8000;
-        s_loader_thid = sceKernelCreateThread(
-            "CarouselLoader",
-            carousel_loader_thread,
-            0x13,   /* Priority 19: lower than main loop, avoids UI starvation */
-            stack, /* 24 KB stack for PSP 1000, 32 KB for others */
-            0, NULL
-        );
-
-        if (s_loader_thid >= 0) {
-            sceKernelStartThread(s_loader_thid, 0, NULL);
-            sceKernelDelayThread(1000);
-        } else {
-            s_loader_thid = -1;
-            s_loader_run  = 0;
-            s_sync_mode   = 1;
-        }
-    }
-
     /* Populate the initial window. */
     if (total_games > 0) cache_sync(cs);
 }
 
 void carousel_destroy(CarouselState *cs) {
-    /* -------- Tell the loader thread to stop -------- */
-    s_loader_run = 0;
-    __sync_synchronize();
-    s_active_cs = NULL;
-    __sync_synchronize();
-
-    /* -------- Wait for the thread to exit, then clean up ------------- */
-    if (s_loader_thid >= 0) {
-        sceKernelWaitThreadEnd(s_loader_thid, NULL);
-        sceKernelDeleteThread(s_loader_thid);
-        s_loader_thid = -1;
-    }
-
     /* -------- Free all cached textures (no other thread running now) -- */
     for (int s = 0; s < CAROUSEL_CACHE_SIZE; s++) {
         if (cs->cache[s].tex) {
@@ -413,9 +271,6 @@ void carousel_destroy(CarouselState *cs) {
         sceKernelDeleteLwMutex(&s_cache_mutex);
         s_mutex_init = 0;
     }
-
-    /* Reset sync mode so the next init can try to create a thread again. */
-    s_sync_mode = 0;
 }
 
 void carousel_update(CarouselState *cs, u32 buttons, u32 pressed) {
@@ -463,49 +318,36 @@ void carousel_update(CarouselState *cs, u32 buttons, u32 pressed) {
     }
 
     /* ----------------------------------------------------------------
-     * Synchronous fallback: load at most 1 pending PNG per frame from
-     * the main thread when the loader thread is unavailable.
+     * Enqueue fallback: if the queue was full when cache_sync ran,
+     * some slots might remain PENDING indefinitely. We retry here.
      * ---------------------------------------------------------------- */
-    if (s_sync_mode) {
-        int lo = cs->current_idx - CAROUSEL_CACHE_RADIUS;
-        int hi = cs->current_idx + CAROUSEL_CACHE_RADIUS;
+    int lo = cs->current_idx - CAROUSEL_CACHE_RADIUS;
+    int hi = cs->current_idx + CAROUSEL_CACHE_RADIUS;
 
-        for (int gi = lo; gi <= hi; gi++) {
-            int s = slot_for(gi);
+    for (int gi = lo; gi <= hi; gi++) {
+        int s = slot_for(gi);
+        int needs_enqueue = 0;
 
-            /* Check under mutex to avoid tearing (even in sync mode a
-             * previous frame may have started filling this slot). */
-            if (s_mutex_init) sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
+        if (s_mutex_init) sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
+        if (cs->cache[s].inf_idx == gi && cs->cache[s].state == CACHE_SLOT_PENDING) {
+            needs_enqueue = 1;
+        }
+        if (s_mutex_init) sceKernelUnlockLwMutex(&s_cache_mutex, 1);
 
-            int needs_load = (cs->cache[s].inf_idx == gi &&
-                              cs->cache[s].state   == CACHE_SLOT_PENDING);
-
-            if (s_mutex_init) sceKernelUnlockLwMutex(&s_cache_mutex, 1);
-
-            if (!needs_load) continue;
-
-            /* Resolve physical index using wrap and optional map. */
+        if (needs_enqueue) {
             int logical  = wrap_idx(gi, cs->total);
             int physical = cs->index_map ? cs->index_map[logical] : logical;
-
             char path[256];
             build_icon_path(path, sizeof(path), physical);
-
-            Texture *tex = texture_load_png(path);
-
-            /* Write result under mutex. */
-            if (s_mutex_init) sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
-            if (cs->cache[s].inf_idx == gi &&
-                cs->cache[s].state   == CACHE_SLOT_PENDING) {
-                cs->cache[s].tex   = tex;
-                cs->cache[s].state = CACHE_SLOT_LOADED;
-            } else {
-                if (tex) texture_free(tex);
+            
+            if (worker_enqueue_load_icon(cs, s, gi, path) == 0) {
+                if (s_mutex_init) sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
+                if (cs->cache[s].inf_idx == gi && cs->cache[s].state == CACHE_SLOT_PENDING) {
+                    cs->cache[s].state = CACHE_SLOT_QUEUED;
+                }
+                if (s_mutex_init) sceKernelUnlockLwMutex(&s_cache_mutex, 1);
             }
-            if (s_mutex_init) sceKernelUnlockLwMutex(&s_cache_mutex, 1);
-
-            /* Load only 1 PNG per frame to keep the UI from freezing. */
-            break;
+            break; /* Load at most 1 PNG per frame to keep the UI from freezing */
         }
     }
 }
@@ -582,4 +424,32 @@ int carousel_count_days_active(const SessionEntry *sessions, int count,
     }
 #undef MAX_TRACKED_DAYS
     return unique;
+}
+
+int carousel_is_slot_pending(CarouselState *cs, int slot_idx, int inf_idx) {
+    if (!s_mutex_init) return 0;
+    int pending = 0;
+    sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
+    if (cs->cache[slot_idx].inf_idx == inf_idx && 
+        (cs->cache[slot_idx].state == CACHE_SLOT_PENDING || cs->cache[slot_idx].state == CACHE_SLOT_QUEUED)) {
+        pending = 1;
+    }
+    sceKernelUnlockLwMutex(&s_cache_mutex, 1);
+    return pending;
+}
+
+void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx, Texture *tex) {
+    if (!s_mutex_init) {
+        if (tex) texture_free(tex);
+        return;
+    }
+    sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
+    if (cs->cache[slot_idx].inf_idx == inf_idx && 
+        (cs->cache[slot_idx].state == CACHE_SLOT_PENDING || cs->cache[slot_idx].state == CACHE_SLOT_QUEUED)) {
+        cs->cache[slot_idx].tex = tex;
+        cs->cache[slot_idx].state = CACHE_SLOT_LOADED;
+    } else {
+        if (tex) texture_free(tex);
+    }
+    sceKernelUnlockLwMutex(&s_cache_mutex, 1);
 }

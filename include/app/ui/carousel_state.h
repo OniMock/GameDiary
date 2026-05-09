@@ -65,6 +65,7 @@
 typedef enum {
     CACHE_SLOT_EMPTY = 0,
     CACHE_SLOT_PENDING,
+    CACHE_SLOT_QUEUED,
     CACHE_SLOT_LOADED
 } CacheSlotState;
 
@@ -183,5 +184,17 @@ int carousel_is_settled(const CarouselState *cs);
  */
 int carousel_count_days_active(const SessionEntry *sessions, int count,
                                u32 game_uid);
+
+/**
+ * @brief Checks if a specific cache slot is still pending for a given index.
+ * Used by the Worker Thread to abort stale loads.
+ */
+int carousel_is_slot_pending(CarouselState *cs, int slot_idx, int inf_idx);
+
+/**
+ * @brief Applies a loaded texture to a cache slot, or frees it if the slot was reassigned.
+ * Used by the Worker Thread.
+ */
+void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx, Texture *tex);
 
 #endif /* GAMEDIARY_CAROUSEL_STATE_H */

@@ -140,6 +140,7 @@ static void language_select_update(u32 buttons, u32 pressed) {
         // Step 1: Perform the work on the first frame after show
         if (s_target_lang != -1 && elapsed > 16) {
             i18n_switch_language(s_target_lang);
+            i18n_reload_font();
             config_get()->language = s_target_lang;
             config_save();
             s_target_lang = -1; // Work done
