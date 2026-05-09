@@ -115,7 +115,8 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_MAIN_MENU]      = "Main navigation menu. Quickly access games, stats, activity, or settings.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Choose the interface language. Changes are applied instantly.",
     [MSG_HELP_DESC_ABOUT]          = "Information about the application, version, and development credits.",
-    [MSG_HELP_DESC_SUPPORT]        = "How to support the developer and help the project.",
+    [MSG_HELP_DESC_SUPPORT]        = "Support the developer via QR Code or crypto wallet.",
+    [MSG_HELP_DESC_BACKUP]         = "Export or import your data for backup in JSON format.",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Close",
 
     [MSG_ABOUT_TITLE]              = "About %s",
@@ -138,5 +139,15 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "Site",
 
     [MSG_SETTINGS_THEME]           = "Theme",
+    [MSG_SETTINGS_BACKUP]          = "Backup",
+
+    [MSG_BACKUP_EXPORT]            = "Export",
+    [MSG_BACKUP_IMPORT]            = "Import",
+    [MSG_BACKUP_EXPORT_OK]         = "Data exported successfully!",
+    [MSG_BACKUP_IMPORT_WARN]       = "Importing will overwrite all current data.\nDo you want to continue?",
+    [MSG_BACKUP_IMPORT_OK]         = "Data imported successfully!",
+    [MSG_BACKUP_ERROR]             = "An error occurred during operation.",
+    [MSG_BACKUP_NOT_FOUND]         = "File backup.json not found.",
     [MSG_LOADING]                  = "Loading...",
+    [MSG_WARNING]                  = "WARNING",
 };

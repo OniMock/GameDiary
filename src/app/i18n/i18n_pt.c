@@ -116,7 +116,8 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_MAIN_MENU]      = "Menu principal de navegação. Acesse rapidamente sua lista de jogos, estatísticas detalhadas, registro de atividades ou configurações do sistema.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Escolha o idioma desejado para toda a interface do GameDiary. As alterações são aplicadas instantaneamente em todos os menus e telas.",
     [MSG_HELP_DESC_ABOUT]          = "Informações sobre o aplicativo, versão e créditos de desenvolvimento.",
-    [MSG_HELP_DESC_SUPPORT]        = "Como apoiar o desenvolvedor e ajudar o projeto.",
+    [MSG_HELP_DESC_SUPPORT]        = "Apoie o desenvolvedor via QR Code ou carteira cripto.",
+    [MSG_HELP_DESC_BACKUP]         = "Exporte ou importe seus dados para backup em formato JSON.",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Fechar",
 
     [MSG_ABOUT_TITLE]              = "Sobre o %s",
@@ -139,5 +140,15 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "Site",
 
     [MSG_SETTINGS_THEME]           = "Tema",
+    [MSG_SETTINGS_BACKUP]          = "Backup",
+
+    [MSG_BACKUP_EXPORT]            = "Exportar",
+    [MSG_BACKUP_IMPORT]            = "Importar",
+    [MSG_BACKUP_EXPORT_OK]         = "Dados exportados com sucesso!",
+    [MSG_BACKUP_IMPORT_WARN]       = "A importação irá substituir todos os dados\natuais. Deseja continuar?",
+    [MSG_BACKUP_IMPORT_OK]         = "Dados importados com sucesso!",
+    [MSG_BACKUP_ERROR]             = "Ocorreu um erro durante a operação.",
+    [MSG_BACKUP_NOT_FOUND]         = "Arquivo backup.json não encontrado.",
     [MSG_LOADING]                  = "Carregando...",
+    [MSG_WARNING]                  = "ATENÇÃO",
 };

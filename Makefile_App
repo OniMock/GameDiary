@@ -14,8 +14,9 @@ endif
 # -----------------------------------------------------------------------
 APP_SRCS := $(shell find src/app -name "*.c" -o -name "*.cpp")
 COMMON_SRCS := $(shell find src/common -name "*.c" -o -name "*.cpp")
+LIB_SRCS := lib/cJSON/cJSON.c
 
-SRCS := $(APP_SRCS) $(COMMON_SRCS)
+SRCS := $(APP_SRCS) $(COMMON_SRCS) $(LIB_SRCS)
 
 # Build in a separate directory to avoid collisions with the plugin objects
 OBJDIR = obj/app

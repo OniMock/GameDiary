@@ -140,5 +140,16 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "Сайт",
 
     [MSG_SETTINGS_THEME]           = "Тема",
+    [MSG_HELP_DESC_BACKUP]         = "Экспортируйте или импортируйте данные в формате JSON.",
+    [MSG_SETTINGS_BACKUP]          = "Резервная копия",
+
+    [MSG_BACKUP_EXPORT]            = "Экспорт",
+    [MSG_BACKUP_IMPORT]            = "Импорт",
+    [MSG_BACKUP_EXPORT_OK]         = "Данные успешно экспортированы!",
+    [MSG_BACKUP_IMPORT_WARN]       = "Импорт заменит все текущие\nданные. Продолжить?",
+    [MSG_BACKUP_IMPORT_OK]         = "Данные успешно импортированы!",
+    [MSG_BACKUP_ERROR]             = "Во время операции произошла ошибка.",
+    [MSG_BACKUP_NOT_FOUND]         = "Файл backup.json не найден.",
     [MSG_LOADING]                  = "Загрузка...",
+    [MSG_WARNING]                  = "ВНИМАНИЕ",
 };

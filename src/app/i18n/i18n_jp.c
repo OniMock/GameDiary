@@ -143,5 +143,17 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "サイト",
 
     [MSG_SETTINGS_THEME]           = "テーマ",
-    [MSG_LOADING]                  = "読み込み中…",
+
+    [MSG_HELP_DESC_BACKUP]         = "JSON形式でデータをバックアップとしてエクスポートまたはインポートします。",
+    [MSG_SETTINGS_BACKUP]          = "バックアップ",
+
+    [MSG_BACKUP_EXPORT]            = "エクスポート",
+    [MSG_BACKUP_IMPORT]            = "インポート",
+    [MSG_BACKUP_EXPORT_OK]         = "データのエクスポートに成功しました！",
+    [MSG_BACKUP_IMPORT_WARN]       = "インポートすると現在のすべてのデータが\n上書きされます。続行しますか？",
+    [MSG_BACKUP_IMPORT_OK]         = "データのインポートに成功しました！",
+    [MSG_BACKUP_ERROR]             = "操作中にエラーが発生しました。",
+    [MSG_BACKUP_NOT_FOUND]         = "backup.json ファイルが見つかりません。",
+    [MSG_LOADING]                  = "読み込み中...",
+    [MSG_WARNING]                  = "警告",
 };

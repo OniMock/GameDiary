@@ -140,5 +140,17 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "Sitio",
 
     [MSG_SETTINGS_THEME]           = "Tema",
+
+    [MSG_HELP_DESC_BACKUP]         = "Exporta o importa tus datos como respaldo en formato JSON.",
+    [MSG_SETTINGS_BACKUP]          = "Respaldo",
+
+    [MSG_BACKUP_EXPORT]            = "Exportar",
+    [MSG_BACKUP_IMPORT]            = "Importar",
+    [MSG_BACKUP_EXPORT_OK]         = "¡Datos exportados correctamente!",
+    [MSG_BACKUP_IMPORT_WARN]       = "La importación reemplazará todos los datos\nactuales. ¿Deseas continuar?",
+    [MSG_BACKUP_IMPORT_OK]         = "¡Datos importados correctamente!",
+    [MSG_BACKUP_ERROR]             = "Ocurrió un error durante la operación.",
+    [MSG_BACKUP_NOT_FOUND]         = "No se encontró el archivo backup.json.",
     [MSG_LOADING]                  = "Cargando...",
+    [MSG_WARNING]                  = "ADVERTENCIA",
 };

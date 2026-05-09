@@ -17,6 +17,7 @@
 #include "common/db_schema.h"
 #include <psptypes.h>
 #include "app/render/image_resources.h"
+#include "app/ui/screen.h"
 
 
 typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT } UIAlign;
@@ -63,6 +64,15 @@ void ui_draw_title_auto(const char *text, Rect r, const ImageResource *icon);
  * Draws the specialized bipartide application header (Logo + Split Title).
  * Used exclusively on the home/main menu.
  */
+extern Screen g_screen_main_menu;
+extern Screen g_screen_game_details;
+extern Screen g_screen_stats;
+extern Screen g_screen_language_select;
+extern Screen g_screen_settings;
+extern Screen g_screen_backup;
+extern Screen g_screen_info;
+extern Screen g_screen_activity;
+
 void ui_draw_app_header(Rect r);
 
 /**

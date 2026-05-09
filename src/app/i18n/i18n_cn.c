@@ -145,4 +145,15 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
 
     [MSG_SETTINGS_THEME]           = "主题",
     [MSG_LOADING]                  = "加载中…",
+
+    [MSG_HELP_DESC_BACKUP]         = "以 JSON 格式导出或导入您的数据备份。",
+    [MSG_SETTINGS_BACKUP]          = "备份",
+    [MSG_BACKUP_EXPORT]            = "导出",
+    [MSG_BACKUP_IMPORT]            = "导入",
+    [MSG_BACKUP_EXPORT_OK]         = "数据导出成功！",
+    [MSG_BACKUP_IMPORT_WARN]       = "导入将覆盖当前所有数据。\n是否继续？",
+    [MSG_BACKUP_IMPORT_OK]         = "数据导入成功！",
+    [MSG_BACKUP_ERROR]             = "操作期间发生错误。",
+    [MSG_BACKUP_NOT_FOUND]         = "未找到 backup.json 文件。",
+    [MSG_WARNING]                  = "警告",
 };
