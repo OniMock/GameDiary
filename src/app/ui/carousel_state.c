@@ -236,11 +236,17 @@ void carousel_init(CarouselState *cs, int total_games, const int *index_map) {
         }
     }
 
+    int prev_gen = cs->generation; // Preserve across memset
+
     memset(cs, 0, sizeof(*cs));
     cs->total       = total_games;
     cs->index_map   = index_map;
     cs->current_idx = 0;
     cs->anim_offset = 0.0f;
+    /* Bump the generation so any tasks enqueued before this re-init
+     * will be treated as stale and discarded by carousel_apply_loaded_icon.
+     * This is the key fix for the rapid filter-change icon bug. */
+    cs->generation  = prev_gen + 1;
 
     /* Initialise all cache slots to the empty sentinel. */
     for (int s = 0; s < CAROUSEL_CACHE_SIZE; s++) {
@@ -438,14 +444,22 @@ int carousel_is_slot_pending(CarouselState *cs, int slot_idx, int inf_idx) {
     return pending;
 }
 
-void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx, Texture *tex) {
+void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx,
+                                int generation, Texture *tex) {
     if (!s_mutex_init) {
         if (tex) texture_free(tex);
         return;
     }
     sceKernelLockLwMutex(&s_cache_mutex, 1, NULL);
-    if (cs->cache[slot_idx].inf_idx == inf_idx && 
-        (cs->cache[slot_idx].state == CACHE_SLOT_PENDING || cs->cache[slot_idx].state == CACHE_SLOT_QUEUED)) {
+    /* Validate three conditions before committing:
+     *  1. Slot still belongs to this inf_idx (not reassigned by navigation).
+     *  2. Slot is still in a loading state (not already evicted).
+     *  3. Generation matches (carousel was not re-inited by a filter change).
+     * Any mismatch means this result is stale — free the texture and discard. */
+    if (cs->cache[slot_idx].inf_idx == inf_idx &&
+        cs->generation == generation &&
+        (cs->cache[slot_idx].state == CACHE_SLOT_PENDING ||
+         cs->cache[slot_idx].state == CACHE_SLOT_QUEUED)) {
         cs->cache[slot_idx].tex = tex;
         cs->cache[slot_idx].state = CACHE_SLOT_LOADED;
     } else {

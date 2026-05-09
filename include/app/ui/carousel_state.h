@@ -104,6 +104,14 @@ typedef struct {
      * Maps logical carousel index [0, total) to physical game index.
      * NULL means 1:1 mapping: physical == logical. */
     const int *index_map;
+
+    /* --- Generation counter ---
+     * Incremented on every carousel_init() (i.e., every filter change).
+     * Worker tasks carry the generation at enqueue time; apply is a no-op
+     * if the carousel has since been re-initialised (generation mismatch).
+     * This atomically invalidates ALL pending tasks without draining the queue.
+     */
+    int generation;
 } CarouselState;
 
 /* -----------------------------------------------------------------------
@@ -192,9 +200,11 @@ int carousel_count_days_active(const SessionEntry *sessions, int count,
 int carousel_is_slot_pending(CarouselState *cs, int slot_idx, int inf_idx);
 
 /**
- * @brief Applies a loaded texture to a cache slot, or frees it if the slot was reassigned.
+ * @brief Applies a loaded texture to a cache slot, or frees it if the slot was
+ * reassigned or the carousel generation has advanced (filter changed rapidly).
  * Used by the Worker Thread.
  */
-void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx, Texture *tex);
+void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx,
+                                int generation, Texture *tex);
 
 #endif /* GAMEDIARY_CAROUSEL_STATE_H */

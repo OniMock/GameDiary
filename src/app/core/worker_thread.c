@@ -30,6 +30,7 @@ typedef struct {
     CarouselState *cs;
     int slot_idx;
     int inf_idx;
+    int generation; /* Snapshot of cs->generation at enqueue time. */
     char path[128];
 } TaskDataLoadIcon;
 
@@ -55,14 +56,17 @@ static volatile int s_run_worker = 0;
  * This keeps the worker thread decoupled from subsystem internal state. */
 extern int config_write_file(const AppConfig* cfg);
 extern int carousel_is_slot_pending(CarouselState *cs, int slot_idx, int inf_idx);
-extern void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx, Texture *tex);
+extern void carousel_apply_loaded_icon(CarouselState *cs, int slot_idx, int inf_idx,
+                                       int generation, Texture *tex);
 
 static void handle_save_config(const TaskDataSaveConfig *data) {
     config_write_file(&data->config);
 }
 
 static void handle_load_icon(const TaskDataLoadIcon *data) {
-    /* 1. Check if the slot is still pending before doing expensive I/O */
+    /* 1. Check if the slot is still pending before doing expensive I/O.
+     *    This is a fast pre-check; carousel_apply_loaded_icon re-validates
+     *    under the mutex with full generation checking. */
     if (!carousel_is_slot_pending(data->cs, data->slot_idx, data->inf_idx)) {
         return; // Slot was reassigned or evicted, skip loading.
     }
@@ -70,8 +74,10 @@ static void handle_load_icon(const TaskDataLoadIcon *data) {
     /* 2. Load the PNG */
     Texture *tex = texture_load_png(data->path);
 
-    /* 3. Apply the texture. The carousel will double check if the slot is still ours. */
-    carousel_apply_loaded_icon(data->cs, data->slot_idx, data->inf_idx, tex);
+    /* 3. Apply the texture. The carousel will double-check generation and
+     *    slot ownership under the mutex before committing the texture. */
+    carousel_apply_loaded_icon(data->cs, data->slot_idx, data->inf_idx,
+                               data->generation, tex);
 }
 
 static int worker_thread_main(SceSize args, void *argp) {
@@ -196,10 +202,13 @@ int worker_enqueue_load_icon(CarouselState *cs, int slot_idx, int inf_idx, const
     task.data.load_icon.cs = cs;
     task.data.load_icon.slot_idx = slot_idx;
     task.data.load_icon.inf_idx = inf_idx;
-    
+    /* Snapshot the current generation so this task can self-invalidate if
+     * the carousel is re-initialised (filter change) before the PNG loads. */
+    task.data.load_icon.generation = cs->generation;
+
     /* Safely copy path */
     strncpy(task.data.load_icon.path, path, sizeof(task.data.load_icon.path) - 1);
     task.data.load_icon.path[sizeof(task.data.load_icon.path) - 1] = '\0';
-    
+
     return enqueue_task(&task);
 }
