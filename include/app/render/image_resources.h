@@ -76,5 +76,7 @@ extern const ImageResource GD_IMG_ICON_SUPPORT_32_PNG;
 extern const ImageResource GD_IMG_ICON_THEME_32_PNG;
 extern const ImageResource GD_IMG_QR_COFFEE_128_PNG;
 extern const ImageResource GD_IMG_QR_WALLET_128_PNG;
+extern const ImageResource GD_IMG_TOGGLE_KNOB_PNG;
+extern const ImageResource GD_IMG_TOGGLE_TRACK_PNG;
 
 #endif // GAMEDIARY_IMAGE_RESOURCES_H

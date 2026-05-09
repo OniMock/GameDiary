@@ -645,74 +645,62 @@ void ui_draw_nav_indicators(int y, bool show_left, bool show_right, bool animate
     }
 }
 
-static void ui_draw_circle_filled(float cx, float cy, float r, uint32_t color) {
-    int segments = 16;
-    struct VertexColor {
-        uint32_t color;
-        float x, y, z;
-    };
-    int vertex_count = segments + 2;
-    struct VertexColor *vertices = (struct VertexColor*)sceGuGetMemory(vertex_count * sizeof(struct VertexColor));
-    if (!vertices) return;
-    
-    vertices[0].color = color;
-    vertices[0].x = cx;
-    vertices[0].y = cy;
-    vertices[0].z = 0.0f;
-    
-    for (int i = 0; i <= segments; i++) {
-        float angle = (i * 2.0f * 3.14159265f) / segments;
-        vertices[i+1].color = color;
-        vertices[i+1].x = cx + cosf(angle) * r;
-        vertices[i+1].y = cy + sinf(angle) * r;
-        vertices[i+1].z = 0.0f;
-    }
-    
-    sceGuDisable(GU_TEXTURE_2D);
-    sceGuEnable(GU_BLEND);
-    sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-    sceGuDisable(GU_DEPTH_TEST);
-    
-    sceKernelDcacheWritebackRange(vertices, vertex_count * sizeof(struct VertexColor));
-    sceGuDrawArray(GU_TRIANGLE_FAN, GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, vertex_count, 0, vertices);
-    
-    sceGuEnable(GU_TEXTURE_2D);
-}
-
 void ui_draw_toggle_switch(int x, int center_y, bool state, float *anim_progress) {
     if (!anim_progress) return;
-    
+
+    /* Lerp the animation progress toward the target (0 = OFF, 1 = ON). */
     float target = state ? 1.0f : 0.0f;
     *anim_progress += (target - *anim_progress) * 0.20f;
     if (fabsf(*anim_progress - target) < 0.01f) {
         *anim_progress = target;
     }
-    
-    int width = 36;
-    int height = 20;
-    int radius = height / 2; // 10
+
+    /* Track dimensions (matches the PNG canvas dimensions at screen scale). */
+    int width  = 36; /* Track width on screen  */
+    int height = 20; /* Track height on screen */
+    int radius = height / 2; /* 10 px — half height, matches pill corners */
+
     int track_x = x - width;
     int track_y = center_y - radius;
-    
-    u32 off_col = COLOR_SUBTEXT2; // Darker gray that contrasts with highlights
-    u32 on_col = COLOR_ACCENT;    // Accent color
-    
-    u8 r_off = off_col & 0xFF, g_off = (off_col >> 8) & 0xFF, b_off = (off_col >> 16) & 0xFF, a_off = off_col >> 24;
-    u8 r_on = on_col & 0xFF, g_on = (on_col >> 8) & 0xFF, b_on = (on_col >> 16) & 0xFF, a_on = on_col >> 24;
-    
-    u8 r = r_off + (u8)((r_on - r_off) * (*anim_progress));
-    u8 g = g_off + (u8)((g_on - g_off) * (*anim_progress));
-    u8 b = b_off + (u8)((b_on - b_off) * (*anim_progress));
-    u8 a = a_off + (u8)((a_on - a_off) * (*anim_progress));
-    
-    u32 track_col = r | (g << 8) | (b << 16) | ((u32)a << 24);
-    
-    ui_draw_circle_filled(track_x + radius, center_y, radius, track_col);
-    ui_draw_circle_filled(track_x + width - radius, center_y, radius, track_col);
-    renderer_draw_rect(track_x + radius, track_y, width - 2 * radius, height, track_col);
-    
-    float knob_x = track_x + radius + (width - 2 * radius) * (*anim_progress);
-    int knob_radius = radius - 2; // 8
-    
-    ui_draw_circle_filled(knob_x, center_y, knob_radius, 0xFFFFFFFF);
+
+    /* --- Color interpolation for the track tint (OFF → ON) --- */
+    u32 off_col = COLOR_SUBTEXT2;
+    u32 on_col  = COLOR_ACCENT;
+
+    u8 r_off = (u8)(off_col & 0xFF);
+    u8 g_off = (u8)((off_col >> 8) & 0xFF);
+    u8 b_off = (u8)((off_col >> 16) & 0xFF);
+    u8 a_off = (u8)(off_col >> 24);
+
+    u8 r_on = (u8)(on_col & 0xFF);
+    u8 g_on = (u8)((on_col >> 8) & 0xFF);
+    u8 b_on = (u8)((on_col >> 16) & 0xFF);
+    u8 a_on = (u8)(on_col >> 24);
+
+    float p = *anim_progress;
+    u8 rc = r_off + (u8)((int)(r_on - r_off) * p);
+    u8 gc = g_off + (u8)((int)(g_on - g_off) * p);
+    u8 bc = b_off + (u8)((int)(b_on - b_off) * p);
+    u8 ac = a_off + (u8)((int)(a_on - a_off) * p);
+    u32 track_col = (u32)rc | ((u32)gc << 8) | ((u32)bc << 16) | ((u32)ac << 24);
+
+    /* --- Draw track using the PNG asset, tinted to the interpolated color.
+     *     sceGuColor multiplies the texture RGBA by the GU color, so a
+     *     white-on-transparent PNG gives us pure tinting at zero extra cost. --- */
+    sceGuColor(track_col);
+    texture_draw_resource(&GD_IMG_TOGGLE_TRACK_PNG, track_x, track_y, width, height);
+
+    /* --- Draw knob (circle) using the PNG asset, always pure white.
+     *     knob_d = 14 px (smaller than track height 20 px → 3 px inset top/bottom).
+     *     Travel is inset by 3 px on each side so the knob never clips the pill edge. --- */
+    int knob_d  = 14;
+    int margin  = 3; /* px inset from each cap edge */
+    float knob_cx = (float)(track_x + margin + knob_d / 2)
+                  + (float)(width - 2 * margin - knob_d) * p;
+    int knob_x = (int)(knob_cx - knob_d / 2);
+    int knob_y = center_y - knob_d / 2;
+
+    sceGuColor(0xFFFFFFFF); /* White: knob is always white regardless of theme */
+    texture_draw_resource(&GD_IMG_TOGGLE_KNOB_PNG, knob_x, knob_y, knob_d, knob_d);
 }
+
