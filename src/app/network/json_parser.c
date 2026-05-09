@@ -48,6 +48,7 @@ int json_parse_version_info(const char* json_buf, NetworkVersionInfo* out_info) 
         return -1;
     }
 
+    extract_string(json_buf, "codename", out_info->codename, sizeof(out_info->codename));
     extract_string(json_buf, "release_date", out_info->release_date, sizeof(out_info->release_date));
     extract_string(json_buf, "url", out_info->url, sizeof(out_info->url));
     

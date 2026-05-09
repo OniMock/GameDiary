@@ -83,6 +83,14 @@ void renderer_init(void) {
 
 void renderer_start_frame(void) {
     sceGuStart(GU_DIRECT, list);
+    
+    // Reset state to a known clean baseline for each frame
+    sceGuColor(0xFFFFFFFF);
+    sceGuEnable(GU_TEXTURE_2D);
+    sceGuEnable(GU_BLEND);
+    sceGuDisable(GU_ALPHA_TEST);
+    sceGuDisable(GU_DEPTH_TEST);
+    
     // Explicitly set the current draw buffer for the GU
     sceGuDrawBuffer(GU_PSM_8888, g_draw_buffer, BUF_WIDTH);
 }

@@ -138,6 +138,7 @@ const char* g_lang_it_entries[MSG_COUNT] = {
     [MSG_INFO_VERSION_ERROR]       = "Impossibile controllare la versione",
     [MSG_INFO_VERSION_CONN_ERROR]  = "Connessione al server non riuscita",
     [MSG_INFO_VERSION_PARSE_ERROR] = "Risposta non valida (Versione mancante)",
+    [MSG_SITE_LABEL]               = "Sito",
 
     [MSG_SETTINGS_THEME]           = "Tema",
     [MSG_THEME_DARK]               = "Scuro",

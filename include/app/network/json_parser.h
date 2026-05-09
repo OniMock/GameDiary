@@ -20,6 +20,7 @@
 
 typedef struct {
     char version[32];
+    char codename[64];
     char release_date[32];
     char url[256];
     int mandatory;

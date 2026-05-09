@@ -161,8 +161,11 @@ jobs:
       - name: Get project version
         id: get_version
         run: |
-          VERSION=$(cat VERSION | tr -d ' \n')
+          VERSION=$(head -n 1 VERSION | tr -d ' \n')
+          CODENAME=$(sed -n '2p' VERSION | tr -d ' \n')
+          if [ -z "$CODENAME" ]; then CODENAME="Skyfall"; fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "codename=$CODENAME" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
 
       # -------------------------------------------------------
@@ -185,10 +188,11 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
+          CODENAME="${{ steps.get_version.outputs.codename }}"
           DATE=$(date +'%Y-%m-%d')
           URL="https://github.com/${{ github.repository }}/releases/download/v$VERSION/GameDiary.zip"
           
-          echo "{\"version\":\"$VERSION\",\"release_date\":\"$DATE\",\"url\":\"$URL\",\"mandatory\":false}" > version.json
+          echo "{\"version\":\"$VERSION\",\"codename\":\"$CODENAME\",\"release_date\":\"$DATE\",\"url\":\"$URL\",\"mandatory\":false}" > version.json
           
           mkdir -p deploy_out
           cp version.json deploy_out/
@@ -284,9 +288,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}
-          name: GameDiary ${{ steps.get_version.outputs.tag }}
+          name: GameDiary ${{ steps.get_version.outputs.tag }} - ${{ steps.get_version.outputs.codename }}
           body: |
-            ## 🎮 GameDiary PSP
+            ## 🎮 GameDiary PSP - ${{ steps.get_version.outputs.codename }}
 
             New version available.
 

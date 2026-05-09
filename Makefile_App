@@ -3,7 +3,11 @@ TARGET = GameDiaryApp
 APP_NAME := GameDiary
 
 
-PROJECT_VERSION := $(shell cat VERSION)
+PROJECT_VERSION  := $(shell head -n 1 VERSION)
+PROJECT_CODENAME := $(shell sed -n '2p' VERSION)
+ifeq ($(PROJECT_CODENAME),)
+PROJECT_CODENAME := Skyfall
+endif
 
 # -----------------------------------------------------------------------
 # Sources (AUTO — sem lista manual de .o)
@@ -38,6 +42,7 @@ CFLAGS = -O2 -Os -G0 -Wall -Wextra \
          -D_PSP_FW_VERSION=661 -DGDIARY_APP \
          -DAPP_TITLE=\"$(APP_NAME)\" \
          -DAPP_VERSION=\"$(PROJECT_VERSION)\" \
+         -DAPP_CODENAME=\"$(PROJECT_CODENAME)\" \
          -DSDK_VERSION=\"$(shell psp-gcc -dumpversion)\" \
          -DBUILD_YEAR=$(shell date +'%Y') \
          -DBUILD_MONTH=$(shell date +'%m' | sed 's/^0//') \

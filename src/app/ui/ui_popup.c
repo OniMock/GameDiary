@@ -60,7 +60,7 @@ void popup_open(const PopupData* data) {
     s_line_height = font_get_height(UI_FONT_SIZE_BODY) + 4.0f; // Size logic plus 4px gap
 
     // Box constraints
-    int text_box_w = 420; // 450 card - 30 padding
+    int text_box_w = 420; // 450 card - 30 padding (15 each side)
 
     for (int i = 0; i < data->line_count; i++) {
         const char* l = data->lines[i];
@@ -213,8 +213,8 @@ void popup_render(void) {
         int line_idx = s_scroll_offset + i;
         int render_y = text_area_y + (i * (int)s_line_height);
 
-        Rect t_rect = { x_origin + 15, render_y, popup_w - 30, (int)s_line_height };
-        ui_draw_text(s_wrapped_lines[line_idx], t_rect, body_color, UI_FONT_SIZE_BODY, ALIGN_LEFT);
+        Rect t_rect = { x_origin + 15, render_y, 420, (int)s_line_height };
+        ui_draw_text_auto_fit(s_wrapped_lines[line_idx], t_rect, body_color, UI_FONT_SIZE_BODY, ALIGN_LEFT);
     }
 
     // --- Scroll Indicators ---

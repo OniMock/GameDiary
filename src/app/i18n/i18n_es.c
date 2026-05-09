@@ -50,7 +50,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_DAY_SAT]              = "Sáb",
 
     // Format Time
-    [MSG_STATS_NO_ACTIVITY]    = "Sin actividad reciente",
+    [MSG_STATS_NO_ACTIVITY]    = "Sin actividad recente",
     [MSG_STATS_DAYS_ACTIVE]    = "Días activos",
     [MSG_STATS_NEVER]          = "Nunca",
     [MSG_DATE_FORMAT]          = "%d/%m/%Y",
@@ -113,12 +113,12 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_HELP_DESC_STATS]          = "Sigue tu tiempo de juego con gráficos. Cambia entre Semana, Mes, Meses y Años para ver qué juegos ocupan la mayor parte de tu tiempo.",
     [MSG_HELP_DESC_ACTIVITY]       = "Historial cronológico de tus sesiones recientes.",
     [MSG_HELP_DESC_SETTINGS]       = "Ajusta el idioma de la interfaz y otras preferencias globales.",
-    [MSG_HELP_DESC_INFO]           = "Información detallada sobre la aplicación, versión, créditos y soporte del proyecto.",
-    [MSG_HELP_DESC_DETAILS]        = "Información detallada sobre un juego específico. Consulta el historial completo de sesiones, la fecha de la primera y la última vez que jugaste, y el total de horas acumuladas. Además, visualiza gráficos por semana, mes, meses y año para entender mejor tu tiempo de juego.",
+    [MSG_HELP_DESC_INFO]           = "Información detallada sobre la aplicación, versão, créditos y soporte del proyecto.",
+    [MSG_HELP_DESC_DETAILS]        = "Información detallada sobre un juego específico. Consulta el historial completo de sesiones, la fecha de la primera y la última vez que jugaste, y el total de horas acumuladas. Além disso, visualiza gráficos por semana, mes, meses y año para entender mejor tu tiempo de juego.",
     [MSG_HELP_DESC_MAIN_MENU]      = "Menú principal para acceder a juegos, estadísticas y ajustes.",
     [MSG_HELP_DESC_LANG_SELECT]    = "Elige el idioma de la interfaz. Se aplica al instante.",
 
-    [MSG_HELP_DESC_ABOUT]          = "Información sobre la aplicación, versión y créditos de desarrollo.",
+    [MSG_HELP_DESC_ABOUT]          = "Información sobre la aplicación, versão y créditos de desarrollo.",
     [MSG_HELP_CLOSE_HINT]          = "[ X / O ]: Cerrar",
 
     [MSG_ABOUT_TITLE]              = "Acerca de %s",
@@ -129,7 +129,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_ABOUT_DATE]               = "Fecha",
     [MSG_ABOUT_DEVELOPER]          = "Desarrollado por OniMock",
     [MSG_HELP_DESC_SUPPORT]        = "Cómo apoyar al desarrollador y ayudar al proyecto.",
-    [MSG_SUPPORT_DESC]             = "Si te gusta mi trabajo y quieres ayudar a mantenerlo activo, considera hacer una donación. No es obligatorio, pero ayuda mucho al desarrollo del proyecto.",
+    [MSG_SUPPORT_DESC]             = "Si te gusta mi trabajo y quieres ayudar a mantenerlo activo, considera hacer una donación. No es obligatorio, mas ayuda mucho al desarrollo del proyecto.",
     [MSG_SUPPORT_COFFEE]           = "Buy Me A Coffee",
     [MSG_SUPPORT_WALLET]           = "Wallet EVM",
 
@@ -138,7 +138,8 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_INFO_VERSION_AVAILABLE]   = "Nueva versión disponible",
     [MSG_INFO_VERSION_ERROR]       = "No se pudo comprobar la versión",
     [MSG_INFO_VERSION_CONN_ERROR]  = "Error al conectar con el servidor",
-    [MSG_INFO_VERSION_PARSE_ERROR] = "Respuesta inválida (Falta la versión)",
+    [MSG_INFO_VERSION_PARSE_ERROR] = "Respuesta inválida (Falta la versão)",
+    [MSG_SITE_LABEL]               = "Sitio",
 
     [MSG_SETTINGS_THEME]           = "Tema",
     [MSG_THEME_DARK]               = "Oscuro",

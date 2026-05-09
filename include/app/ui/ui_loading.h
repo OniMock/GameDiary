@@ -43,6 +43,13 @@
 void ui_loading_show(const char *label);
 
 /**
+ * @brief Updates the loading popup label text while it is active.
+ *
+ * @param label  New text to show to the right of the spinner.
+ */
+void ui_loading_update_label(const char *label);
+
+/**
  * @brief Requests the loading popup to fade out and close.
  *
  * The popup will not disappear instantly — it fades out over a few frames.

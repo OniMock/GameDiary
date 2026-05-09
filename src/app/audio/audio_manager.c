@@ -147,7 +147,8 @@ void audio_init(void) {
     s_sema_mutex = sceKernelCreateSema("AudioMutex", 0, 1, 1, 0);
     
     s_run_audio = 1;
-    s_thread_id = sceKernelCreateThread("GameDiarySFX", audio_thread, 0x18, 0x1000, 0, 0);
+    // Priority 0x16 (22) is higher than Main Thread (0x18 / 24) to ensure deterministic audio playback
+    s_thread_id = sceKernelCreateThread("GameDiarySFX", audio_thread, 0x16, 0x1000, 0, 0);
     if (s_thread_id >= 0) {
         sceKernelStartThread(s_thread_id, 0, NULL);
     }

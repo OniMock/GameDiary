@@ -76,6 +76,15 @@ void ui_loading_show(const char *label) {
     }
 }
 
+void ui_loading_update_label(const char *label) {
+    if (label) {
+        strncpy(s_label, label, sizeof(s_label) - 1);
+        s_label[sizeof(s_label) - 1] = '\0';
+    } else {
+        s_label[0] = '\0';
+    }
+}
+
 void ui_loading_hide(void) {
     if (s_state == LOADING_STATE_VISIBLE || s_state == LOADING_STATE_FADE_IN) {
         s_state = LOADING_STATE_FADE_OUT;

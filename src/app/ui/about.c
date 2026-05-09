@@ -81,7 +81,7 @@ static void about_draw(void) {
     int content_y = safe_rect.y + 60;
     int content_w = safe_rect.w - 20;
 
-    int card2_w = 85;
+    int card2_w = 100;
     int gap = 10;
     int card1_w = content_w - card2_w - gap;
 
@@ -130,13 +130,17 @@ static void about_draw(void) {
     // Version
     ui_draw_text(i18n_get(MSG_ABOUT_VERSION), (Rect){ctx, cty, ctw, 14}, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
     cty += 14;
-    ui_draw_text(APP_VERSION, (Rect){ctx, cty, ctw, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
-    cty += 25;
+    ui_draw_text_auto_fit(APP_VERSION, (Rect){ctx, cty, ctw, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
+    cty += 20;
+
+    // Codename
+    ui_draw_text_auto_fit(APP_CODENAME, (Rect){ctx, cty, ctw, 14}, COLOR_ACCENT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
+    cty += 24;
 
     // SDK
     ui_draw_text(i18n_get(MSG_ABOUT_PSP_SDK), (Rect){ctx, cty, ctw, 14}, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
     cty += 14;
-    ui_draw_text(SDK_VERSION, (Rect){ctx, cty, ctw, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
+    ui_draw_text_auto_fit(SDK_VERSION, (Rect){ctx, cty, ctw, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
     cty += 25;
 
     // Date
@@ -148,7 +152,7 @@ static void about_draw(void) {
     b_tm.tm_mday = BUILD_DAY;
     char date_buf[32];
     strftime(date_buf, sizeof(date_buf), i18n_get(MSG_DATE_FORMAT), &b_tm);
-    ui_draw_text(date_buf, (Rect){ctx, cty, ctw, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
+    ui_draw_text_auto_fit(date_buf, (Rect){ctx, cty, ctw, 14}, COLOR_TEXT, UI_FONT_SIZE_SMALL, ALIGN_LEFT);
 
     ui_draw_standard_hints();
 }
