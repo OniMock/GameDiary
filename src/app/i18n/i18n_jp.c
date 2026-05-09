@@ -27,8 +27,6 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SETTINGS_ABOUT]       = "情報",
     [MSG_SETTINGS_SUPPORT]     = "サポート",
     [MSG_SETTINGS_SFX]         = "サウンド (SFX)",
-    [MSG_SFX_ON]               = "オン",
-    [MSG_SFX_OFF]              = "オフ",
     [MSG_TOP_WEEK]             = "週",
     [MSG_TOP_MONTH]            = "月",
     [MSG_TOP_YEAR]             = "年",
@@ -145,7 +143,5 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "サイト",
 
     [MSG_SETTINGS_THEME]           = "テーマ",
-    [MSG_THEME_DARK]               = "ダーク",
-    [MSG_THEME_LIGHT]              = "ライト",
     [MSG_LOADING]                  = "読み込み中…",
 };

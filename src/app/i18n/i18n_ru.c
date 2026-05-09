@@ -27,8 +27,6 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SETTINGS_ABOUT]       = "О программе",
     [MSG_SETTINGS_SUPPORT]     = "Поддержка",
     [MSG_SETTINGS_SFX]         = "Звук (SFX)",
-    [MSG_SFX_ON]               = "Вкл",
-    [MSG_SFX_OFF]              = "Выкл",
     [MSG_TOP_WEEK]             = "Неделя",
     [MSG_TOP_MONTH]            = "Месяц",
     [MSG_TOP_YEAR]             = "Год",
@@ -142,7 +140,5 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "Сайт",
 
     [MSG_SETTINGS_THEME]           = "Тема",
-    [MSG_THEME_DARK]               = "Темная",
-    [MSG_THEME_LIGHT]              = "Светлая",
     [MSG_LOADING]                  = "Загрузка...",
 };

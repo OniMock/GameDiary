@@ -27,8 +27,6 @@ const char* g_lang_fr_entries[MSG_COUNT] = {
     [MSG_SETTINGS_ABOUT]       = "À propos",
     [MSG_SETTINGS_SUPPORT]     = "Support",
     [MSG_SETTINGS_SFX]         = "Sons (SFX)",
-    [MSG_SFX_ON]               = "Activé",
-    [MSG_SFX_OFF]              = "Désactivé",
     [MSG_TOP_WEEK]             = "Semaine",
     [MSG_TOP_MONTH]            = "Mois",
     [MSG_TOP_YEAR]             = "Année",
@@ -141,7 +139,5 @@ const char* g_lang_fr_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "Site",
 
     [MSG_SETTINGS_THEME]           = "Thème",
-    [MSG_THEME_DARK]               = "Sombre",
-    [MSG_THEME_LIGHT]              = "Clair",
     [MSG_LOADING]                  = "Chargement...",
 };

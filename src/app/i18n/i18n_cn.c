@@ -28,8 +28,6 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SETTINGS_ABOUT]       = "关于",
     [MSG_SETTINGS_SUPPORT]     = "支持",
     [MSG_SETTINGS_SFX]         = "声音 (SFX)",
-    [MSG_SFX_ON]               = "开启",
-    [MSG_SFX_OFF]              = "关闭",
     [MSG_TOP_WEEK]             = "周",
     [MSG_TOP_MONTH]            = "月",
     [MSG_TOP_YEAR]             = "年",
@@ -146,7 +144,5 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "网站",
 
     [MSG_SETTINGS_THEME]           = "主题",
-    [MSG_THEME_DARK]               = "深色",
-    [MSG_THEME_LIGHT]              = "浅色",
     [MSG_LOADING]                  = "加载中…",
 };

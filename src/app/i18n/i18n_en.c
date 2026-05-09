@@ -26,8 +26,6 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_SETTINGS_ABOUT]       = "About",
     [MSG_SETTINGS_SUPPORT]     = "Support",
     [MSG_SETTINGS_SFX]         = "SFX",
-    [MSG_SFX_ON]               = "On",
-    [MSG_SFX_OFF]              = "Off",
     [MSG_TOP_WEEK]             = "Week",
     [MSG_TOP_MONTH]            = "Month",
     [MSG_TOP_YEAR]             = "Year",
@@ -140,7 +138,5 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "Site",
 
     [MSG_SETTINGS_THEME]           = "Theme",
-    [MSG_THEME_DARK]               = "Dark",
-    [MSG_THEME_LIGHT]              = "Light",
     [MSG_LOADING]                  = "Loading...",
 };

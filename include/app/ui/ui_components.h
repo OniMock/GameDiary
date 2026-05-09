@@ -135,4 +135,14 @@ void ui_format_duration(u32 seconds, char *out, size_t size);
  */
 void ui_draw_nav_indicators(int y, bool show_left, bool show_right, bool animate_left, bool animate_right, u32 last_nav_ms, u32 color);
 
+/**
+ * @brief Draws a modern animated toggle switch.
+ *
+ * @param x             X coordinate of the right-most edge of the switch.
+ * @param center_y      Y coordinate of the vertical center of the switch.
+ * @param state         Boolean state (true = ON, false = OFF).
+ * @param anim_progress Pointer to a float tracking animation [0.0 = OFF, 1.0 = ON].
+ */
+void ui_draw_toggle_switch(int x, int center_y, bool state, float *anim_progress);
+
 #endif // GAMEDIARY_UI_COMPONENTS_H

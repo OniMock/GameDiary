@@ -36,6 +36,9 @@ static u32 s_loading_start_ms = 0;
 static bool s_is_changing = false;
 static int s_pending_action = -1; // 1: Theme, 2: SFX
 
+static float s_anim_theme = 0.0f;
+static float s_anim_sfx = 0.0f;
+
 static const char* s_helper_lines[8];
 static PopupData s_helper_data;
 
@@ -155,13 +158,12 @@ static void settings_draw(void) {
                          label, (i == g_selection), left_icon, right_icon);
 
         if (i == 1) {
-           const char* status = config_get()->theme == 1 ? i18n_get(MSG_THEME_LIGHT) : i18n_get(MSG_THEME_DARK);
-           Rect status_rect = { item_rect.x, item_rect.y, item_rect.w - 16, item_rect.h };
-           ui_draw_text(status, status_rect, COLOR_TEXT, UI_FONT_SIZE_MEDIUM, ALIGN_RIGHT);
+           // Light theme is 1 (OFF), Dark theme is 0 (ON)
+           bool state = (config_get()->theme == 0);
+           ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2, state, &s_anim_theme);
         } else if (i == 2) {
-           const char* status = config_get()->sfx_enabled ? i18n_get(MSG_SFX_ON) : i18n_get(MSG_SFX_OFF);
-           Rect status_rect = { item_rect.x, item_rect.y, item_rect.w - 16, item_rect.h };
-           ui_draw_text(status, status_rect, COLOR_TEXT, UI_FONT_SIZE_MEDIUM, ALIGN_RIGHT);
+           bool state = config_get()->sfx_enabled;
+           ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2, state, &s_anim_sfx);
         }
     }
 
