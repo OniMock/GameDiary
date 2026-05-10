@@ -27,7 +27,6 @@
 
   #include "app/network/network_manager.h"
   #include "app/network/http_client.h"
-  #include "app/network/json_parser.h"
   #include "app/network/version_check.h"
   #include "app/ui/ui_loading.h"
   #include "app/render/renderer.h"
@@ -316,7 +315,7 @@ void info_check_version_flow(void) {
     } else {
         // Evaluate the JSON.
         NetworkVersionInfo out_info;
-        int parse_ret = json_parse_version_info(g_http_json_buf, &out_info);
+        int parse_ret = json_parse_version_info_cjson(g_http_json_buf, &out_info);
 
         if (parse_ret < 0) {
             debug_log("HTTP", "Failed to parse JSON!");
