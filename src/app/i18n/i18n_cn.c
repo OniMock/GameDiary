@@ -144,6 +144,10 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SITE_LABEL]               = "网站",
 
     [MSG_SETTINGS_THEME]           = "主题",
+
+    [MSG_SETTINGS_FORMATTING]      = "格式化",
+    [MSG_FORMATTING_HOURS_ONLY]    = "格式：仅小时",
+    [MSG_HELP_DESC_FORMATTING]     = "调整时间的显示方式。隐藏天数，仅显示总小时和分钟。",
     [MSG_LOADING]                  = "加载中…",
 
     [MSG_HELP_DESC_BACKUP]         = "以 JSON 格式导出或导入您的数据备份。",

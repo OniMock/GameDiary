@@ -154,6 +154,10 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_OK]         = "データのインポートに成功しました！",
     [MSG_BACKUP_ERROR]             = "操作中にエラーが発生しました。",
     [MSG_BACKUP_NOT_FOUND]         = "backup.json ファイルが見つかりません。",
+
+    [MSG_SETTINGS_FORMATTING]      = "表示形式",
+    [MSG_FORMATTING_HOURS_ONLY]    = "形式：時間のみ",
+    [MSG_HELP_DESC_FORMATTING]     = "時間の表示方法を調整します。日数を非表示にして、合計時間と分のみを表示します。",
     [MSG_LOADING]                  = "読み込み中...",
     [MSG_WARNING]                  = "警告",
 };

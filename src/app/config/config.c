@@ -42,6 +42,7 @@ int config_load(void) {
         g_config.language = -1;
         g_config.sfx_enabled = 1;
         g_config.theme = 0;
+        g_config.format_hours_only = 0;
         return config_write_file(&g_config); // Create with defaults
     }
 
@@ -52,6 +53,9 @@ int config_load(void) {
         // It's an older version. Set new fields to default.
         if (res <= 8) { // 8 is the size of the old struct (language + sfx_enabled)
             g_config.theme = 0; // Dark theme
+            g_config.format_hours_only = 0;
+        } else if (res <= 12) { // 12 is the size of the old struct (+ theme)
+            g_config.format_hours_only = 0;
         }
         config_write_file(&g_config); // Save the updated struct size
         return 0;
@@ -61,6 +65,7 @@ int config_load(void) {
         g_config.language = -1;
         g_config.sfx_enabled = 1;
         g_config.theme = 0;
+        g_config.format_hours_only = 0;
         return -1;
     }
 

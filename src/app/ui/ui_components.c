@@ -19,6 +19,7 @@
 #include "app/render/font.h"
 #include "app/render/renderer.h"
 #include "app/render/texture.h"
+#include "app/config/config.h"
 #include "common/utils.h"
 #include <pspgu.h>
 #include <psprtc.h>
@@ -577,6 +578,22 @@ void ui_draw_menu_item_auto(int x, int y, int w, int h, const char *label,
 }
 
 void ui_format_duration(u32 seconds, char *out, size_t size) {
+  if (config_get()->format_hours_only) {
+    u32 h = seconds / 3600;
+    u32 m = (seconds % 3600) / 60;
+    
+    if (h > 0) {
+      if (m > 0) {
+        snprintf(out, size, i18n_get(MSG_DURATION_H_M), h, m);
+      } else {
+        snprintf(out, size, i18n_get(MSG_DURATION_HOURS), h);
+      }
+    } else {
+      snprintf(out, size, i18n_get(MSG_DURATION_MINS), m);
+    }
+    return;
+  }
+
   u32 d = seconds / 86400;
   u32 h = (seconds % 86400) / 3600;
   u32 m = (seconds % 3600) / 60;

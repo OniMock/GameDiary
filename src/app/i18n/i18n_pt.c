@@ -149,6 +149,10 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_OK]         = "Dados importados com sucesso!",
     [MSG_BACKUP_ERROR]             = "Ocorreu um erro durante a operação.",
     [MSG_BACKUP_NOT_FOUND]         = "Arquivo backup.json não encontrado.",
+
+    [MSG_SETTINGS_FORMATTING]      = "Formatação",
+    [MSG_FORMATTING_HOURS_ONLY]    = "Formato: Apenas Horas",
+    [MSG_HELP_DESC_FORMATTING]     = "Ajuste como o tempo é exibido. Oculte dias para mostrar apenas as horas e minutos totais.",
     [MSG_LOADING]                  = "Carregando...",
     [MSG_WARNING]                  = "ATENÇÃO",
 };

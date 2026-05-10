@@ -150,6 +150,10 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_OK]         = "Данные успешно импортированы!",
     [MSG_BACKUP_ERROR]             = "Во время операции произошла ошибка.",
     [MSG_BACKUP_NOT_FOUND]         = "Файл backup.json не найден.",
+
+    [MSG_SETTINGS_FORMATTING]      = "Форматирование",
+    [MSG_FORMATTING_HOURS_ONLY]    = "Формат: Только часы",
+    [MSG_HELP_DESC_FORMATTING]     = "Настройте отображение времени. Скройте дни, чтобы показывать только общее количество часов и минут.",
     [MSG_LOADING]                  = "Загрузка...",
     [MSG_WARNING]                  = "ВНИМАНИЕ",
 };

@@ -54,6 +54,7 @@ extern const ImageResource GD_IMG_ICON_CONTROLLER_32_PNG;
 extern const ImageResource GD_IMG_ICON_EXPORT_32_PNG;
 extern const ImageResource GD_IMG_ICON_FILTER_128_PNG;
 extern const ImageResource GD_IMG_ICON_FILTER_32_PNG;
+extern const ImageResource GD_IMG_ICON_FORMATTING_32_PNG;
 extern const ImageResource GD_IMG_ICON_GAMES_32_PNG;
 extern const ImageResource GD_IMG_ICON_GAME_128_PNG;
 extern const ImageResource GD_IMG_ICON_HELPER_32_PNG;
