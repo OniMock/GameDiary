@@ -105,7 +105,7 @@ static void formatting_draw(void) {
         }
 
         ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
-                         label, (i == g_selection), &GD_IMG_ICON_FORMATTING_32_PNG, NULL);
+                         label, (i == g_selection), NULL, NULL);
 
         if (i == 0) {
            bool state = config_get()->format_hours_only;
