@@ -158,6 +158,6 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_WARN]       = "导入将覆盖当前所有数据。\n是否继续？",
     [MSG_BACKUP_IMPORT_OK]         = "数据导入成功！",
     [MSG_BACKUP_ERROR]             = "操作期间发生错误。",
-    [MSG_BACKUP_NOT_FOUND]         = "未找到 backup.json 文件。",
+    [MSG_BACKUP_NOT_FOUND]         = "未找到备份文件。",
     [MSG_WARNING]                  = "警告",
 };

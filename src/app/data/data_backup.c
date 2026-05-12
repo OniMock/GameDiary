@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BACKUP_JSON_FILENAME "/backup.json"
+
 
 static u32 calculate_generic_checksum(const void *data, size_t len, size_t skip_offset) {
     u32 hash = 2166136261U; // FNV offset basis

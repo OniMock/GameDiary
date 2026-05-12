@@ -153,7 +153,7 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_WARN]       = "インポートすると現在のすべてのデータが\n上書きされます。続行しますか？",
     [MSG_BACKUP_IMPORT_OK]         = "データのインポートに成功しました！",
     [MSG_BACKUP_ERROR]             = "操作中にエラーが発生しました。",
-    [MSG_BACKUP_NOT_FOUND]         = "backup.json ファイルが見つかりません。",
+    [MSG_BACKUP_NOT_FOUND]         = "バックアップファイルが見つかりません。",
 
     [MSG_SETTINGS_FORMATTING]      = "表示形式",
     [MSG_FORMATTING_HOURS_ONLY]    = "形式：時間のみ",

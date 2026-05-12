@@ -22,6 +22,7 @@
 #define GDIARY_ICON_DIR "icons"
 #define GDIARY_DB_DIR "db"
 #define GDIARY_SELF_ID "HBX7F0342D8"
+#define BACKUP_JSON_FILENAME "/backup.json"
 
 // Database files
 #define GAMES_DAT "games.dat"

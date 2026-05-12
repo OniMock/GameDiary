@@ -19,6 +19,7 @@
 #include "app/data/data_backup.h"
 #include "app/data/data_loader.h"
 #include "common/utils.h"
+#include "common/db_schema.h"
 #include <pspctrl.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,13 +38,13 @@ static int s_pending_action = -1; // 1: Export, 2: Import
 static const char* s_result_lines[2];
 static PopupData s_result_popup;
 
-static void show_result(MessageId msg_id) {
+static void show_result(MessageId msg_id, const char* line2) {
     s_result_lines[0] = i18n_get(msg_id);
-    s_result_lines[1] = "";
+    s_result_lines[1] = line2 ? line2 : "";
     s_result_popup.title = i18n_get(MSG_SETTINGS_BACKUP);
     s_result_popup.icon = &GD_IMG_ICON_BACKUP_32_PNG;
     s_result_popup.lines = s_result_lines;
-    s_result_popup.line_count = 1;
+    s_result_popup.line_count = (line2 && line2[0] != '\0') ? 2 : 1;
     s_result_popup.show_close_hint = true;
     popup_open(&s_result_popup);
 }
@@ -75,6 +76,7 @@ static void backup_init(void) {
 
 static int s_operation_result = 0;
 static int s_active_action = 0; // 1: Export, 2: Import
+static char s_path_buffer[128];
 
 static void backup_update(u32 buttons, u32 pressed) {
     (void)buttons;
@@ -110,12 +112,16 @@ static void backup_update(u32 buttons, u32 pressed) {
             s_confirm_import = false; // Finally hide the confirm overlay if it was there
 
             if (s_active_action == 1) { // Export
-                if (s_operation_result == 0) show_result(MSG_BACKUP_EXPORT_OK);
-                else show_result(MSG_BACKUP_ERROR);
+                if (s_operation_result == 0) show_result(MSG_BACKUP_EXPORT_OK, NULL);
+                else show_result(MSG_BACKUP_ERROR, NULL);
             } else if (s_active_action == 2) { // Import
-                if (s_operation_result == 0) show_result(MSG_BACKUP_IMPORT_OK);
-                else if (s_operation_result == -1) show_result(MSG_BACKUP_NOT_FOUND);
-                else show_result(MSG_BACKUP_ERROR);
+                if (s_operation_result == 0) show_result(MSG_BACKUP_IMPORT_OK, NULL);
+                else if (s_operation_result == -1) {
+                    snprintf(s_path_buffer, sizeof(s_path_buffer), "%s%s%s", 
+                        utils_get_device_prefix(), GDIARY_BASE_DIR, BACKUP_JSON_FILENAME);
+                    show_result(MSG_BACKUP_NOT_FOUND, s_path_buffer);
+                }
+                else show_result(MSG_BACKUP_ERROR, NULL);
             }
         }
         return;

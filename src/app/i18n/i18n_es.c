@@ -150,7 +150,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_WARN]       = "La importación reemplazará todos los datos\nactuales. ¿Deseas continuar?",
     [MSG_BACKUP_IMPORT_OK]         = "¡Datos importados correctamente!",
     [MSG_BACKUP_ERROR]             = "Ocurrió un error durante la operación.",
-    [MSG_BACKUP_NOT_FOUND]         = "No se encontró el archivo backup.json.",
+    [MSG_BACKUP_NOT_FOUND]         = "No se encontró el archivo de backup.",
 
     [MSG_SETTINGS_FORMATTING]      = "Formato",
     [MSG_FORMATTING_HOURS_ONLY]    = "Formato: Solo Horas",
