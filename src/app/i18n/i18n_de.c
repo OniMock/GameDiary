@@ -153,6 +153,8 @@ const char* g_lang_de_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_OK]         = "Daten erfolgreich importiert!",
     [MSG_BACKUP_ERROR]             = "Während des Vorgangs ist ein Fehler aufgetreten.",
     [MSG_BACKUP_NOT_FOUND]         = "Backup-Datei nicht gefunden.",
+    [MSG_SUCCESS]                  = "Erfolg",
+    [MSG_ERROR]                    = "Fehler",
 
     [MSG_SETTINGS_FORMATTING]      = "Formatierung",
     [MSG_FORMATTING_HOURS_ONLY]    = "Format: Nur Stunden",

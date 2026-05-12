@@ -30,6 +30,7 @@
  */
 typedef struct {
     const char* title;
+    uint32_t title_color;      // Color for the title (0 for default COLOR_TEXT)
     const ImageResource* icon; // Left header icon (NULL for none)
     const char** lines;        // Array of input strings (can be long strings)
     int line_count;            // Number of input strings

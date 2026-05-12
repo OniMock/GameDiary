@@ -187,7 +187,11 @@ void popup_render(void) {
     if (s_current_data && s_current_data->title) {
         // Center text vertically relative to the 24px icon.
         Rect title_rect = { text_offset_x, header_y + 4, popup_w - 60, 24 };
-        ui_draw_text(s_current_data->title, title_rect, text_color, UI_FONT_SIZE_TITLE_HUGE, ALIGN_LEFT);
+        uint32_t t_color = text_color;
+        if (s_current_data->title_color != 0) {
+            t_color = UI_COLOR_ALPHA_VAL(s_current_data->title_color, element_alpha);
+        }
+        ui_draw_text(s_current_data->title, title_rect, t_color, UI_FONT_SIZE_TITLE_HUGE, ALIGN_LEFT);
     }
 
     // Header Separator

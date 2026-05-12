@@ -38,10 +38,11 @@ static int s_pending_action = -1; // 1: Export, 2: Import
 static const char* s_result_lines[2];
 static PopupData s_result_popup;
 
-static void show_result(MessageId msg_id, const char* line2) {
+static void show_result(MessageId title_id, u32 title_color, MessageId msg_id, const char* line2) {
     s_result_lines[0] = i18n_get(msg_id);
     s_result_lines[1] = line2 ? line2 : "";
-    s_result_popup.title = i18n_get(MSG_SETTINGS_BACKUP);
+    s_result_popup.title = i18n_get(title_id);
+    s_result_popup.title_color = title_color;
     s_result_popup.icon = &GD_IMG_ICON_BACKUP_32_PNG;
     s_result_popup.lines = s_result_lines;
     s_result_popup.line_count = (line2 && line2[0] != '\0') ? 2 : 1;
@@ -112,16 +113,16 @@ static void backup_update(u32 buttons, u32 pressed) {
             s_confirm_import = false; // Finally hide the confirm overlay if it was there
 
             if (s_active_action == 1) { // Export
-                if (s_operation_result == 0) show_result(MSG_BACKUP_EXPORT_OK, NULL);
-                else show_result(MSG_BACKUP_ERROR, NULL);
+                if (s_operation_result == 0) show_result(MSG_SUCCESS, COLOR_SUCCESS, MSG_BACKUP_EXPORT_OK, NULL);
+                else show_result(MSG_ERROR, COLOR_DANGER, MSG_BACKUP_ERROR, NULL);
             } else if (s_active_action == 2) { // Import
-                if (s_operation_result == 0) show_result(MSG_BACKUP_IMPORT_OK, NULL);
+                if (s_operation_result == 0) show_result(MSG_SUCCESS, COLOR_SUCCESS, MSG_BACKUP_IMPORT_OK, NULL);
                 else if (s_operation_result == -1) {
                     snprintf(s_path_buffer, sizeof(s_path_buffer), "%s%s%s", 
                         utils_get_device_prefix(), GDIARY_BASE_DIR, BACKUP_JSON_FILENAME);
-                    show_result(MSG_BACKUP_NOT_FOUND, s_path_buffer);
+                    show_result(MSG_ERROR, COLOR_DANGER, MSG_BACKUP_NOT_FOUND, s_path_buffer);
                 }
-                else show_result(MSG_BACKUP_ERROR, NULL);
+                else show_result(MSG_ERROR, COLOR_DANGER, MSG_BACKUP_ERROR, NULL);
             }
         }
         return;

@@ -159,5 +159,7 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_BACKUP_IMPORT_OK]         = "数据导入成功！",
     [MSG_BACKUP_ERROR]             = "操作期间发生错误。",
     [MSG_BACKUP_NOT_FOUND]         = "未找到备份文件。",
+    [MSG_SUCCESS]                  = "成功",
+    [MSG_ERROR]                    = "错误",
     [MSG_WARNING]                  = "警告",
 };

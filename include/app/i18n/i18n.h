@@ -180,6 +180,8 @@ typedef enum {
     MSG_HELP_DESC_FORMATTING,
 
     MSG_LOADING,
+    MSG_SUCCESS,
+    MSG_ERROR,
     MSG_WARNING,
     MSG_COUNT
 
