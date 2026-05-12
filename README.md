@@ -31,20 +31,21 @@
 
 1. [Overview](#overview)
 2. [Features](#features)
-3. [Screenshots / UI](#screenshots--ui)
-4. [How It Works](#how-it-works)
-5. [Installation](#installation)
-6. [Usage](#usage)
-7. [Project Structure](#project-structure)
-8. [Configuration](#configuration)
-9. [Development](#development)
-10. [Plugin Details](#plugin-details)
-11. [Roadmap](#roadmap)
-12. [Contributing](#contributing)
-13. [Support](#support)
-14. [License](#license)
-15. [Credits](#credits)
-16. [Author](#author)
+3. [Official Website & Web Tools](#-official-website--web-tools)
+4. [Screenshots / UI](#screenshots--ui)
+5. [How It Works](#how-it-works)
+6. [Installation](#installation)
+7. [Usage](#usage)
+8. [Project Structure](#project-structure)
+9. [Configuration](#configuration)
+10. [Development](#development)
+11. [Plugin Details](#plugin-details)
+12. [Roadmap](#roadmap)
+13. [Contributing](#contributing)
+14. [Support](#support)
+15. [License](#license)
+16. [Credits](#credits)
+17. [Author](#author)
 
 
 ---
@@ -77,6 +78,20 @@ from EBOOTs and ISOs for a rich visual diary without manual scraping.
 * **POPS Compatibility**: Reliable tracking and icon parsing for PlayStation 1 classics running via the official emulator.
 
 ---
+
+## 🌐 Official Website & Web Tools
+
+Extend your GameDiary experience with our **[Official Web App](https://game-diary-app.vercel.app/)**, designed to manage and refine your collection beyond the handheld.
+
+By using the **Backup / Export** feature in the PSP application, you can generate a `backup.json` file (located in `ms0:/PSP/COMMON/GameDiary/backup.json`) that can be used with our specialized web tools:
+
+*   **Visual Database Editor**: A premium web-based editor to manually add, remove, or fix game sessions on an interactive timeline.
+*   **Database Merge Tool**: Safely combine multiple `backup.json` files from different Memory Sticks or PSP consoles into a single, unified master database without losing history.
+*   **Modern Management**: Access and refine your gaming stats from any PC or smartphone with a sleek, responsive interface.
+
+
+> [!TIP]
+> Go to **Settings > Backup > Export** in the PSP app to generate the file needed for the web tools.
 
 ## 🖼️ Screenshots / UI
 
@@ -271,7 +286,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 - [x] Official Website for tools.
 - [x] Network-based version checker.
 - [x] Expand UI features with Dark/Light Theme.
-- [ ] Export stats to JSON/CSV for external use.
+- [x] Export stats to JSON/CSV for external use.
 - [ ] Fix plugin for UMD games (GTA, etc).
 - [ ] Ongoing maintenance, fixes, and compatibility improvements.
 
