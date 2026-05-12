@@ -30,8 +30,10 @@
 #include "common/utils.h"
 
 #define SETTINGS_MENU_COUNT 5
+#define MAX_VISIBLE_ITEMS 4
 
 static int g_selection = 0;
+static int g_scroll_offset = 0;
 static u32 s_loading_start_ms = 0;
 static bool s_is_changing = false;
 static int s_pending_action = -1; // 1: Theme, 2: SFX
@@ -68,12 +70,29 @@ static void settings_update(u32 buttons, u32 pressed) {
     }
 
     if (pressed & PSP_CTRL_UP) {
-        g_selection = (g_selection - 1 + SETTINGS_MENU_COUNT) % SETTINGS_MENU_COUNT;
         audio_play_sfx(SFX_NAVIGATE);
+        g_selection = (g_selection - 1 + SETTINGS_MENU_COUNT) % SETTINGS_MENU_COUNT;
+        
+        // Scroll up if selection goes above view
+        if (g_selection < g_scroll_offset) {
+            g_scroll_offset = g_selection;
+        } else if (g_selection == SETTINGS_MENU_COUNT - 1) {
+            // Jump to bottom
+            g_scroll_offset = SETTINGS_MENU_COUNT - MAX_VISIBLE_ITEMS;
+            if (g_scroll_offset < 0) g_scroll_offset = 0;
+        }
     }
     if (pressed & PSP_CTRL_DOWN) {
-        g_selection = (g_selection + 1) % SETTINGS_MENU_COUNT;
         audio_play_sfx(SFX_NAVIGATE);
+        g_selection = (g_selection + 1) % SETTINGS_MENU_COUNT;
+        
+        // Scroll down if selection goes below view
+        if (g_selection >= g_scroll_offset + MAX_VISIBLE_ITEMS) {
+            g_scroll_offset = g_selection - (MAX_VISIBLE_ITEMS - 1);
+        } else if (g_selection == 0) {
+            // Jump to top
+            g_scroll_offset = 0;
+        }
     }
 
     if (pressed & PSP_CTRL_CROSS) {
@@ -139,46 +158,61 @@ static void settings_draw(void) {
 
     Rect list_area = {60, 70, 360, 160};
 
-    for (int i = 0; i < SETTINGS_MENU_COUNT; i++) {
-        Rect item_rect = rect_column(list_area, i, SETTINGS_MENU_COUNT, 6);
+    int items_to_draw = (SETTINGS_MENU_COUNT < MAX_VISIBLE_ITEMS) ? SETTINGS_MENU_COUNT : MAX_VISIBLE_ITEMS;
+
+    for (int i = 0; i < items_to_draw; i++) {
+        int idx = g_scroll_offset + i;
+        if (idx >= SETTINGS_MENU_COUNT) break;
+
+        Rect item_rect = rect_column(list_area, i, MAX_VISIBLE_ITEMS, 6);
 
         const char* label = "";
         const ImageResource* left_icon = NULL;
         const ImageResource* right_icon = NULL;
 
-        if (i == 0) {
+        if (idx == 0) {
             label = i18n_get(MSG_SETTINGS_LANGUAGE);
             left_icon = &GD_IMG_ICON_LANGUAGE_32_PNG;
             right_icon = i18n_get_current_flag();
-        } else if (i == 1) {
+        } else if (idx == 1) {
             label = i18n_get(MSG_SETTINGS_FORMATTING);
             left_icon = &GD_IMG_ICON_FORMATTING_32_PNG;
             right_icon = NULL;
-        } else if (i == 2) {
+        } else if (idx == 2) {
             label = i18n_get(MSG_SETTINGS_BACKUP);
             left_icon = &GD_IMG_ICON_BACKUP_32_PNG;
             right_icon = NULL;
-        } else if (i == 3) {
+        } else if (idx == 3) {
             label = i18n_get(MSG_SETTINGS_THEME);
             left_icon = &GD_IMG_ICON_THEME_32_PNG;
             right_icon = NULL;
-        } else if (i == 4) {
+        } else if (idx == 4) {
             label = i18n_get(MSG_SETTINGS_SFX);
             left_icon = config_get()->sfx_enabled ? &GD_IMG_ICON_SOUND_ACTIVE_32_PNG : &GD_IMG_ICON_SOUND_INACTIVE_32_PNG;
             right_icon = NULL;
         }
 
         ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
-                         label, (i == g_selection), left_icon, right_icon);
+                         label, (idx == g_selection), left_icon, right_icon);
 
-        if (i == 3) {
+        if (idx == 3) {
            // Light theme is 1 (OFF), Dark theme is 0 (ON)
            bool state = (config_get()->theme == 0);
            ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2, state, &s_anim_theme);
-        } else if (i == 4) {
+        } else if (idx == 4) {
            bool state = config_get()->sfx_enabled;
            ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2, state, &s_anim_sfx);
         }
+    }
+
+    // Scrollbar
+    if (SETTINGS_MENU_COUNT > MAX_VISIBLE_ITEMS) {
+        Rect scroll_bg = {list_area.x + list_area.w + 10, list_area.y, 4, list_area.h};
+        renderer_draw_rect(scroll_bg.x, scroll_bg.y, scroll_bg.w, scroll_bg.h, COLOR_BORDER);
+
+        float handle_h = (float)MAX_VISIBLE_ITEMS / SETTINGS_MENU_COUNT * list_area.h;
+        float handle_y = (float)g_scroll_offset / SETTINGS_MENU_COUNT * list_area.h;
+        renderer_draw_rect(scroll_bg.x, list_area.y + (int)handle_y, scroll_bg.w, (int)handle_h, COLOR_ACCENT);
     }
 
     ui_draw_standard_hints();
