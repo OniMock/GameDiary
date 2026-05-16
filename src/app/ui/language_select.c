@@ -34,7 +34,7 @@ static int g_selection = 0;
 static int g_scroll_offset = 0;
 static u32 s_loading_start_ms = 0;
 static bool s_is_changing = false;
-static int s_target_lang = -1;
+static int s_target_lang = -999;
 
 static const char* s_helper_lines[7];
 static PopupData s_helper_data;
@@ -138,17 +138,17 @@ static void language_select_update(u32 buttons, u32 pressed) {
         u32 elapsed = utils_get_time_ms() - s_loading_start_ms;
 
         // Step 1: Perform the work on the first frame after show
-        if (s_target_lang != -1 && elapsed > 16) {
+        if (s_target_lang != -999 && elapsed > 16) {
             i18n_switch_language(s_target_lang);
             i18n_reload_font();
             ui_loading_update_label(i18n_get(MSG_LOADING));
             config_get()->language = s_target_lang;
             config_save();
-            s_target_lang = -1; // Work done
+            s_target_lang = -999; // Work done
         }
 
         // Step 2: Wait for minimum duration (1000ms)
-        if (s_target_lang == -1 && elapsed >= 1000) {
+        if (s_target_lang == -999 && elapsed >= 1000) {
             ui_loading_hide();
             s_is_changing = false;
         }
@@ -200,8 +200,8 @@ static void language_select_draw(void) {
         ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
                          name, (idx == g_selection), NULL, right_flag);
 
-        // indicator for the active language if not selected
-        if (is_active && idx != g_selection) {
+        // indicator for the active language
+        if (is_active) {
              renderer_draw_rect(item_rect.x + item_rect.w - 5, item_rect.y + 10, 3, item_rect.h - 20, COLOR_SUCCESS);
         }
     }
