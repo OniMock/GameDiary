@@ -18,6 +18,7 @@
 #include "common/common.h"
 #include "common/sfo_parser.h"
 #include "common/utils.h"
+#include "common/debug.h"
 #include <pspkernel.h>
 #include <pspsdk/kubridge.h>
 #include <pspsdk/systemctrl.h>
@@ -44,12 +45,19 @@ static void fetch_system_metadata(GameMetadata *metadata) {
     u32 param_len = 0;
     char param_buf[256];
 
+    debug_log("METADATA", "fetch_system_metadata: Attempting to fetch from System Control.");
+
     // Try to get DISC_ID
     if (sctrlGetInitPARAM("DISC_ID", &param_type, &param_len, param_buf) >= 0) {
         if (param_len > 0 && param_len < sizeof(metadata->game_id)) {
             memcpy(metadata->game_id, param_buf, param_len);
             metadata->game_id[param_len] = '\0';
+            debug_log("METADATA", "fetch_system_metadata: DISC_ID fetched successfully: '%s'", metadata->game_id);
+        } else {
+            debug_log("METADATA", "fetch_system_metadata: DISC_ID found but invalid length (%d)", param_len);
         }
+    } else {
+        debug_log("METADATA", "fetch_system_metadata: sctrlGetInitPARAM for DISC_ID failed.");
     }
 
     // Try to get TITLE
@@ -57,7 +65,12 @@ static void fetch_system_metadata(GameMetadata *metadata) {
         if (param_len > 0 && param_len < sizeof(metadata->game_name)) {
             memcpy(metadata->game_name, param_buf, param_len);
             metadata->game_name[param_len] = '\0';
+            debug_log("METADATA", "fetch_system_metadata: TITLE fetched successfully: '%s'", metadata->game_name);
+        } else {
+            debug_log("METADATA", "fetch_system_metadata: TITLE found but invalid length (%d)", param_len);
         }
+    } else {
+        debug_log("METADATA", "fetch_system_metadata: sctrlGetInitPARAM for TITLE failed.");
     }
 }
 
@@ -65,20 +78,29 @@ static void fetch_system_metadata(GameMetadata *metadata) {
  * @brief Extracts metadata specifically from PS1 EBOOT.PBP files.
  */
 static void fetch_ps1_metadata(GameMetadata *metadata, const char *path) {
-    if (!path || path[0] == '\0') return;
+    if (!path || path[0] == '\0') {
+        debug_log("METADATA", "fetch_ps1_metadata: Path is empty, skipping PS1 fetch.");
+        return;
+    }
+
+    debug_log("METADATA", "fetch_ps1_metadata: Parsing SFO from PS1 EBOOT at '%s'", path);
 
     pbp_read_sfo_string(path, "DISC_ID", metadata->game_id, sizeof(metadata->game_id));
     pbp_read_sfo_string(path, "TITLE", metadata->game_name, sizeof(metadata->game_name));
+
+    debug_log("METADATA", "fetch_ps1_metadata: SFO read -> DISC_ID: '%s', TITLE: '%s'", metadata->game_id, metadata->game_name);
 
     // Fallback if TITLE is missing (common in some converted PS1 games)
     if (metadata->game_name[0] == '\0') {
         if (metadata->game_id[0] != '\0') {
             snprintf(metadata->game_name, sizeof(metadata->game_name), "PS1: %s", metadata->game_id);
+            debug_log("METADATA", "fetch_ps1_metadata: TITLE empty. Using fallback 'PS1: %s'", metadata->game_id);
         } else {
             // Last resort: use numeric part of path or filename
             const char *filename = strrchr(path, '/');
             filename = filename ? filename + 1 : path;
             snprintf(metadata->game_name, sizeof(metadata->game_name), "PT: %.50s", filename);
+            debug_log("METADATA", "fetch_ps1_metadata: DISC_ID and TITLE empty. Using filename fallback: '%s'", metadata->game_name);
         }
     }
 }
@@ -95,7 +117,12 @@ static void fetch_ps1_metadata(GameMetadata *metadata, const char *path) {
  * the game folder name is extracted from the executable path as a last resort.
  */
 static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
-    if (metadata->file_path[0] == '\0') return;
+    if (metadata->file_path[0] == '\0') {
+        debug_log("METADATA", "fetch_homebrew_sfo_metadata: file_path is empty, skipping SFO parse.");
+        return;
+    }
+
+    debug_log("METADATA", "fetch_homebrew_sfo_metadata: Parsing homebrew path and SFO from '%s'", metadata->file_path);
 
     /* --- 1. First priority: Use the game folder name from the path ---
      * Users often name their folders cleanly (e.g. "Super Mario 64").
@@ -113,6 +140,7 @@ static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
             if (dir_name[0] != '\0') {
                 strncpy(metadata->game_name, dir_name, sizeof(metadata->game_name) - 1);
                 metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
+                debug_log("METADATA", "fetch_homebrew_sfo_metadata: Extracted folder name as TITLE: '%s'", metadata->game_name);
             }
         }
     }
@@ -125,6 +153,7 @@ static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
         if (pbp_read_sfo_string(metadata->file_path, "TITLE", title_buf, sizeof(title_buf)) && title_buf[0] != '\0') {
             strncpy(metadata->game_name, title_buf, sizeof(metadata->game_name) - 1);
             metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
+            debug_log("METADATA", "fetch_homebrew_sfo_metadata: Fallback to SFO TITLE: '%s'", metadata->game_name);
         }
     }
 
@@ -139,6 +168,9 @@ static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
             if (strncmp(id_buf, "UC", 2) != 0 && strncmp(id_buf, "UL", 2) != 0 && strncmp(id_buf, "NP", 2) != 0) {
                 strncpy(metadata->game_id, id_buf, sizeof(metadata->game_id) - 1);
                 metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
+                debug_log("METADATA", "fetch_homebrew_sfo_metadata: Successfully parsed custom DISC_ID from SFO: '%s'", metadata->game_id);
+            } else {
+                debug_log("METADATA", "fetch_homebrew_sfo_metadata: SFO DISC_ID '%s' rejected (Sony region copy).", id_buf);
             }
         }
     }
@@ -151,6 +183,8 @@ static void fetch_homebrew_fallback_id(GameMetadata *metadata) {
     if (strcmp(metadata->game_id, "UNKNOWN-00000") == 0) {
         snprintf(metadata->game_id, sizeof(metadata->game_id), "HBX%08X",
                  (unsigned int)hash_string(metadata->game_name));
+        debug_log("METADATA", "fetch_homebrew_fallback_id: Generated HBX hash ID: '%s' based on TITLE: '%s'", 
+                  metadata->game_id, metadata->game_name);
     }
 }
 
@@ -159,12 +193,16 @@ int metadata_fetch(GameMetadata *metadata) {
     metadata->category = apitype_detect_category(apitype);
 
     snprintf(metadata->apitype_str, sizeof(metadata->apitype_str), "0x%03X", (unsigned int)apitype);
+    debug_log("METADATA", "metadata_fetch: Detected APITYPE: %s, Category: %d", metadata->apitype_str, metadata->category);
     set_default_metadata(metadata);
 
     // Resolve executable path
     memset(metadata->file_path, 0, sizeof(metadata->file_path));
     if (kuKernelInitFileName(metadata->file_path) < 0) {
         metadata->file_path[0] = '\0';
+        debug_log("METADATA", "metadata_fetch: kuKernelInitFileName failed to get executable path.");
+    } else {
+        debug_log("METADATA", "metadata_fetch: Resolved executable path: '%s'", metadata->file_path);
     }
 
     // Branching based on category
@@ -188,6 +226,7 @@ int metadata_fetch(GameMetadata *metadata) {
             if (strncmp(metadata->game_id, "UC", 2) == 0 || 
                 strncmp(metadata->game_id, "UL", 2) == 0 || 
                 strncmp(metadata->game_id, "NP", 2) == 0) {
+                debug_log("METADATA", "metadata_fetch: Rejected spoofed DISC_ID '%s' for Homebrew.", metadata->game_id);
                 strncpy(metadata->game_id, "UNKNOWN-00000", sizeof(metadata->game_id) - 1);
             }
 
@@ -198,6 +237,7 @@ int metadata_fetch(GameMetadata *metadata) {
 
         default:
             // VSH or UNKNOWN
+            debug_log("METADATA", "metadata_fetch: Category is VSH or UNKNOWN, skipping deep metadata resolution.");
             break;
     }
 
@@ -205,15 +245,22 @@ int metadata_fetch(GameMetadata *metadata) {
 }
 
 int metadata_fetch_from_umd(GameMetadata *metadata) {
+    debug_log("METADATA", "metadata_fetch_from_umd: Attempting to read UMD_DATA.BIN...");
     SceUID fd = sceIoOpen("disc0:/UMD_DATA.BIN", PSP_O_RDONLY, 0);
-    if (fd < 0) return 0;
+    if (fd < 0) {
+        debug_log("METADATA", "metadata_fetch_from_umd: Failed to open disc0:/UMD_DATA.BIN (fd: %d)", fd);
+        return 0;
+    }
 
     char buf[64];
     memset(buf, 0, sizeof(buf));
     int bytes = sceIoRead(fd, buf, sizeof(buf) - 1);
     sceIoClose(fd);
 
-    if (bytes <= 0) return 0;
+    if (bytes <= 0) {
+        debug_log("METADATA", "metadata_fetch_from_umd: Read empty or failed from UMD_DATA.BIN (%d bytes)", bytes);
+        return 0;
+    }
 
     // Parse DISC_ID from "DISC_ID|..." format
     int j = 0;
@@ -225,9 +272,11 @@ int metadata_fetch_from_umd(GameMetadata *metadata) {
     }
     metadata->game_id[j] = '\0';
     metadata->category = CAT_PSP;
+    debug_log("METADATA", "metadata_fetch_from_umd: Parsed UMD DISC_ID: '%s'", metadata->game_id);
 
     // Try to get Title from UMD SFO
-    sfo_read_string("disc0:/PSP_GAME/PARAM.SFO", "TITLE", metadata->game_name, sizeof(metadata->game_name));
+    int sfo_read = sfo_read_string("disc0:/PSP_GAME/PARAM.SFO", "TITLE", metadata->game_name, sizeof(metadata->game_name));
+    debug_log("METADATA", "metadata_fetch_from_umd: Read TITLE from disc0 SFO (Result: %d) -> '%s'", sfo_read, metadata->game_name);
 
     return 1;
 }
