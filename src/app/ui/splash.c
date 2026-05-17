@@ -26,14 +26,17 @@
 #include <psprtc.h>
 #include <pspkernel.h>
 
-#define FADE_DURATION_MS 500
-#define HOLD_DURATION_MS 1000
+#define FADE_DURATION_MS 400
+#define HOLD_DURATION_MS 800
 
 typedef enum {
-    SPLASH_STATE_FADE_IN,
+    SPLASH_STATE_FADE_IN_1,
     SPLASH_STATE_LOAD,
-    SPLASH_STATE_HOLD,
-    SPLASH_STATE_FADE_OUT,
+    SPLASH_STATE_HOLD_1,
+    SPLASH_STATE_FADE_OUT_1,
+    SPLASH_STATE_FADE_IN_2,
+    SPLASH_STATE_HOLD_2,
+    SPLASH_STATE_FADE_OUT_2,
     SPLASH_STATE_DONE
 } SplashState;
 
@@ -41,12 +44,14 @@ static SplashState s_state;
 static u64 s_start_time;
 static u64 s_state_start_time;
 static u8 s_alpha;
+static const ImageResource* s_current_image;
 
 static void splash_init(void) {
-    s_state = SPLASH_STATE_FADE_IN;
+    s_state = SPLASH_STATE_FADE_IN_1;
     s_start_time = utils_get_time_ms();
     s_state_start_time = s_start_time;
     s_alpha = 0;
+    s_current_image = &GD_IMG_ICON_SPLASH_PNG;
 }
 
 bool splash_is_loading(void) {
@@ -55,13 +60,13 @@ bool splash_is_loading(void) {
 
 void splash_do_load_tasks(void) {
     config_load();
-    
+
     if (config_get()->theme == 1) {
         ui_style_set_light();
     } else {
         ui_style_set_dark();
     }
-    
+
     char base_path[128];
     snprintf(base_path, sizeof(base_path), "%s%s", utils_get_device_prefix(), GDIARY_BASE_DIR);
     storage_init(base_path);
@@ -70,8 +75,8 @@ void splash_do_load_tasks(void) {
     i18n_init(config_get()->language);
     audio_init();
     data_load_all();
-    
-    s_state = SPLASH_STATE_HOLD;
+
+    s_state = SPLASH_STATE_HOLD_1;
     /* Reset the holding time so we still see the logo briefly if loading was somewhat fast */
     s_state_start_time = utils_get_time_ms();
 }
@@ -82,7 +87,7 @@ static void splash_update(u32 buttons, u32 pressed) {
     u64 elapsed = now - s_state_start_time;
 
     switch (s_state) {
-        case SPLASH_STATE_FADE_IN:
+        case SPLASH_STATE_FADE_IN_1:
             if (elapsed >= FADE_DURATION_MS) {
                 s_alpha = 255;
                 s_state = SPLASH_STATE_LOAD;
@@ -95,14 +100,42 @@ static void splash_update(u32 buttons, u32 pressed) {
             /* Main thread will pick this up outside of renderer frame */
             break;
 
-        case SPLASH_STATE_HOLD:
+        case SPLASH_STATE_HOLD_1:
             if (elapsed >= HOLD_DURATION_MS) {
-                s_state = SPLASH_STATE_FADE_OUT;
+                s_state = SPLASH_STATE_FADE_OUT_1;
                 s_state_start_time = now;
             }
             break;
 
-        case SPLASH_STATE_FADE_OUT:
+        case SPLASH_STATE_FADE_OUT_1:
+            if (elapsed >= FADE_DURATION_MS) {
+                s_alpha = 0;
+                s_state = SPLASH_STATE_FADE_IN_2;
+                s_state_start_time = now;
+                s_current_image = &GD_IMG_ICON_SPLASH_DEVELOPED_PNG;
+            } else {
+                s_alpha = (u8)(255 - ((elapsed * 255) / FADE_DURATION_MS));
+            }
+            break;
+
+        case SPLASH_STATE_FADE_IN_2:
+            if (elapsed >= FADE_DURATION_MS) {
+                s_alpha = 255;
+                s_state = SPLASH_STATE_HOLD_2;
+                s_state_start_time = now;
+            } else {
+                s_alpha = (u8)((elapsed * 255) / FADE_DURATION_MS);
+            }
+            break;
+
+        case SPLASH_STATE_HOLD_2:
+            if (elapsed >= HOLD_DURATION_MS) {
+                s_state = SPLASH_STATE_FADE_OUT_2;
+                s_state_start_time = now;
+            }
+            break;
+
+        case SPLASH_STATE_FADE_OUT_2:
             if (elapsed >= FADE_DURATION_MS) {
                 s_alpha = 0;
                 s_state = SPLASH_STATE_DONE;
@@ -121,14 +154,16 @@ static void splash_update(u32 buttons, u32 pressed) {
 static void splash_draw(void) {
     renderer_clear(0xFF000000); // Clear to Black
 
-    int img_w = GD_IMG_ICON_SPLASH_PNG.width;
-    int img_h = GD_IMG_ICON_SPLASH_PNG.height;
+    if (!s_current_image) return;
+
+    int img_w = s_current_image->width;
+    int img_h = s_current_image->height;
     int x = (480 - img_w) / 2;
     int y = (272 - img_h) / 2;
 
     u32 color = UI_COLOR_ALPHA_VAL(0xFFFFFFFF, s_alpha);
 
-    texture_draw_resource_tinted(&GD_IMG_ICON_SPLASH_PNG, x, y, img_w, img_h, color);
+    texture_draw_resource_tinted(s_current_image, x, y, img_w, img_h, color);
 }
 
 static void splash_destroy(void) {
