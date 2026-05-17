@@ -13,7 +13,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/OniMock/GameDiary?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
 ![GitHub last commit](https://img.shields.io/github/last-commit/OniMock/GameDiary)
-![GitHub downloads](https://img.shields.io/github/downloads/OniMock/GameDiary/total)
+[![GitHub downloads](https://img.shields.io/github/downloads/OniMock/GameDiary/total)](https://github.com/OniMock/GameDiary/releases/latest)
 
   <img src="./assets-src/logo.png" width="400" />
 
