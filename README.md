@@ -9,6 +9,7 @@
 [![Official Website](https://img.shields.io/badge/Official_Website-GameDiary-111111?style=flat&logo=firefoxbrowser&logoColor=white)](https://game-diary-app.vercel.app/)
 [![GameBrew Wiki](https://img.shields.io/badge/GameBrew-Wiki-E9711C?style=flat&logo=wikipedia&logoColor=white)](https://www.gamebrew.org/wiki/GameDiary_PSP)
 [![PSPunk](https://img.shields.io/badge/PSPunk-Homebrew-E30016?style=flat&logo=playstation&logoColor=white)](https://www.pspunk.com/psp-homebrew/)
+[![Compatibility List](https://img.shields.io/badge/Compatibility_List-Tested_Games-34A853?style=flat&logo=google&logoColor=white)](https://docs.google.com/spreadsheets/d/1rcNE7YMPR731JNituGIee5ARop7di-FBcygmstWmvJk/edit?usp=sharing)
 
 ![GitHub stars](https://img.shields.io/github/stars/OniMock/GameDiary?style=social)
 ![GitHub issues](https://img.shields.io/github/issues/OniMock/GameDiary)
@@ -31,21 +32,22 @@
 
 1. [Overview](#overview)
 2. [Features](#features)
-3. [Official Website & Web Tools](#-official-website--web-tools)
-4. [Screenshots / UI](#screenshots--ui)
-5. [How It Works](#how-it-works)
-6. [Installation](#installation)
-7. [Usage](#usage)
-8. [Project Structure](#project-structure)
-9. [Configuration](#configuration)
-10. [Development](#development)
-11. [Plugin Details](#plugin-details)
-12. [Roadmap](#roadmap)
-13. [Contributing](#contributing)
-14. [Support](#support)
-15. [License](#license)
-16. [Credits](#credits)
-17. [Author](#author)
+3. [Compatibility List](#-compatibility-list)
+4. [Official Website & Web Tools](#-official-website--web-tools)
+5. [Screenshots / UI](#screenshots--ui)
+6. [How It Works](#how-it-works)
+7. [Installation](#installation)
+8. [Usage](#usage)
+9. [Project Structure](#project-structure)
+10. [Configuration](#configuration)
+11. [Development](#development)
+12. [Plugin Details](#plugin-details)
+13. [Roadmap](#roadmap)
+14. [Contributing](#contributing)
+15. [Support](#support)
+16. [License](#license)
+17. [Credits](#credits)
+18. [Author](#author)
 
 
 ---
@@ -76,6 +78,14 @@ from EBOOTs and ISOs for a rich visual diary without manual scraping.
 ### 🧩 System
 * **Global Internationalization (i18n)**: Fully localized in English, Spanish, Portuguese, Russian, German, French, Italian, Japanese and Chinese with automatic language detection based on PSP system settings.
 * **POPS Compatibility**: Reliable tracking and icon parsing for PlayStation 1 classics running via the official emulator.
+
+---
+
+## 📋 Compatibility List
+
+Curious if your favorite game is supported? We maintain an actively updated **[Community Compatibility List (Google Sheets)](https://docs.google.com/spreadsheets/d/1rcNE7YMPR731JNituGIee5ARop7di-FBcygmstWmvJk/edit?usp=sharing)**.
+
+This spreadsheet contains all UMDs, PS1 classics, and Homebrews tested by us and other users. You can also contribute by testing games and adding them to the list!
 
 ---
 
