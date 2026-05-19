@@ -129,14 +129,15 @@ jobs:
           cp EBOOT.PBP release_debug/GameDiary/EBOOT.PBP
 
           cd release_debug
-          zip -r ../GameDiaryDebug.zip .
+          echo "📂 Debug structure:"
+          find . -type f -exec ls -lh {} \;
           cd ..
 
       - name: Upload Debug artifact
         uses: actions/upload-artifact@v4
         with:
           name: GameDiaryDebug
-          path: GameDiaryDebug.zip
+          path: release_debug/
 
   # ===========================================================
   # 🚀 AUTOMATIC RELEASE
@@ -232,6 +233,22 @@ jobs:
           echo "📦 Release ZIP:"
           unzip -l GameDiary.zip
 
+      - name: Download Debug artifact
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: GameDiaryDebug
+          path: artifact_debug/
+
+      - name: Repack Debug ZIP
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          cd artifact_debug
+          zip -r ../GameDiaryDebug.zip .
+          cd ..
+          echo "📦 Release Debug ZIP:"
+          unzip -l GameDiaryDebug.zip
+
       # -------------------------------------------------------
       # 📝 Generate Changelog
       # -------------------------------------------------------
@@ -297,8 +314,13 @@ jobs:
 
             ## 📦 Download
 
-            * GameDiary.zip (PRX + EBOOT)
+            * **GameDiary.zip** (PRX + EBOOT) - Standard release.
               https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.zip
+            
+            * **GameDiaryDebug.zip** - Debug version. Use this **only** if the main version has issues. 
+              https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/GameDiaryDebug.zip
+              * **Why use it?** It generates detailed step-by-step text logs in `ms0:/PSP/COMMON/GameDiary/debug-DD-MM-YYYY.txt`.
+              * **When is it useful?** If the plugin fails to read a Game ID, crashes, or playtime isn't saving, these logs will tell us exactly where and why it failed.
 
             ---
 
@@ -352,6 +374,8 @@ jobs:
             ## 📝 Changelog
 
             ${{ steps.git-cliff.outputs.content }}
-          files: GameDiary.zip
+          files: |
+            GameDiary.zip
+            GameDiaryDebug.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
