@@ -18,8 +18,10 @@
 #include <string.h>
 
 void debug_init(void) {
+#ifdef GDIARY_DEBUG
     // Ensure base directory exists
     utils_ensure_storage_dirs(utils_get_device_prefix());
+#endif
 }
 
 #ifdef GDIARY_PLUGIN

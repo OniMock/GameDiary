@@ -15,6 +15,7 @@
 
 #include "plugin/tracker.h"
 #include "common/common.h"
+#include "common/db_schema.h"
 #include "common/utils.h"
 #include "plugin/detector.h"
 #include "common/storage.h"
@@ -91,6 +92,12 @@ static int tracker_thread_main(SceSize args, void *argp) {
   if (cb_thid >= 0) {
     sceKernelStartThread(cb_thid, 0, NULL);
   }
+
+  // Initialize storage dynamically after the settle delay
+  const char *prefix = utils_get_device_prefix();
+  char base_dir[128];
+  snprintf(base_dir, sizeof(base_dir), "%s%s", prefix, GDIARY_BASE_DIR);
+  storage_init(base_dir);
 
   // Initialize session (marks as a new launch)
   const GameMetadata *metadata = detector_get_metadata();

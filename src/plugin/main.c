@@ -43,14 +43,6 @@ int module_start(SceSize args, void *argp) {
     return 1; // VSH, ignore
   }
 
-  /* Resolve base path securely avoiding buggy CFW sctrl hooks on PRO-C.
-   * utils_get_device_prefix physically checks if ef0: exists. */
-  const char *prefix = utils_get_device_prefix();
-  char base_dir[128];
-  snprintf(base_dir, sizeof(base_dir), "%s%s", prefix, GDIARY_BASE_DIR);
-
-  storage_init(base_dir);
-
   // Grab game info right at boot before the buffer clears
   detector_init();
 

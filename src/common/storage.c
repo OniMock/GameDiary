@@ -197,7 +197,7 @@ static int save_registry_atomic(const GameRegistryHeader *h_template, const Game
     // 5. Cleanup and Rename
     sceIoClose(out_fd);
 
-    sceIoRemove(path);
+    safe_remove_if_exists(path);
     int res = sceIoRename(tmp_path, path);
     if (res >= 0) {
         sceIoSync(g_device, 0); /* One critical sync after the atomic rename */
@@ -241,11 +241,11 @@ void storage_init(const char *base_dir) {
   /* Recovery: check if " GAMES_TMP " is valid and should be promoted. */
   GameRegistryHeader tmp_header;
   if (load_reliable_header(&tmp_header, tmp_path) == 0) {
-      sceIoRemove(path);
+      safe_remove_if_exists(path);
       sceIoRename(tmp_path, path);
       sceIoSync(g_device, 0);
   } else {
-      sceIoRemove(tmp_path);
+      safe_remove_if_exists(tmp_path);
   }
 
   if (load_reliable_header(&g_header, path) < 0) {
