@@ -81,8 +81,10 @@ static int tracker_thread_main(SceSize args, void *argp) {
   (void)args;
   (void)argp;
 
-  // Give memory stick and CFW time to settle
-  sceKernelDelayThread(5 * 1000 * 1000);
+  // Give memory stick and CFW time to settle.
+  // Increased to 15 seconds to safely bypass heavy initial loading screens (like GTA and NFS)
+  // before we attempt any fallback reads from disc0:/
+  sceKernelDelayThread(15 * 1000 * 1000);
 
   // Second pass to fetch ID directly from disc if parameters failed
   detector_init_late();

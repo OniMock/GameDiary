@@ -246,6 +246,7 @@ int metadata_fetch(GameMetadata *metadata) {
 
 int metadata_fetch_from_umd(GameMetadata *metadata) {
     debug_log("METADATA", "metadata_fetch_from_umd: Attempting to read UMD_DATA.BIN...");
+    sceKernelDelayThread(200 * 1000); /* 200ms yield before accessing physical UMD */
     SceUID fd = sceIoOpen("disc0:/UMD_DATA.BIN", PSP_O_RDONLY, 0);
     if (fd < 0) {
         debug_log("METADATA", "metadata_fetch_from_umd: Failed to open disc0:/UMD_DATA.BIN (fd: %d)", fd);
@@ -275,6 +276,7 @@ int metadata_fetch_from_umd(GameMetadata *metadata) {
     debug_log("METADATA", "metadata_fetch_from_umd: Parsed UMD DISC_ID: '%s'", metadata->game_id);
 
     // Try to get Title from UMD SFO
+    sceKernelDelayThread(200 * 1000); /* 200ms yield between UMD reads */
     int sfo_read = sfo_read_string("disc0:/PSP_GAME/PARAM.SFO", "TITLE", metadata->game_name, sizeof(metadata->game_name));
     debug_log("METADATA", "metadata_fetch_from_umd: Read TITLE from disc0 SFO (Result: %d) -> '%s'", sfo_read, metadata->game_name);
 

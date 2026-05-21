@@ -132,6 +132,7 @@ int utils_copy_file(const char *src, const char *dst) {
   int bytes;
   while ((bytes = sceIoRead(f_in, buf, sizeof(buf))) > 0) {
     sceIoWrite(f_out, buf, bytes);
+    sceKernelDelayThread(1000); /* 1ms yield to prevent I/O starvation */
   }
   sceIoClose(f_in);
   sceIoClose(f_out);
@@ -201,6 +202,7 @@ int utils_extract_pbp_icon(const char *pbp_path, const char *dst) {
       break;
     sceIoWrite(f_out, buf, bytes);
     total_read += bytes;
+    sceKernelDelayThread(1000); /* 1ms yield to prevent I/O starvation */
   }
 
   sceIoClose(f_in);
