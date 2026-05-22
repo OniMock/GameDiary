@@ -27,7 +27,7 @@ void detector_init(void) {
             g_current_game.game_id, g_current_game.game_name, g_current_game.category, g_current_game.file_path);
 }
 
-void detector_init_late(void) {
+int detector_init_late(void) {
   debug_log("DETECTOR", "detector_init_late: Checking if ID needs late UMD fetch. Current ID: '%s'", g_current_game.game_id);
   // If the game info is still unknown, try a late fetch from UMD.
   // DO NOT fetch if it's an HBX- hash, as that indicates a successfully 
@@ -39,11 +39,14 @@ void detector_init_late(void) {
     if (success) {
       debug_log("DETECTOR", "detector_init_late: UMD fetch SUCCEEDED -> ID: '%s', Name: '%s'",
                 g_current_game.game_id, g_current_game.game_name);
+      return 1;
     } else {
       debug_log("DETECTOR", "detector_init_late: UMD fetch FAILED. Metadata remains UNKNOWN.");
+      return 0;
     }
   } else {
     debug_log("DETECTOR", "detector_init_late: ID is already resolved. Skipping late fetch.");
+    return 1;
   }
 }
 

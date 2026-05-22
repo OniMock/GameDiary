@@ -23,7 +23,7 @@ void detector_init(void);
  * @brief Fetches game metadata again after the system has settled (via UMD).
  * Called from the tracker thread after a startup delay.
  */
-void detector_init_late(void);
+int detector_init_late(void);
 
 /**
  * @brief Returns a const pointer to the cached game metadata.

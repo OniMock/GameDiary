@@ -25,6 +25,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#define PSP_UMD_READY_FLAG 0x20
+#define SCE_UMD_GET_DRIVE_STAT_NID 0x6B4A146C
+#define PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC 120U
+#define UMD_READINESS_UNAVAILABLE (-1)
+#define UMD_READINESS_NOT_READY    0
+#define UMD_READINESS_READY        1
+
 /**
  * @brief Resets metadata to fallback values.
  */
@@ -244,7 +251,98 @@ int metadata_fetch(GameMetadata *metadata) {
     return 1;
 }
 
+static int is_disc_launch(const GameMetadata *metadata) {
+    return metadata &&
+           metadata->file_path[0] != '\0' &&
+           strncmp(metadata->file_path, "disc0:/", 7) == 0;
+}
+
+static int get_mounted_iso_path(char *out, size_t out_size) {
+    if (!out || out_size == 0) return 0;
+
+    out[0] = '\0';
+    kuKernelGetUmdFile(out, (int)out_size);
+    out[out_size - 1] = '\0';
+    return out[0] != '\0';
+}
+
+static int get_umd_readiness_state(void) {
+    typedef int (*SceUmdGetDriveStatFn)(void);
+    static SceUmdGetDriveStatFn get_drive_stat = NULL;
+    static int lookup_done = 0;
+
+    if (!lookup_done) {
+        u32 addr = sctrlHENFindFunction("Umd_driver", "sceUmd", SCE_UMD_GET_DRIVE_STAT_NID);
+        if (addr == 0) {
+            addr = sctrlHENFindFunction("sceUmd_driver", "sceUmd", SCE_UMD_GET_DRIVE_STAT_NID);
+        }
+        if (addr == 0) {
+            addr = sctrlHENFindFunction("sceUmd_Service", "sceUmdUser", SCE_UMD_GET_DRIVE_STAT_NID);
+        }
+        get_drive_stat = (SceUmdGetDriveStatFn)addr;
+        lookup_done = 1;
+        debug_log("METADATA", "metadata_fetch_from_umd: sceUmdGetDriveStat lookup -> 0x%X",
+                  (unsigned int)addr);
+    }
+
+    if (!get_drive_stat) {
+        debug_log("METADATA", "metadata_fetch_from_umd: sceUmdGetDriveStat unavailable; skipping disc0 open.");
+        return UMD_READINESS_UNAVAILABLE;
+    }
+
+    int stat = get_drive_stat();
+    if (stat < 0) {
+        debug_log("METADATA", "metadata_fetch_from_umd: sceUmdGetDriveStat failed (stat: %d)", stat);
+        return UMD_READINESS_NOT_READY;
+    }
+
+    debug_log("METADATA", "metadata_fetch_from_umd: UMD drive stat: 0x%X", (unsigned int)stat);
+    return (stat & PSP_UMD_READY_FLAG) ? UMD_READINESS_READY : UMD_READINESS_NOT_READY;
+}
+
 int metadata_fetch_from_umd(GameMetadata *metadata) {
+    char mounted_iso[256];
+    int is_virtual_umd = 0;
+    static u32 unsafe_fallback_start_ts = 0;
+
+    if (!metadata ||
+        (metadata->category != CAT_PSP &&
+         !(metadata->category == CAT_UNKNOWN && is_disc_launch(metadata)))) {
+        debug_log("METADATA", "metadata_fetch_from_umd: Skipping non-PSP metadata.");
+        return 0;
+    }
+
+    is_virtual_umd = get_mounted_iso_path(mounted_iso, sizeof(mounted_iso));
+    if (is_virtual_umd) {
+        debug_log("METADATA", "metadata_fetch_from_umd: Mounted ISO/CSO path: '%s'; allowing virtual disc0 fallback.",
+                  mounted_iso);
+    }
+
+    if (!is_virtual_umd) {
+        int readiness = get_umd_readiness_state();
+        if (readiness == UMD_READINESS_NOT_READY) {
+            debug_log("METADATA", "metadata_fetch_from_umd: UMD is not READY; skipping disc0 open this attempt.");
+            return 0;
+        }
+
+        if (readiness == UMD_READINESS_UNAVAILABLE) {
+            u32 now = utils_get_timestamp();
+            if (unsafe_fallback_start_ts == 0) {
+                unsafe_fallback_start_ts = now;
+            }
+
+            u32 waited = now - unsafe_fallback_start_ts;
+            if (waited < PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC) {
+                debug_log("METADATA", "metadata_fetch_from_umd: no READY check for physical UMD; waiting %u/%u s before late disc0 fallback.",
+                          (unsigned int)waited,
+                          (unsigned int)PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC);
+                return 0;
+            }
+
+            debug_log("METADATA", "metadata_fetch_from_umd: no READY check available; allowing late physical UMD disc0 fallback.");
+        }
+    }
+
     debug_log("METADATA", "metadata_fetch_from_umd: Attempting to read UMD_DATA.BIN...");
     sceKernelDelayThread(200 * 1000); /* 200ms yield before accessing physical UMD */
     SceUID fd = sceIoOpen("disc0:/UMD_DATA.BIN", PSP_O_RDONLY, 0);
@@ -272,6 +370,13 @@ int metadata_fetch_from_umd(GameMetadata *metadata) {
         }
     }
     metadata->game_id[j] = '\0';
+    if (metadata->game_id[0] == '\0') {
+        strncpy(metadata->game_id, "UNKNOWN-00000", sizeof(metadata->game_id) - 1);
+        metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
+        debug_log("METADATA", "metadata_fetch_from_umd: UMD_DATA.BIN did not contain a usable DISC_ID.");
+        return 0;
+    }
+
     metadata->category = CAT_PSP;
     debug_log("METADATA", "metadata_fetch_from_umd: Parsed UMD DISC_ID: '%s'", metadata->game_id);
 

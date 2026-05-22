@@ -27,11 +27,18 @@ static SceUID tracker_thid = -1;
 static SceUID cb_thid = -1;
 static int running = 0;
 
+#define TRACKER_BASE_SETTLE_US       (15 * 1000 * 1000)
+#define TRACKER_UMD_EXTRA_SETTLE_US  (30 * 1000 * 1000)
+#define TRACKER_UMD_RETRY_DELAY_US   (15 * 1000 * 1000)
+#define TRACKER_UMD_MAX_ATTEMPTS     16
+#define UNKNOWN_GAME_ID              "UNKNOWN-00000"
+
 static volatile u32 pending_seconds = 0;
 static volatile u32 session_total_seconds = 0;
 static SceOff current_session_offset = -1;
 static volatile int is_suspended = 1; /* Start suspended until detector confirms */
 static u32 current_game_uid = 0;
+static int cb_thread(SceSize args, void *argp);
 
 /*
  * Timestamp captured at the exact moment the current gaming session begins.
@@ -40,6 +47,59 @@ static u32 current_game_uid = 0;
  * would be fully attributed to the following day instead of the day it started.
  */
 static u32 session_start_ts = 0;
+
+static int metadata_looks_like_disc_launch(const GameMetadata *metadata) {
+  return metadata &&
+         metadata->file_path[0] != '\0' &&
+         strncmp(metadata->file_path, "disc0:/", 7) == 0;
+}
+
+static int metadata_is_unresolved_psp(const GameMetadata *metadata) {
+  return metadata &&
+         (metadata->category == CAT_PSP ||
+          (metadata->category == CAT_UNKNOWN && metadata_looks_like_disc_launch(metadata))) &&
+         strcmp(metadata->game_id, UNKNOWN_GAME_ID) == 0;
+}
+
+static void start_power_callback_thread(void) {
+  cb_thid =
+      sceKernelCreateThread("GameDiaryPwrCB", cb_thread, 0x30, 0x800, 0, 0);
+  if (cb_thid >= 0) {
+    sceKernelStartThread(cb_thid, 0, NULL);
+  }
+}
+
+static void resolve_late_umd_metadata(void) {
+  const GameMetadata *metadata = detector_get_metadata();
+  if (!metadata_is_unresolved_psp(metadata)) {
+    detector_init_late();
+    return;
+  }
+
+  debug_log("tracker", "PSP metadata still UNKNOWN after base settle; waiting %u s before disc0 fallback.",
+            (unsigned int)(TRACKER_UMD_EXTRA_SETTLE_US / 1000000));
+  sceKernelDelayThread(TRACKER_UMD_EXTRA_SETTLE_US);
+
+  for (u32 attempt = 1; running && attempt <= TRACKER_UMD_MAX_ATTEMPTS; attempt++) {
+    debug_log("tracker", "Late UMD metadata attempt %u/%u",
+              (unsigned int)attempt, (unsigned int)TRACKER_UMD_MAX_ATTEMPTS);
+
+    if (detector_init_late()) {
+      return;
+    }
+
+    metadata = detector_get_metadata();
+    if (!metadata_is_unresolved_psp(metadata)) {
+      return;
+    }
+
+    if (attempt < TRACKER_UMD_MAX_ATTEMPTS) {
+      debug_log("tracker", "UMD metadata still UNKNOWN; retrying in %u s.",
+                (unsigned int)(TRACKER_UMD_RETRY_DELAY_US / 1000000));
+      sceKernelDelayThread(TRACKER_UMD_RETRY_DELAY_US);
+    }
+  }
+}
 
 static int power_callback(int unknown, int power_info, void *arg) {
   (void)unknown;
@@ -81,19 +141,34 @@ static int tracker_thread_main(SceSize args, void *argp) {
   (void)args;
   (void)argp;
 
+  current_game_uid = 0;
+  current_session_offset = -1;
+  pending_seconds = 0;
+  session_total_seconds = 0;
+  is_suspended = 1;
+  session_start_ts = utils_get_timestamp();
+
   // Give memory stick and CFW time to settle.
-  // Increased to 15 seconds to safely bypass heavy initial loading screens (like GTA and NFS)
-  // before we attempt any fallback reads from disc0:/
-  sceKernelDelayThread(15 * 1000 * 1000);
+  sceKernelDelayThread(TRACKER_BASE_SETTLE_US);
 
-  // Second pass to fetch ID directly from disc if parameters failed
-  detector_init_late();
+  // Second pass to fetch ID directly from disc if parameters failed.
+  // GTA can keep the UMD driver busy during its intro, so unresolved UMDs
+  // get a longer settle window and bounded retries before any storage entry
+  // is created.
+  resolve_late_umd_metadata();
 
-  cb_thid =
-      sceKernelCreateThread("GameDiaryPwrCB", cb_thread, 0x30, 0x800, 0, 0);
-  if (cb_thid >= 0) {
-    sceKernelStartThread(cb_thid, 0, NULL);
+  if (!running) {
+    return 0;
   }
+
+  const GameMetadata *metadata = detector_get_metadata();
+  if (metadata_is_unresolved_psp(metadata)) {
+    debug_log("tracker", "UMD metadata unresolved after %u attempts; tracking disabled to avoid unsafe disc0 I/O.",
+              (unsigned int)TRACKER_UMD_MAX_ATTEMPTS);
+    return 0;
+  }
+
+  start_power_callback_thread();
 
   // Initialize storage dynamically after the settle delay
   const char *prefix = utils_get_device_prefix();
@@ -102,8 +177,6 @@ static int tracker_thread_main(SceSize args, void *argp) {
   storage_init(base_dir);
 
   // Initialize session (marks as a new launch)
-  const GameMetadata *metadata = detector_get_metadata();
-  
   utils_set_log_context(metadata->game_id);
 
   int st_res = storage_get_or_create_game(metadata, &current_game_uid);
@@ -117,10 +190,12 @@ static int tracker_thread_main(SceSize args, void *argp) {
 
   session_total_seconds = 0;
   current_session_offset = -1;
-  /* Record the exact start time of this gaming session. This timestamp is
-   * immutable and will be used for ALL writes of this session entry, ensuring
-   * playtime is always attributed to the day the session began. */
-  session_start_ts = utils_get_timestamp();
+  u32 now_ts = utils_get_timestamp();
+  if (now_ts > session_start_ts) {
+    session_total_seconds = now_ts - session_start_ts;
+    debug_log("tracker", "Backfilled startup time before tracking init (%u s)",
+              (unsigned int)session_total_seconds);
+  }
   is_suspended = 0; /* Everything ready */
 
   while (running) {
@@ -149,7 +224,7 @@ static int tracker_thread_main(SceSize args, void *argp) {
 void tracker_thread_start(void) {
   running = 1;
   tracker_thid = sceKernelCreateThread("GameDiaryTrk", tracker_thread_main,
-                                       0x30, 0x4000, 0, 0);
+                                       0x40, 0x4000, 0, 0);
   if (tracker_thid >= 0) {
     sceKernelStartThread(tracker_thid, 0, NULL);
   }

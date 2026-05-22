@@ -319,6 +319,16 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
   /* Caller must have called storage_init() before this point.
    * If not initialized, we can't recover gracefully without a base_dir. */
   if (!g_initialized) return -1;
+  if (!meta || !uid) return -2;
+
+  /* A PSP game without a real DISC_ID is not safe to persist. In this state
+   * the UMD driver may still be busy; creating an UNKNOWN entry would also
+   * trigger PSP icon capture from disc0:/ and can disturb sensitive boots. */
+  if ((meta->category == CAT_PSP ||
+       (meta->category == CAT_UNKNOWN && strncmp(meta->file_path, "disc0:/", 7) == 0)) &&
+      strcmp(meta->game_id, "UNKNOWN-00000") == 0) {
+    return -3;
+  }
 
   // PRO-C Workaround: Retry ensuring directories exist.
   // During CFW boot (module_start), the MS can be locked or virtualized, 
@@ -377,9 +387,11 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
 
 #if defined(GDIARY_PLUGIN) && !defined(GDIARY_APP)
       /* Capture icon using the stored base dir. */
-      char icons_dir[160];
-      snprintf(icons_dir, sizeof(icons_dir), "%s/icons", g_base_dir);
-      utils_capture_icon(new_game.game_id, new_game.category, icons_dir, meta->file_path);
+      if (strcmp(new_game.game_id, "UNKNOWN-00000") != 0) {
+        char icons_dir[160];
+        snprintf(icons_dir, sizeof(icons_dir), "%s/icons", g_base_dir);
+        utils_capture_icon(new_game.game_id, new_game.category, icons_dir, meta->file_path);
+      }
 #endif
 
       return 0;

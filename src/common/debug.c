@@ -26,22 +26,36 @@ void debug_init(void) {
 
 #ifdef GDIARY_PLUGIN
 // Minimal implementation of itoa with padding support for the plugin
-static char* mini_itoa(unsigned int value, char* str, int width) {
-    char temp[16];
+static char* mini_utoa(unsigned int value, char* str, char* end, int width,
+                       unsigned int base, int uppercase) {
+    char temp[32];
+    const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
     int i = 0;
+    if (base < 2 || base > 16) base = 10;
     if (value == 0) temp[i++] = '0';
     else {
         while (value > 0) {
-            temp[i++] = (value % 10) + '0';
-            value /= 10;
+            temp[i++] = digits[value % base];
+            value /= base;
         }
     }
-    while (i < width && i < 15) temp[i++] = '0';
-    while (i > 0) *str++ = temp[--i];
+    while (i < width && i < (int)sizeof(temp) - 1) temp[i++] = '0';
+    while (i > 0 && str < end) *str++ = temp[--i];
     return str;
 }
 
+static char* mini_itoa(int value, char* str, char* end, int width) {
+    if (value < 0) {
+        unsigned int magnitude = (unsigned int)(-(value + 1)) + 1;
+        if (str < end) *str++ = '-';
+        return mini_utoa(magnitude, str, end, width, 10, 0);
+    }
+    return mini_utoa((unsigned int)value, str, end, width, 10, 0);
+}
+
 static int mini_vsnprintf(char* buffer, size_t n, const char* format, va_list arg) {
+    if (n == 0) return 0;
+
     char* p = buffer;
     char* end = buffer + n - 1;
     const char* f = format;
@@ -57,15 +71,29 @@ static int mini_vsnprintf(char* buffer, size_t n, const char* format, va_list ar
                     f++;
                 }
             }
+            while (*f == 'l') f++;
+
             if (*f == 's') {
                 char* s = va_arg(arg, char*);
                 if (!s) s = "(null)";
                 while (*s && p < end) *p++ = *s++;
-            } else if (*f == 'd' || *f == 'u') {
+            } else if (*f == 'd') {
+                int val = va_arg(arg, int);
+                p = mini_itoa(val, p, end, width);
+            } else if (*f == 'u') {
                 unsigned int val = va_arg(arg, unsigned int);
-                p = mini_itoa(val, p, width);
+                p = mini_utoa(val, p, end, width, 10, 0);
+            } else if (*f == 'x' || *f == 'X') {
+                unsigned int val = va_arg(arg, unsigned int);
+                p = mini_utoa(val, p, end, width, 16, *f == 'X');
+            } else if (*f == 'c') {
+                int val = va_arg(arg, int);
+                if (p < end) *p++ = (char)val;
             } else if (*f == '%') {
                 *p++ = '%';
+            } else if (*f != '\0') {
+                if (p < end) *p++ = '%';
+                if (p < end) *p++ = *f;
             }
         } else {
             *p++ = *f;
