@@ -305,75 +305,7 @@ jobs:
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}
           name: GameDiary ${{ steps.get_version.outputs.tag }} - ${{ steps.get_version.outputs.codename }}
-          body: |
-            ## 🎮 GameDiary PSP - ${{ steps.get_version.outputs.codename }}
-
-            New version available.
-
-            ---
-
-            ## 📦 Download
-
-            * **GameDiary.zip** (PRX + EBOOT) - Standard release.
-              https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.zip
-            
-            * **GameDiaryDebug.zip** - Debug version. Use this **only** if the main version has issues. 
-              https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/GameDiaryDebug.zip
-              * **Why use it?** It generates detailed step-by-step text logs in `ms0:/PSP/COMMON/GameDiary/debug-DD-MM-YYYY.txt`.
-              * **When is it useful?** If the plugin fails to read a Game ID, crashes, or playtime isn't saving, these logs will tell us exactly where and why it failed.
-
-            ---
-
-            ## ⚙️ Installation
-
-            ### 📌 Plugin (GameDiary.prx)
-
-            1. Copy `GameDiary.prx` to:
-
-            ```
-            /SEPLUGINS/
-            ```
-
-            2. Enable the plugin in ARK-4:
-
-            * For PSP games:
-
-            ```
-            ms0:/SEPLUGINS/GameDiary.prx 1
-            ```
-
-            (or `ef0:/` on PSP Go)
-
-            * For POPS (PS1):
-
-            ```
-            ms0:/SEPLUGINS/GameDiary.prx 1
-            ```
-
-            ---
-
-            ### 🎮 Application (EBOOT)
-
-            1. Copy the `GameDiary` folder to:
-
-            ```
-            /PSP/GAME/
-            ```
-
-            2. Final structure:
-
-            ```
-            PSP/
-              GAME/
-                GameDiary/
-                  EBOOT.PBP
-            ```
-
-            ---
-
-            ## 📝 Changelog
-
-            ${{ steps.git-cliff.outputs.content }}
+          body_path: .github/release_body.md
           files: |
             GameDiary.zip
             GameDiaryDebug.zip
