@@ -36,6 +36,7 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_CAT_PSX]              = "PlayStation (PSX)",
     [MSG_CAT_MINIS]            = "PlayStation Minis",
     [MSG_CAT_HOMEBREW]         = "Homebrew",
+    [MSG_CAT_UNKNOWN]          = "Desconocido",
     [MSG_ERROR_NO_GAMES]       = "No se encontraron juegos",
     [MSG_CTRL_NAVIGATE]        = "Navegar",
 
@@ -157,6 +158,10 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_SETTINGS_FORMATTING]      = "Formato",
     [MSG_FORMATTING_HOURS_ONLY]    = "Formato: Solo Horas",
     [MSG_HELP_DESC_FORMATTING]     = "Ajusta cómo se muestra el tiempo. Oculta los días para mostrar solo el total de horas y minutos.",
+    [MSG_MENU_LEADERBOARD]         = "Clasificación",
+    [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: Inicio de la lista",
+    [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: Final de la lista",
+    [MSG_HELP_DESC_LEADERBOARD]    = "Clasificación de tus juegos más jugados. Ordena los juegos por tiempo de juego en cada categoría.",
     [MSG_LOADING]                  = "Cargando...",
     [MSG_WARNING]                  = "ADVERTENCIA",
 };

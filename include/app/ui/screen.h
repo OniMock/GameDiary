@@ -41,6 +41,7 @@ extern Screen g_screen_main_menu;
 extern Screen g_screen_stats;
 extern Screen g_screen_activity;
 extern Screen g_screen_game_list;
+extern Screen g_screen_leaderboard;
 extern Screen g_screen_game_details;
 extern Screen g_screen_settings;
 extern Screen g_screen_formatting;

@@ -29,7 +29,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define MENU_ITEM_COUNT 5
+#define MENU_ITEM_COUNT 6
 
 static float g_current_index = 0.0f;
 static float g_target_index = 0.0f;
@@ -46,6 +46,7 @@ typedef struct {
 
 static const MainMenuItem g_menu_items[MENU_ITEM_COUNT] = {
     { MSG_MENU_GAMES, &GD_IMG_ICON_GAME_128_PNG, &g_screen_game_list },
+    { MSG_MENU_LEADERBOARD, &GD_IMG_ICON_LEADERBOARD_128_PNG, &g_screen_leaderboard },
     { MSG_MENU_STATS, &GD_IMG_ICON_STATS_128_PNG, &g_screen_stats },
     { MSG_MENU_ACTIVITY, &GD_IMG_ICON_ACTIVITY_128_PNG, &g_screen_activity },
     { MSG_MENU_SETTINGS, &GD_IMG_ICON_SETTINGS_128_PNG, &g_screen_settings },
@@ -203,7 +204,7 @@ static void main_menu_draw(void) {
         float draw_x_f = (float)center_x + (offset * spacing);
         float w_f = base_w * scale;
         float h_f = base_h * scale;
-        
+
         // Convert to integer only at the final step using proper rounding (+0.5f)
         // This eliminates the 1-pixel "vai e volta" (jitter) during animation
         int w = (int)(w_f + 0.5f);

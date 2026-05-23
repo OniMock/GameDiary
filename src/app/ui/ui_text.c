@@ -332,6 +332,71 @@ void ui_draw_game_name_auto_fit(const char *text, Rect r, u32 color, float size,
   ui_draw_game_name(draw_ptr, r, color, final_scale, align);
 }
 
+/**
+ * @brief Draws a game name using the game-name font at a FIXED size.
+ *        If the text overflows, applies ellipsis at the same given size
+ *        instead of shrinking the font. The size passed is always honoured.
+ */
+void ui_draw_game_name_fixed(const char *text, Rect r, u32 color, float size,
+                             UIAlign align) {
+  if (!text || !*text) return;
+
+  char buffer[256];
+
+  /* Sanitize newlines into spaces */
+  size_t len = 0;
+  while (text[len] && len < sizeof(buffer) - 1) {
+    char c = text[len];
+    buffer[len] = (c == '\n' || c == '\r') ? ' ' : c;
+    len++;
+  }
+  buffer[len] = '\0';
+
+  float text_w = font_get_game_name_width(buffer, size);
+
+  if (text_w > (float)r.w) {
+    /* Overflow: truncate with ellipsis at fixed size */
+    const char *ellipsis = "...";
+    float ellipsis_w = font_get_game_name_width(ellipsis, size);
+    float target_w   = (float)r.w - ellipsis_w;
+
+    if (target_w < 0.0f) {
+      /* Not even ellipsis fits — draw nothing or just "..." */
+      if (ellipsis_w <= (float)r.w) {
+        ui_draw_game_name(ellipsis, r, color, size, align);
+      }
+      return;
+    }
+
+    /* Walk through UTF-8 codepoints to find max fitting prefix */
+    size_t best_fit = 0;
+    size_t cur = 0;
+    char   temp[256];
+    while (cur < len) {
+      size_t csz = utf8_char_size((unsigned char)buffer[cur]);
+      if (csz == 0) csz = 1;
+      size_t next = cur + csz;
+      if (next >= sizeof(temp)) break;
+
+      snprintf(temp, sizeof(temp), "%.*s", (int)next, buffer);
+      float w = font_get_game_name_width(temp, size);
+      if (w <= target_w) {
+        best_fit = next;
+        cur = next;
+      } else {
+        break;
+      }
+    }
+
+    char final_buf[256];
+    snprintf(final_buf, sizeof(final_buf), "%.*s%s", (int)best_fit, buffer, ellipsis);
+    ui_draw_game_name(final_buf, r, color, size, align);
+  } else {
+    /* Fits without truncation */
+    ui_draw_game_name(buffer, r, color, size, align);
+  }
+}
+
 void ui_text_wrap(const char* src, float scale, int max_px_width,
                   char out_lines[][MAX_LINE_WIDTH], int max_lines, int* out_count) {
     if (!src || !out_count) return;

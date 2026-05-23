@@ -36,6 +36,7 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_CAT_PSX]              = "PSX",
     [MSG_CAT_MINIS]            = "ミニ",
     [MSG_CAT_HOMEBREW]         = "自作",
+    [MSG_CAT_UNKNOWN]          = "不明",
     [MSG_ERROR_NO_GAMES]       = "ゲームがありません",
     [MSG_CTRL_NAVIGATE]        = "移動",
 
@@ -160,6 +161,10 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SETTINGS_FORMATTING]      = "表示形式",
     [MSG_FORMATTING_HOURS_ONLY]    = "形式：時間のみ",
     [MSG_HELP_DESC_FORMATTING]     = "時間の表示方法を調整します。日数を非表示にして、合計時間と分のみを表示します。",
+    [MSG_MENU_LEADERBOARD]         = "ランキング",
+    [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: リストの先頭",
+    [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: リストの最後",
+    [MSG_HELP_DESC_LEADERBOARD]    = "最もプレイしたゲームのランキングです。各カテゴリでプレイ時間順にゲームを並べ替えます。",
     [MSG_LOADING]                  = "読み込み中...",
     [MSG_WARNING]                  = "警告",
 };

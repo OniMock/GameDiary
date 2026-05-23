@@ -36,6 +36,7 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_CAT_PSX]              = "PlayStation (PSX)",
     [MSG_CAT_MINIS]            = "PlayStation Minis",
     [MSG_CAT_HOMEBREW]         = "Homebrew",
+    [MSG_CAT_UNKNOWN]          = "Неизвестно",
     [MSG_ERROR_NO_GAMES]       = "Игры не найдены",
     [MSG_CTRL_NAVIGATE]        = "Навигация",
 
@@ -156,6 +157,10 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SETTINGS_FORMATTING]      = "Форматирование",
     [MSG_FORMATTING_HOURS_ONLY]    = "Формат: Только часы",
     [MSG_HELP_DESC_FORMATTING]     = "Настройте отображение времени. Скройте дни, чтобы показывать только общее количество часов и минут.",
+    [MSG_MENU_LEADERBOARD]         = "Рейтинг",
+    [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: Начало списка",
+    [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: Конец списка",
+    [MSG_HELP_DESC_LEADERBOARD]    = "Рейтинг ваших самых популярных игр. Сортирует игры по времени игры в каждой категории.",
     [MSG_LOADING]                  = "Загрузка...",
     [MSG_WARNING]                  = "ВНИМАНИЕ",
 };

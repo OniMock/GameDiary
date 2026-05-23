@@ -63,6 +63,8 @@ extern const ImageResource GD_IMG_ICON_INFO_128_PNG;
 extern const ImageResource GD_IMG_ICON_INFO_32_PNG;
 extern const ImageResource GD_IMG_ICON_LANGUAGE_128_PNG;
 extern const ImageResource GD_IMG_ICON_LANGUAGE_32_PNG;
+extern const ImageResource GD_IMG_ICON_LEADERBOARD_128_PNG;
+extern const ImageResource GD_IMG_ICON_LEADERBOARD_32_PNG;
 extern const ImageResource GD_IMG_ICON_LOGO_128_PNG;
 extern const ImageResource GD_IMG_ICON_LOGO_32_PNG;
 extern const ImageResource GD_IMG_ICON_MENU_128_PNG;

@@ -74,6 +74,20 @@ void ui_draw_game_name_auto_fit(const char *text, Rect r, u32 color, float size,
 void ui_draw_game_name(const char *text, Rect r, u32 color, float size, UIAlign align);
 
 /**
+ * @brief Draws a game name text at a FIXED font size.
+ *        Applies ellipsis ("...") when the text overflows the rect,
+ *        but never shrinks or grows the font — size is always honoured.
+ *
+ * @param text   Game name to draw.
+ * @param r      Rectangle area.
+ * @param color  Text color.
+ * @param size   Font size (never modified).
+ * @param align  Alignment.
+ */
+void ui_draw_game_name_fixed(const char *text, Rect r, u32 color, float size,
+                             UIAlign align);
+
+/**
  * @brief Splits a UTF-8 string into two parts, attempting to balance visual width
  *        while prioritizing semantic breakpoints (spaces or CamelCase transitions).
  *

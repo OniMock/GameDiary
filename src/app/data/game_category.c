@@ -26,20 +26,24 @@ const char* game_category_get_name(u8 category) {
         case CAT_PSP:      return i18n_get(MSG_CAT_PSP);
         case CAT_PS1:      return i18n_get(MSG_CAT_PSX);
         case CAT_HOMEBREW: return i18n_get(MSG_CAT_HOMEBREW);
-        default:           return i18n_get(MSG_CAT_HOMEBREW); // Fallback to HB for unknown
+        default:           return i18n_get(MSG_CAT_UNKNOWN);
     }
 }
 
 int game_category_get_available(u8 *out_categories) {
     u32 count = data_get_game_count();
     GameStats *games = data_get_games();
-    
-    u8 found[CAT_UNKNOWN] = {0};
+
+    /*
+     * Track all categories including CAT_UNKNOWN (value 4).
+     * Array size is CAT_UNKNOWN + 1 so index 4 is valid.
+     */
+    u8 found[CAT_UNKNOWN + 1] = {0};
     int found_count = 0;
 
     for (u32 i = 0; i < count; i++) {
         u8 norm = game_category_normalize(games[i].entry.category);
-        if (norm < CAT_UNKNOWN && found[norm] == 0) {
+        if (norm <= CAT_UNKNOWN && found[norm] == 0) {
             found[norm] = 1;
             out_categories[found_count++] = norm;
         }

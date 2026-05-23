@@ -13,7 +13,7 @@ void ui_style_set_dark(void) {
     g_ui_style.bg        = UI_COLOR_HEX(0x0F0F0F); // #0F0F0F - Background
     g_ui_style.card      = UI_COLOR_HEX(0x1E1E1E); // #1E1E1E - Card/Surface
     g_ui_style.border    = UI_COLOR_HEX(0x252525); // #252525 - Borders/Dividers
-    g_ui_style.highlight = UI_COLOR_ALPHA(UI_COLOR_HEX(0x444444), 66); // #444444 - Selection/Hover (66% alpha)
+    g_ui_style.highlight = UI_COLOR_HEX(0x28323D); // #28323D - Lighter premium slate-blue/gray for selection
 
     // Typography
     g_ui_style.text      = UI_COLOR_HEX(0xFFFFFF); // #FFFFFF - Main Text
