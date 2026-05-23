@@ -297,7 +297,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 - [x] Network-based version checker.
 - [x] Expand UI features with Dark/Light Theme.
 - [x] Export stats to JSON/CSV for external use.
-- [ ] Fix plugin for UMD games (GTA, etc).
+- [x] Fix plugin for UMD games (GTA, etc).
 - [ ] Ongoing maintenance, fixes, and compatibility improvements.
 
 ---
