@@ -270,20 +270,43 @@ jobs:
             mv CHANGELOG.tmp.md CHANGELOG.md
           fi
 
-          rm -f CHANGELOG.tmp.md
-
       - name: Commit changelog
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           git config user.name "onimock-actions"
           git config user.email "onimock-actions@github.com"
-
           git add CHANGELOG.md
-
           git commit -m "chore(release): update changelog ${{ steps.get_version.outputs.tag }} [skip cliff]" || echo "No changes"
-
           git push origin HEAD:${{ github.ref_name }}
 
+      # -------------------------------------------------------
+      # 📝 Generate Release Body
+      # -------------------------------------------------------
+      - name: Generate Release Body
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          CHANGELOG=$(cat CHANGELOG.tmp.md)
+
+          sed \
+            -e "s|CODENAME_PLACEHOLDER|${{ steps.get_version.outputs.codename }}|g" \
+            -e "s|TAG_PLACEHOLDER|${{ steps.get_version.outputs.tag }}|g" \
+            -e "s|REPO_PLACEHOLDER|${{ github.repository }}|g" \
+            .github/release_body.md > release_body_final.md
+
+          python3 - <<'EOF'
+          import re
+
+          with open("CHANGELOG.tmp.md", "r") as f:
+              changelog = f.read().strip()
+
+          with open("release_body_final.md", "r") as f:
+              body = f.read()
+
+          body = body.replace("CHANGELOG_PLACEHOLDER", changelog)
+
+          with open("release_body_final.md", "w") as f:
+              f.write(body)
+          EOF
 
       # -------------------------------------------------------
       # 🏷️ Create tag
@@ -297,7 +320,7 @@ jobs:
           git push origin ${{ steps.get_version.outputs.tag }}
 
       # -------------------------------------------------------
-      # 🚀 Create release
+      # 🚀 Create Release
       # -------------------------------------------------------
       - name: Create Release
         if: steps.check_tag.outputs.exists == 'false'
@@ -305,7 +328,7 @@ jobs:
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}
           name: GameDiary ${{ steps.get_version.outputs.tag }} - ${{ steps.get_version.outputs.codename }}
-          body_path: .github/release_body.md
+          body_path: release_body_final.md
           files: |
             GameDiary.zip
             GameDiaryDebug.zip

@@ -1,16 +1,28 @@
-## 🎮 GameDiary PSP - ${{ steps.get_version.outputs.codename }}
+## 🎮 GameDiary PSP - CODENAME_PLACEHOLDER
 
 New version available.
+
+---
+
+## ❤️ Special Thanks
+
+Huge thanks to these Reddit users for helping test GameDiary PSP and providing valuable feedback during development:
+
+* u/aligator187
+* u/KoeBizkit
+* u/SubstantialLab9688
+
+Your testing, bug reports, and patience helped improve compatibility and stability across different PSP models and CFWs.
 
 ---
 
 ## 📦 Download
 
 * **GameDiary.zip** (PRX + EBOOT) - Standard release.
-  https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/GameDiary.zip
+  https://github.com/REPO_PLACEHOLDER/releases/download/TAG_PLACEHOLDER/GameDiary.zip
 
 * **GameDiaryDebug.zip** - Debug version. Use this **only** if the main version has issues.
-  https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.tag }}/GameDiaryDebug.zip
+  https://github.com/REPO_PLACEHOLDER/releases/download/TAG_PLACEHOLDER/GameDiaryDebug.zip
   * **Why use it?** It generates detailed step-by-step text logs in `ms0:/PSP/COMMON/GameDiary/debug-DD-MM-YYYY.txt`.
   * **When is it useful?** If the plugin fails to read a Game ID, crashes, or playtime isn't saving, these logs will tell us exactly where and why it failed.
 
@@ -77,4 +89,4 @@ PSP/
 
 ## 📝 Changelog
 
-${{ steps.git-cliff.outputs.content }}
+CHANGELOG_PLACEHOLDER
