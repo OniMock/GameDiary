@@ -224,8 +224,21 @@ static const char* ui_text_calc_auto_fit(const char* text, float max_w, float si
                                         char* out_buf, size_t buf_size) {
     if (!text || !*text) return "";
 
-    float current_w = is_game_name ? font_get_game_name_width(text, size) 
-                                   : font_get_width(text, size);
+    /* Sanitize newlines and carriage returns into out_buf first */
+    size_t len = 0;
+    while (text[len] && len < buf_size - 1) {
+        char c = text[len];
+        if (c == '\n' || c == '\r') {
+            out_buf[len] = ' ';
+        } else {
+            out_buf[len] = c;
+        }
+        len++;
+    }
+    out_buf[len] = '\0';
+
+    float current_w = is_game_name ? font_get_game_name_width(out_buf, size) 
+                                   : font_get_width(out_buf, size);
     *out_scale = size;
 
     if (current_w > max_w) {
@@ -251,16 +264,16 @@ static const char* ui_text_calc_auto_fit(const char* text, float max_w, float si
                 size_t best_fit = 0;
                 char temp[128];
                 size_t curr_len = 0;
-                size_t max_len = strlen(text);
+                size_t max_len = strlen(out_buf);
 
                 while (curr_len < max_len) {
-                    size_t c_size = utf8_char_size((unsigned char)text[curr_len]);
+                    size_t c_size = utf8_char_size((unsigned char)out_buf[curr_len]);
                     if (c_size == 0) c_size = 1;
 
                     size_t next_len = curr_len + c_size;
                     if (next_len >= sizeof(temp)) break;
 
-                    snprintf(temp, sizeof(temp), "%.*s", (int)next_len, text);
+                    snprintf(temp, sizeof(temp), "%.*s", (int)next_len, out_buf);
                     float w = is_game_name ? font_get_game_name_width(temp, min_scale)
                                            : font_get_width(temp, min_scale);
 
@@ -271,14 +284,18 @@ static const char* ui_text_calc_auto_fit(const char* text, float max_w, float si
                         break;
                     }
                 }
-                snprintf(out_buf, buf_size, "%.*s%s", (int)best_fit, text, ellipsis);
+                
+                char final_temp[256];
+                snprintf(final_temp, sizeof(final_temp), "%.*s%s", (int)best_fit, out_buf, ellipsis);
+                strncpy(out_buf, final_temp, buf_size - 1);
+                out_buf[buf_size - 1] = '\0';
             }
             return out_buf;
         } else {
             *out_scale = needed_scale;
         }
     }
-    return text;
+    return out_buf;
 }
 
 void ui_draw_text_auto_fit(const char *text, Rect r, u32 color, float size,
