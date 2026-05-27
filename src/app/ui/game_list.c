@@ -274,6 +274,10 @@ static void game_list_init(void) {
             }
         }
     }
+
+    if (s_filtered_count > 0) {
+        g_prev_idx = ((g_cs.current_idx % s_filtered_count) + s_filtered_count) % s_filtered_count;
+    }
 }
 
 static void game_list_update(u32 buttons, u32 pressed) {
