@@ -45,6 +45,15 @@ u32 utils_get_timestamp(void) {
   return (u32)((tick / 1000000ULL) - 62135596800ULL);
 }
 
+int utils_get_timezone_offset_seconds(void) {
+  u64 utc_tick, local_tick;
+  sceRtcGetCurrentTick(&utc_tick);
+  if (sceRtcConvertUtcToLocalTime(&utc_tick, &local_tick) < 0) {
+    return 0;
+  }
+  return (int)(( (s64)local_tick - (s64)utc_tick ) / 1000000LL);
+}
+
 u32 utils_get_time_ms(void) {
     u64 tick;
     sceRtcGetCurrentTick(&tick);

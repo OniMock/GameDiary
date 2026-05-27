@@ -24,7 +24,6 @@
 #include "common/debug.h"
 
 static SceUID tracker_thid = -1;
-static SceUID cb_thid = -1;
 static int running = 0;
 
 #define TRACKER_BASE_SETTLE_US       (15 * 1000 * 1000)
@@ -36,9 +35,7 @@ static int running = 0;
 static volatile u32 pending_seconds = 0;
 static volatile u32 session_total_seconds = 0;
 static SceOff current_session_offset = -1;
-static volatile int is_suspended = 1; /* Start suspended until detector confirms */
 static u32 current_game_uid = 0;
-static int cb_thread(SceSize args, void *argp);
 
 /*
  * Timestamp captured at the exact moment the current gaming session begins.
@@ -61,13 +58,8 @@ static int metadata_is_unresolved_psp(const GameMetadata *metadata) {
          strcmp(metadata->game_id, UNKNOWN_GAME_ID) == 0;
 }
 
-static void start_power_callback_thread(void) {
-  cb_thid =
-      sceKernelCreateThread("GameDiaryPwrCB", cb_thread, 0x30, 0x800, 0, 0);
-  if (cb_thid >= 0) {
-    sceKernelStartThread(cb_thid, 0, NULL);
-  }
-}
+// Power callback removed to prevent kernel panics with certain games.
+// Using time-gap detection instead.
 
 static void resolve_late_umd_metadata(void) {
   const GameMetadata *metadata = detector_get_metadata();
@@ -101,41 +93,7 @@ static void resolve_late_umd_metadata(void) {
   }
 }
 
-static int power_callback(int unknown, int power_info, void *arg) {
-  (void)unknown;
-  (void)arg;
 
-  if (power_info & PSP_POWER_CB_POWER_SWITCH ||
-      power_info & PSP_POWER_CB_SUSPENDING) {
-    if (pending_seconds > 0 && current_game_uid > 0) {
-      session_total_seconds += pending_seconds;
-      /* Use session_start_ts, NOT the current time. The session must be
-       * attributed to the day it started, even if we cross midnight. */
-      storage_log_session(current_game_uid, session_total_seconds,
-                             session_start_ts, &current_session_offset);
-      pending_seconds = 0;
-    }
-    debug_log("tracker", "Power Callback: Suspending (Total: %u s)", session_total_seconds);
-    is_suspended = 1;
-  } else if (power_info & PSP_POWER_CB_RESUME_COMPLETE) {
-    debug_log("tracker", "Power Callback: Resumed");
-    is_suspended = 0;
-  }
-
-  return 0;
-}
-
-static int cb_thread(SceSize args, void *argp) {
-  (void)args;
-  (void)argp;
-
-  int cbid = sceKernelCreateCallback("PwrCB", power_callback, NULL);
-  if (cbid >= 0) {
-    scePowerRegisterCallback(0, cbid);
-    sceKernelSleepThreadCB();
-  }
-  return 0;
-}
 
 static int tracker_thread_main(SceSize args, void *argp) {
   (void)args;
@@ -145,7 +103,6 @@ static int tracker_thread_main(SceSize args, void *argp) {
   current_session_offset = -1;
   pending_seconds = 0;
   session_total_seconds = 0;
-  is_suspended = 1;
   session_start_ts = utils_get_timestamp();
 
   // Give memory stick and CFW time to settle.
@@ -168,7 +125,7 @@ static int tracker_thread_main(SceSize args, void *argp) {
     return 0;
   }
 
-  start_power_callback_thread();
+
 
   // Initialize storage dynamically after the settle delay
   const char *prefix = utils_get_device_prefix();
@@ -196,19 +153,51 @@ static int tracker_thread_main(SceSize args, void *argp) {
     debug_log("tracker", "Backfilled startup time before tracking init (%u s)",
               (unsigned int)session_total_seconds);
   }
-  is_suspended = 0; /* Everything ready */
+  
+  u32 last_tick_ts = utils_get_timestamp();
 
   while (running) {
     sceKernelDelayThread(1000 * 1000); // 1 sec
 
-    if (!is_suspended) {
+    now_ts = utils_get_timestamp();
+    u32 diff = now_ts - last_tick_ts;
+
+    // If more than 10 seconds passed since the last 1-second tick, 
+    // the system was likely suspended in sleep mode!
+    if (diff >= 10) {
+      debug_log("tracker", "Large time gap detected (%u s). Assuming resume from sleep.", diff);
+      
+      if (current_game_uid > 0) {
+        /* Flush any pending seconds accumulated before sleep,
+         * attributing them to the OLD session (old day). */
+        session_total_seconds += pending_seconds;
+        pending_seconds = 0;
+        if (session_total_seconds > 0) {
+          storage_log_session(current_game_uid, session_total_seconds,
+                                 session_start_ts, &current_session_offset);
+          debug_log("tracker", "Pre-sleep flush (Total: %u s)", session_total_seconds);
+        }
+
+        /* Switch to local timestamp for day-boundary comparison so that
+         * midnight on the PSP clock (00:00 local) triggers the split. */
+        int local_offset = utils_get_timezone_offset_seconds();
+        u32 start_day = (session_start_ts + local_offset) / 86400;
+        u32 current_day = (now_ts + local_offset) / 86400;
+
+        if (start_day != current_day) {
+          debug_log("tracker", "Day changed during sleep (start_day=%u, current_day=%u). Starting new session.",
+                    (unsigned int)start_day, (unsigned int)current_day);
+          session_start_ts = now_ts;
+          session_total_seconds = 0;
+          current_session_offset = -1; /* Force storage to create a new record */
+        }
+      }
+    } else {
       pending_seconds++;
 
       if (pending_seconds >= 60) {
         if (current_game_uid > 0) {
           session_total_seconds += pending_seconds;
-          /* Use session_start_ts (immutable) so the session always belongs
-           * to the day it started, regardless of when this flush happens. */
           storage_log_session(current_game_uid, session_total_seconds,
                                  session_start_ts, &current_session_offset);
           debug_log("tracker", "Periodic Flush (Total: %u s)", session_total_seconds);
@@ -216,6 +205,8 @@ static int tracker_thread_main(SceSize args, void *argp) {
         pending_seconds = 0;
       }
     }
+
+    last_tick_ts = now_ts;
   }
 
   return 0;

@@ -44,6 +44,7 @@ u32 utils_get_u32_le(const u8 *p);
  * Syncs app and plugin time logic.
  */
 u32 utils_get_timestamp(void);
+int utils_get_timezone_offset_seconds(void);
 
 /**
  * @brief Gets the current time in milliseconds using the PSP RTC.
