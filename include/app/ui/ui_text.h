@@ -12,6 +12,7 @@
 #define GAMEDIARY_UI_TEXT_H
 
 #include "app/ui/ui_components.h"
+#include <stdbool.h>
 #include <stddef.h>
 
 #define MAX_LINE_WIDTH 512
@@ -73,19 +74,31 @@ void ui_draw_game_name_auto_fit(const char *text, Rect r, u32 color, float size,
  */
 void ui_draw_game_name(const char *text, Rect r, u32 color, float size, UIAlign align);
 
+/** Delay before marquee starts while @p hint is active (ms). */
+#define UI_GAME_NAME_HINT_DELAY_MS 1000
+
+/** Pause at the end of the scroll before returning to truncated text (ms). */
+#define UI_GAME_NAME_MARQUEE_END_HOLD_MS 2000
+
 /**
  * @brief Draws a game name text at a FIXED font size.
  *        Applies ellipsis ("...") when the text overflows the rect,
  *        but never shrinks or grows the font — size is always honoured.
  *
+ *        When @p hint is true and the text is truncated, waits
+ *        #UI_GAME_NAME_HINT_DELAY_MS showing the ellipsis, scrolls the full
+ *        string, holds the end for #UI_GAME_NAME_MARQUEE_END_HOLD_MS, then
+ *        returns to the truncated view and repeats.
+ *
  * @param text   Game name to draw.
- * @param r      Rectangle area.
+ * @param r      Rectangle area (also used as clip region for marquee).
  * @param color  Text color.
  * @param size   Font size (never modified).
- * @param align  Alignment.
+ * @param align  Alignment (marquee always scrolls left-to-right).
+ * @param hint   True when the row/item is focused (selected).
  */
 void ui_draw_game_name_fixed(const char *text, Rect r, u32 color, float size,
-                             UIAlign align);
+                             UIAlign align, bool hint);
 
 /**
  * @brief Splits a UTF-8 string into two parts, attempting to balance visual width

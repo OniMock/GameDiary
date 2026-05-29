@@ -159,7 +159,8 @@ static void plugin_settings_draw(void) {
     int text_h = 14;
     int text_y = item_rect.y + (item_rect.h - text_h) / 2;
     Rect text_rect = {text_x, text_y, item_rect.w - (text_x - item_rect.x) - 40, text_h};
-    ui_draw_game_name_fixed(label, text_rect, text_color, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
+    ui_draw_game_name_fixed(label, text_rect, text_color, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT,
+                            selected);
 
     if (idx == 0) {
       bool state = plugin_dat_get_hotkey_enabled() != 0;

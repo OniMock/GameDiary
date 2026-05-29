@@ -377,7 +377,8 @@ static void leaderboard_draw(void) {
 
         /* 4.1b. Game name — fixed size, ellipsis only when it overflows */
         Rect name_rect = {name_x, row_y + 8, name_w, 14};
-        ui_draw_game_name_fixed(g->entry.game_name, name_rect, name_col, UI_FONT_SIZE_TINY, ALIGN_LEFT);
+        ui_draw_game_name_fixed(g->entry.game_name, name_rect, name_col, UI_FONT_SIZE_TINY,
+                                ALIGN_LEFT, (idx == s_selected_idx));
 
         /* 4.2. Playtime Horizontal Bar (Middle) */
         int bar_y = row_y + 11;
