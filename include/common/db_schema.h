@@ -30,6 +30,8 @@
 #define SESSIONS_DAT "sessions.dat"
 #define SESSIONS_TMP "sessions.tmp"
 #define CONFIG_DAT "config.dat"
+#define PLUGIN_DAT "plugin.dat"
+#define TRACKER_DAT "tracker.dat"
 
 /**
  * @brief Game entry structure.

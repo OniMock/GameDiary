@@ -29,7 +29,7 @@
 #include "app/ui/ui_loading.h"
 #include "common/utils.h"
 
-#define SETTINGS_MENU_COUNT 5
+#define SETTINGS_MENU_COUNT 6
 #define MAX_VISIBLE_ITEMS 4
 
 static int g_selection = 0;
@@ -72,7 +72,7 @@ static void settings_update(u32 buttons, u32 pressed) {
     if (pressed & PSP_CTRL_UP) {
         audio_play_sfx(SFX_NAVIGATE);
         g_selection = (g_selection - 1 + SETTINGS_MENU_COUNT) % SETTINGS_MENU_COUNT;
-        
+
         // Scroll up if selection goes above view
         if (g_selection < g_scroll_offset) {
             g_scroll_offset = g_selection;
@@ -85,7 +85,7 @@ static void settings_update(u32 buttons, u32 pressed) {
     if (pressed & PSP_CTRL_DOWN) {
         audio_play_sfx(SFX_NAVIGATE);
         g_selection = (g_selection + 1) % SETTINGS_MENU_COUNT;
-        
+
         // Scroll down if selection goes below view
         if (g_selection >= g_scroll_offset + MAX_VISIBLE_ITEMS) {
             g_scroll_offset = g_selection - (MAX_VISIBLE_ITEMS - 1);
@@ -101,17 +101,20 @@ static void settings_update(u32 buttons, u32 pressed) {
             screen_manager_push(&g_screen_language_select);
         } else if (g_selection == 1) {
             audio_play_sfx(SFX_CONFIRM);
-            screen_manager_push(&g_screen_formatting);
+            screen_manager_push(&g_screen_plugin_settings);
         } else if (g_selection == 2) {
             audio_play_sfx(SFX_CONFIRM);
-            screen_manager_push(&g_screen_backup);
+            screen_manager_push(&g_screen_formatting);
         } else if (g_selection == 3) {
+            audio_play_sfx(SFX_CONFIRM);
+            screen_manager_push(&g_screen_backup);
+        } else if (g_selection == 4) {
             audio_play_sfx(SFX_CONFIRM);
             ui_loading_show(i18n_get(MSG_LOADING)); // We'll update the text next frame
             s_loading_start_ms = utils_get_time_ms();
             s_is_changing = true;
             s_pending_action = 1;
-        } else if (g_selection == 4) {
+        } else if (g_selection == 5) {
             audio_play_sfx(SFX_CONFIRM);
             AppConfig* cfg = config_get();
             cfg->sfx_enabled = !cfg->sfx_enabled;
@@ -175,18 +178,22 @@ static void settings_draw(void) {
             left_icon = &GD_IMG_ICON_LANGUAGE_32_PNG;
             right_icon = i18n_get_current_flag();
         } else if (idx == 1) {
+            label = i18n_get(MSG_SETTINGS_PLUGIN);
+            left_icon = &GD_IMG_ICON_PLUGIN_32_PNG;
+            right_icon = NULL;
+        } else if (idx == 2) {
             label = i18n_get(MSG_SETTINGS_FORMATTING);
             left_icon = &GD_IMG_ICON_FORMATTING_32_PNG;
             right_icon = NULL;
-        } else if (idx == 2) {
+        } else if (idx == 3) {
             label = i18n_get(MSG_SETTINGS_BACKUP);
             left_icon = &GD_IMG_ICON_BACKUP_32_PNG;
             right_icon = NULL;
-        } else if (idx == 3) {
+        } else if (idx == 4) {
             label = i18n_get(MSG_SETTINGS_THEME);
             left_icon = &GD_IMG_ICON_THEME_32_PNG;
             right_icon = NULL;
-        } else if (idx == 4) {
+        } else if (idx == 5) {
             label = i18n_get(MSG_SETTINGS_SFX);
             left_icon = config_get()->sfx_enabled ? &GD_IMG_ICON_SOUND_ACTIVE_32_PNG : &GD_IMG_ICON_SOUND_INACTIVE_32_PNG;
             right_icon = NULL;
@@ -195,11 +202,11 @@ static void settings_draw(void) {
         ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
                          label, (idx == g_selection), left_icon, right_icon);
 
-        if (idx == 3) {
+        if (idx == 4) {
            // Light theme is 1 (OFF), Dark theme is 0 (ON)
            bool state = (config_get()->theme == 0);
            ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2, state, &s_anim_theme);
-        } else if (idx == 4) {
+        } else if (idx == 5) {
            bool state = config_get()->sfx_enabled;
            ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2, state, &s_anim_sfx);
         }

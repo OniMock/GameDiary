@@ -155,6 +155,10 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_SUCCESS]                  = "Éxito",
     [MSG_ERROR]                    = "Error",
 
+    [MSG_SETTINGS_PLUGIN]          = "Plugin",
+    [MSG_SETTINGS_PLUGIN_HOTKEY]   = "Atajo en juego (mantén L+R+SELECT por 2 s)",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Activa o desactiva el atajo del plugin. Mantén L+R+SELECT durante 2 segundos en el juego para alternarlo. Cuando está desactivado, el seguimiento de tiempo ignora la lista de bloqueo y la combinación queda inactiva. Se guarda en plugin.dat en la Memory Stick.",
+
     [MSG_SETTINGS_FORMATTING]      = "Formato",
     [MSG_FORMATTING_HOURS_ONLY]    = "Formato: Solo Horas",
     [MSG_HELP_DESC_FORMATTING]     = "Ajusta cómo se muestra el tiempo. Oculta los días para mostrar solo el total de horas y minutos.",

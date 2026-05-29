@@ -20,6 +20,7 @@
 #include "plugin/apitype.h"
 #include "plugin/detector.h"
 #include "plugin/tracker.h"
+#include "plugin/plugin_config.h"
 #include "common/utils.h"
 #include "common/debug.h"
 
@@ -36,7 +37,9 @@ int module_start(SceSize args, void *argp) {
   int cat = apitype_detect_category(apitype);
 
   debug_init();
-  debug_log("main", "Plugin starting (APITYPE: 0x%X, CAT: %d)", apitype, cat);
+  plugin_config_init();
+  debug_log("main", "Plugin starting (APITYPE: 0x%X, CAT: %d, hotkey: %u)",
+            apitype, cat, (unsigned int)plugin_config_get()->hotkey_enabled);
 
   // If it's VSH, we skip loading to not track idle XMB time.
   if (cat == CAT_VSH) {

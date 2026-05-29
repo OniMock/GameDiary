@@ -154,6 +154,10 @@ const char* g_lang_it_entries[MSG_COUNT] = {
     [MSG_SUCCESS]                  = "Successo",
     [MSG_ERROR]                    = "Errore",
 
+    [MSG_SETTINGS_PLUGIN]           = "Plugin",
+    [MSG_SETTINGS_PLUGIN_HOTKEY]    = "Scorciatoia in gioco (tieni premuto L+R+SELECT per 2 s)",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Abilita o disabilita la scorciatoia del plugin. Tieni premuto L+R+SELECT per 2 secondi durante il gioco per attivarla o disattivarla. Quando disabilitata, il tracciamento del tempo di gioco ignora la lista di blocco e la combinazione diventa inattiva. Salvato in plugin.dat sulla Memory Stick.",
+
     [MSG_SETTINGS_FORMATTING]      = "Formattazione",
     [MSG_FORMATTING_HOURS_ONLY]    = "Formato: Solo Ore",
     [MSG_HELP_DESC_FORMATTING]     = "Regola il modo in cui viene visualizzato il tempo. Nascondi i giorni per mostrare solo il totale di ore e minuti.",

@@ -9,7 +9,12 @@ PLUGIN_OBJS = \
   src/plugin/detector.o \
   src/plugin/metadata_repository.o \
   src/plugin/tracker.o \
-  src/plugin/icon_capture.o
+  src/plugin/icon_capture.o \
+  src/plugin/plugin_config.o \
+  src/plugin/tracker_db.o \
+  src/plugin/tracker_runtime.o \
+  src/plugin/input_combo.o \
+  src/plugin/overlay_notification.o
 
 # -----------------------------------------------------------------------
 # Common objects — shared between plugin and app
@@ -56,7 +61,7 @@ PRX_EXPORTS = exports.exp
 USE_KERNEL_LIBS = 1
 PSP_FW_VERSION = 661
 
-LIBS = -lpsppower -lpsprtc -lpspsystemctrl_kernel -lpspkubridge -lgcc
+LIBS = -lpsppower -lpsprtc -lpspsystemctrl_kernel -lpspkubridge -lpspctrl -lpspdisplay -lgcc
 
 PSPSDK = $(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

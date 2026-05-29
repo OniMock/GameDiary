@@ -152,6 +152,9 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_SUCCESS]                  = "Success",
     [MSG_ERROR]                    = "Error",
 
+    [MSG_SETTINGS_PLUGIN]           = "Plugin",
+    [MSG_SETTINGS_PLUGIN_HOTKEY]    = "In-Game Hotkey (Hold L+R+SELECT for 2s)",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Enable or disable the plugin hotkey. Hold L+R+SELECT for 2 seconds in-game to toggle it. When disabled, playtime tracking ignores the block list and the combo becomes inactive. Saved to plugin.dat on the memory stick.",
     [MSG_SETTINGS_FORMATTING]      = "Formatting",
     [MSG_FORMATTING_HOURS_ONLY]    = "Format Time: Hours Only",
     [MSG_HELP_DESC_FORMATTING]     = "Adjust how the time is displayed. Hide days to show only total hours and minutes.",

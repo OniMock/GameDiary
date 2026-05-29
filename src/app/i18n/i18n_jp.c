@@ -158,6 +158,10 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SUCCESS]                  = "成功",
     [MSG_ERROR]                    = "エラー",
 
+    [MSG_SETTINGS_PLUGIN]           = "プラグイン",
+    [MSG_SETTINGS_PLUGIN_HOTKEY]    = "ゲーム内ホットキー（L+R+SELECT を2秒長押し）",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "プラグインのホットキーを有効または無効にします。ゲーム中に L+R+SELECT を2秒間長押しすると切り替えできます。無効時はプレイ時間の記録でブロックリストを無視し、キーコンボも無効になります。設定はメモリースティックの plugin.dat に保存されます。",
+
     [MSG_SETTINGS_FORMATTING]      = "表示形式",
     [MSG_FORMATTING_HOURS_ONLY]    = "形式：時間のみ",
     [MSG_HELP_DESC_FORMATTING]     = "時間の表示方法を調整します。日数を非表示にして、合計時間と分のみを表示します。",
