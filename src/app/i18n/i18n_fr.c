@@ -156,7 +156,8 @@ const char* g_lang_fr_entries[MSG_COUNT] = {
 
     [MSG_SETTINGS_PLUGIN]          = "Plugin",
     [MSG_SETTINGS_PLUGIN_HOTKEY]   = "Raccourci en jeu (maintenir L+R+SELECT 2 s)",
-    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Active ou désactive le raccourci du plugin. Maintenez L+R+SELECT pendant 2 secondes en jeu pour le basculer. Lorsqu’il est désactivé, le suivi du temps de jeu ignore la liste de blocage et la combinaison devient inactive. Sauvegardé dans plugin.dat sur la Memory Stick.",
+    [MSG_SETTINGS_PLUGIN_ICONS]     = "Sauvegarder les icônes des jeux",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Les options du plugin sont sauvegardées dans plugin.dat. Raccourci : maintenez L+R+SELECT en jeu pour activer ou désactiver le suivi (désactivé = toujours suivre).\nIcônes : sauvegarde les couvertures PNG lorsqu’un nouveau jeu est enregistré.",
 
     [MSG_SETTINGS_FORMATTING]      = "Formatage",
     [MSG_FORMATTING_HOURS_ONLY]    = "Format : Heures uniquement",

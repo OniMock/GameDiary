@@ -155,7 +155,8 @@ const char* g_lang_pt_entries[MSG_COUNT] = {
 
     [MSG_SETTINGS_PLUGIN]           = "Plugin",
     [MSG_SETTINGS_PLUGIN_HOTKEY]    = "Atalho no jogo (segure L+R+SELECT por 2 s)",
-    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Ativa ou desativa o atalho do plugin. Segure L+R+SELECT por 2 segundos durante o jogo para alternar. Quando desativado, o rastreamento de tempo ignora a lista de bloqueio e a combinação fica inativa. Salvo em plugin.dat no Memory Stick.",
+    [MSG_SETTINGS_PLUGIN_ICONS]     = "Salvar ícones dos jogos",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "As opções do plugin são salvas em plugin.dat. Atalho: segure L+R+SELECT durante o jogo para alternar o rastreamento (desativado = sempre rastrear).\nÍcones: salva capas PNG quando um novo jogo é registrado.",
 
     [MSG_SETTINGS_FORMATTING]      = "Formatação",
     [MSG_FORMATTING_HOURS_ONLY]    = "Formato: Apenas Horas",

@@ -17,7 +17,7 @@
 #define _APP_PLUGIN_DAT_H_
 
 /**
- * @brief Loads plugin.dat; missing/invalid → hotkey disabled (0).
+ * @brief Loads plugin.dat; missing/invalid → hotkey off, icons on.
  */
 void plugin_dat_load(void);
 
@@ -25,6 +25,11 @@ void plugin_dat_load(void);
 int plugin_dat_get_hotkey_enabled(void);
 
 void plugin_dat_set_hotkey_enabled(int enabled);
+
+/** @brief 1 = capture game icons (default when plugin.dat is missing). */
+int plugin_dat_get_icon_enabled(void);
+
+void plugin_dat_set_icon_enabled(int enabled);
 
 /** @brief Writes plugin.dat synchronously. @return 0 on success. */
 int plugin_dat_save(void);

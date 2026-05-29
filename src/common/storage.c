@@ -18,6 +18,7 @@
 #include "common/utils.h"
 #if defined(GDIARY_PLUGIN) && !defined(GDIARY_APP)
 #include "plugin/icon_capture.h"
+#include "plugin/plugin_config.h"
 #endif
 
 #include <pspkernel.h>
@@ -386,11 +387,14 @@ int storage_get_or_create_game(const GameMetadata *meta, u32 *uid) {
       add_to_cache(&new_game); // Success! Add to cache now.
 
 #if defined(GDIARY_PLUGIN) && !defined(GDIARY_APP)
-      /* Capture icon using the stored base dir. */
       if (strcmp(new_game.game_id, "UNKNOWN-00000") != 0) {
-        char icons_dir[160];
-        snprintf(icons_dir, sizeof(icons_dir), "%s/icons", g_base_dir);
-        utils_capture_icon(new_game.game_id, new_game.category, icons_dir, meta->file_path);
+        const PluginConfigRuntime *pcfg = plugin_config_get();
+        if (pcfg && pcfg->icon_enabled) {
+          char icons_dir[160];
+          snprintf(icons_dir, sizeof(icons_dir), "%s/icons", g_base_dir);
+          utils_capture_icon(new_game.game_id, new_game.category, icons_dir,
+                             meta->file_path);
+        }
       }
 #endif
 

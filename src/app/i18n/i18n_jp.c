@@ -160,7 +160,8 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
 
     [MSG_SETTINGS_PLUGIN]           = "プラグイン",
     [MSG_SETTINGS_PLUGIN_HOTKEY]    = "ゲーム内ホットキー（L+R+SELECT を2秒長押し）",
-    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "プラグインのホットキーを有効または無効にします。ゲーム中に L+R+SELECT を2秒間長押しすると切り替えできます。無効時はプレイ時間の記録でブロックリストを無視し、キーコンボも無効になります。設定はメモリースティックの plugin.dat に保存されます。",
+    [MSG_SETTINGS_PLUGIN_ICONS]     = "ゲームアイコンを保存",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "プラグイン設定は plugin.dat に保存されます。ホットキー：ゲーム中に L+R+SELECT を長押しすると記録のオン/オフを切り替えます（オフ = 常に記録）。\nアイコン：新しいゲームが登録されたときに PNG カバーを保存します。",
 
     [MSG_SETTINGS_FORMATTING]      = "表示形式",
     [MSG_FORMATTING_HOURS_ONLY]    = "形式：時間のみ",

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static PluginConfigRuntime g_plugin_config = {0};
+static PluginConfigRuntime g_plugin_config = {0, 1};
 
 static int read_config_file(PluginConfigFile *out) {
   const char *prefix = utils_get_device_prefix();
@@ -45,24 +45,37 @@ static int read_config_file(PluginConfigFile *out) {
   return 0;
 }
 
+static void apply_file_to_runtime(const PluginConfigFile *file) {
+  if (file->hotkey_enabled <= 1) {
+    g_plugin_config.hotkey_enabled = file->hotkey_enabled;
+  }
+
+  /* v1 has no icon field — always enabled. v2+ reads icon_enabled. */
+  if (file->version >= PLUGIN_CONFIG_VERSION) {
+    if (file->icon_enabled <= 1) {
+      g_plugin_config.icon_enabled = file->icon_enabled;
+    }
+  } else {
+    g_plugin_config.icon_enabled = 1;
+  }
+}
+
 void plugin_config_init(void) {
-  /* Sem plugin.dat (ou arquivo inválido): hotkey desligada, tracker.dat ignorado */
+  /* Missing/invalid: hotkey off, icons on (compat with installs without plugin.dat). */
   g_plugin_config.hotkey_enabled = 0;
+  g_plugin_config.icon_enabled = 1;
 
   PluginConfigFile file;
   if (read_config_file(&file) != 0) {
     return;
   }
 
-  if (file.version != PLUGIN_CONFIG_VERSION) {
+  if (file.version != PLUGIN_CONFIG_VERSION_V1 &&
+      file.version != PLUGIN_CONFIG_VERSION) {
     return;
   }
 
-  if (file.hotkey_enabled > 1) {
-    return;
-  }
-
-  g_plugin_config.hotkey_enabled = file.hotkey_enabled;
+  apply_file_to_runtime(&file);
 }
 
 const PluginConfigRuntime *plugin_config_get(void) {

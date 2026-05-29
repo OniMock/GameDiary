@@ -156,7 +156,8 @@ const char* g_lang_it_entries[MSG_COUNT] = {
 
     [MSG_SETTINGS_PLUGIN]           = "Plugin",
     [MSG_SETTINGS_PLUGIN_HOTKEY]    = "Scorciatoia in gioco (tieni premuto L+R+SELECT per 2 s)",
-    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Abilita o disabilita la scorciatoia del plugin. Tieni premuto L+R+SELECT per 2 secondi durante il gioco per attivarla o disattivarla. Quando disabilitata, il tracciamento del tempo di gioco ignora la lista di blocco e la combinazione diventa inattiva. Salvato in plugin.dat sulla Memory Stick.",
+    [MSG_SETTINGS_PLUGIN_ICONS]     = "Salva icone dei giochi",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Le opzioni del plugin vengono salvate in plugin.dat. Scorciatoia: tieni premuto L+R+SELECT durante il gioco per attivare/disattivare il tracciamento (disattivato = traccia sempre).\nIcone: salva le copertine PNG quando viene registrato un nuovo gioco.",
 
     [MSG_SETTINGS_FORMATTING]      = "Formattazione",
     [MSG_FORMATTING_HOURS_ONLY]    = "Formato: Solo Ore",

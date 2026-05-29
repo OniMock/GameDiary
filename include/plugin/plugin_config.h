@@ -19,23 +19,27 @@
 #include <psptypes.h>
 
 #define PLUGIN_CONFIG_FILE_SIZE  32
-#define PLUGIN_CONFIG_VERSION    1
+#define PLUGIN_CONFIG_VERSION    2
+#define PLUGIN_CONFIG_VERSION_V1 1
 
 #pragma pack(push, 1)
 typedef struct {
-  u32 version;
-  u8  hotkey_enabled;
-  u8  reserved[27];
+    u32 version;
+    u8  hotkey_enabled;
+    u8  icon_enabled;
+    u8  reserved[26];
 } PluginConfigFile;
 #pragma pack(pop)
 
 typedef struct {
   u8 hotkey_enabled;
+  u8 icon_enabled;
 } PluginConfigRuntime;
 
 /**
  * @brief Loads plugin.dat into internal cache (call once from module_start).
- * Missing or invalid file → hotkey_enabled = 0 (tracker.dat block list ignored).
+ * Missing or invalid file → hotkey_enabled = 0, icon_enabled = 1.
+ * v1 plugin.dat → icon_enabled = 1 (field absent).
  */
 void plugin_config_init(void);
 

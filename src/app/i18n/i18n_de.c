@@ -159,7 +159,8 @@ const char* g_lang_de_entries[MSG_COUNT] = {
 
     [MSG_SETTINGS_PLUGIN]           = "Plugin",
     [MSG_SETTINGS_PLUGIN_HOTKEY]    = "In-Game-Hotkey (L+R+SELECT 2 Sek. halten)",
-    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Aktiviert oder deaktiviert den Plugin-Hotkey. Halte L+R+SELECT im Spiel 2 Sekunden lang gedrückt, um ihn umzuschalten. Wenn deaktiviert, ignoriert die Spielzeit-Erfassung die Blockliste und die Tastenkombination ist inaktiv. Wird in plugin.dat auf dem Memory Stick gespeichert.",
+    [MSG_SETTINGS_PLUGIN_ICONS]     = "Spielsymbole speichern",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "Plugin-Optionen werden in plugin.dat gespeichert. Hotkey: Halte L+R+SELECT im Spiel gedrückt, um die Aufzeichnung umzuschalten (aus = immer aufzeichnen).\nSymbole: Speichert PNG-Cover, wenn ein neues Spiel registriert wird.",
     [MSG_SETTINGS_FORMATTING]       = "Formatierung",
     [MSG_FORMATTING_HOURS_ONLY]     = "Format: Nur Stunden",
     [MSG_HELP_DESC_FORMATTING]      = "Passe an, wie die Zeit angezeigt wird. Blende Tage aus, um nur die gesamten Stunden und Minuten anzuzeigen.",

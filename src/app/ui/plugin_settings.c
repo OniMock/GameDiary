@@ -10,7 +10,7 @@
 
 /**
  * @file plugin_settings.c
- * @brief Plugin hotkey settings (plugin.dat).
+ * @brief Plugin settings persisted to plugin.dat.
  */
 
 #include "app/ui/screen.h"
@@ -26,10 +26,13 @@
 #include <stdbool.h>
 #include "common/utils.h"
 
-#define PLUGIN_SETTINGS_ITEM_COUNT 1
+#define PLUGIN_SETTINGS_ITEM_COUNT 2
+#define MAX_VISIBLE_ITEMS            4
 
 static int g_selection = 0;
+static int g_scroll_offset = 0;
 static float s_anim_hotkey = 0.0f;
+static float s_anim_icons = 0.0f;
 static u32 s_loading_start_ms = 0;
 static bool s_is_saving = false;
 static int s_save_done = 0;
@@ -56,6 +59,9 @@ static void plugin_settings_init(void) {
   s_helper_data.show_close_hint = true;
 
   s_anim_hotkey = plugin_dat_get_hotkey_enabled() ? 1.0f : 0.0f;
+  s_anim_icons = plugin_dat_get_icon_enabled() ? 1.0f : 0.0f;
+  g_selection = 0;
+  g_scroll_offset = 0;
   s_is_saving = false;
   s_save_done = 0;
 }
@@ -82,19 +88,31 @@ static void plugin_settings_update(u32 buttons, u32 pressed) {
     return;
   }
 
-  if (pressed & PSP_CTRL_UP || pressed & PSP_CTRL_DOWN) {
+  if (pressed & PSP_CTRL_UP) {
+    g_selection = (g_selection - 1 + PLUGIN_SETTINGS_ITEM_COUNT) % PLUGIN_SETTINGS_ITEM_COUNT;
+    if (g_selection < g_scroll_offset) {
+      g_scroll_offset = g_selection;
+    }
+    audio_play_sfx(SFX_NAVIGATE);
+  }
+  if (pressed & PSP_CTRL_DOWN) {
     g_selection = (g_selection + 1) % PLUGIN_SETTINGS_ITEM_COUNT;
+    if (g_selection >= g_scroll_offset + MAX_VISIBLE_ITEMS) {
+      g_scroll_offset = g_selection - (MAX_VISIBLE_ITEMS - 1);
+    }
     audio_play_sfx(SFX_NAVIGATE);
   }
 
   if (pressed & PSP_CTRL_CROSS) {
+    audio_play_sfx(SFX_CONFIRM);
     if (g_selection == 0) {
-      audio_play_sfx(SFX_CONFIRM);
       plugin_dat_set_hotkey_enabled(!plugin_dat_get_hotkey_enabled());
-      ui_loading_show(i18n_get(MSG_LOADING));
-      s_loading_start_ms = utils_get_time_ms();
-      s_is_saving = true;
+    } else if (g_selection == 1) {
+      plugin_dat_set_icon_enabled(!plugin_dat_get_icon_enabled());
     }
+    ui_loading_show(i18n_get(MSG_LOADING));
+    s_loading_start_ms = utils_get_time_ms();
+    s_is_saving = true;
   }
 
   if (pressed & PSP_CTRL_CIRCLE) {
@@ -112,18 +130,34 @@ static void plugin_settings_draw(void) {
   ui_draw_title_auto(i18n_get(MSG_SETTINGS_PLUGIN), safe_rect, &GD_IMG_ICON_PLUGIN_32_PNG);
 
   Rect list_area = {60, 70, 360, 160};
+  int items_to_draw = PLUGIN_SETTINGS_ITEM_COUNT;
 
-  for (int i = 0; i < PLUGIN_SETTINGS_ITEM_COUNT; i++) {
-    Rect item_rect = rect_column(list_area, i, 4, 10);
-    const char *label = i18n_get(MSG_SETTINGS_PLUGIN_HOTKEY);
+  for (int i = 0; i < items_to_draw; i++) {
+    int idx = g_scroll_offset + i;
+    if (idx >= PLUGIN_SETTINGS_ITEM_COUNT) {
+      break;
+    }
+
+    Rect item_rect = rect_column(list_area, i, MAX_VISIBLE_ITEMS, 6);
+    const char *label = "";
+
+    if (idx == 0) {
+      label = i18n_get(MSG_SETTINGS_PLUGIN_HOTKEY);
+    } else if (idx == 1) {
+      label = i18n_get(MSG_SETTINGS_PLUGIN_ICONS);
+    }
 
     ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
-                           label, (i == g_selection), NULL, NULL);
+                           label, (idx == g_selection), NULL, NULL);
 
-    if (i == 0) {
+    if (idx == 0) {
       bool state = plugin_dat_get_hotkey_enabled() != 0;
       ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2,
                             state, &s_anim_hotkey);
+    } else if (idx == 1) {
+      bool state = plugin_dat_get_icon_enabled() != 0;
+      ui_draw_toggle_switch(item_rect.x + item_rect.w - 6, item_rect.y + item_rect.h / 2,
+                            state, &s_anim_icons);
     }
   }
 

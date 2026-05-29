@@ -166,7 +166,8 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
 
     [MSG_SETTINGS_PLUGIN]           = "插件",
     [MSG_SETTINGS_PLUGIN_HOTKEY]    = "游戏内快捷键（长按 L+R+SELECT 2 秒）",
-    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "启用或禁用插件快捷键。在游戏中长按 L+R+SELECT 2 秒即可切换。禁用后，游戏时间统计将忽略屏蔽列表，并且组合键失效。设置会保存到记忆棒中的 plugin.dat。",
+    [MSG_SETTINGS_PLUGIN_ICONS]     = "保存游戏图标",
+    [MSG_HELP_DESC_PLUGIN_SETTINGS] = "插件选项保存到 plugin.dat。快捷键：在游戏中长按 L+R+SELECT 可切换记录功能（关闭 = 始终记录）。\n图标：注册新游戏时保存 PNG 封面。",
 
     [MSG_HELP_DESC_LEADERBOARD]     = "您游玩时间最长游戏的排行榜。根据各类别中的游玩时间排序游戏。",
     [MSG_SUCCESS]                   = "成功",
