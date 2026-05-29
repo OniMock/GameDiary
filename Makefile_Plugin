@@ -14,7 +14,9 @@ PLUGIN_OBJS = \
   src/plugin/tracker_db.o \
   src/plugin/tracker_runtime.o \
   src/plugin/input_combo.o \
-  src/plugin/overlay_notification.o
+  src/plugin/overlay_notification.o \
+  src/plugin/overlay_blit.o \
+  src/plugin/overlay_msx_font.o
 
 # -----------------------------------------------------------------------
 # Common objects — shared between plugin and app

@@ -10,11 +10,18 @@
 
 /**
  * @file overlay_notification.c
- * @brief Simple top-left text overlay (framebuffer, no malloc).
+ * @brief In-game tracker messages (universal HUD-style blit + display hooks).
+ *
+ * Follows the same approach as missyhud / FPS plugins:
+ * - PSPSDK msx font + GetMode/GetFrameBuf blit
+ * - Hooks on sceDisplaySetFrameBuf and sceDisplay_driver_63E22A26 (internal flip)
+ * - Draw after flip and on both known VRAM buffers (double buffering)
  */
 
 #include "plugin/overlay_notification.h"
+#include "plugin/overlay_blit.h"
 #include "common/utils.h"
+#include <pspsdk/systemctrl.h>
 #include <pspdisplay.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,147 +29,185 @@
 #define OVERLAY_HIDE_MS     2000U
 #define OVERLAY_MAX_LINES   2
 #define OVERLAY_LINE_LEN    48
-#define OVERLAY_MARGIN_X    8
-#define OVERLAY_MARGIN_Y    8
-#define FONT_W              8
-#define FONT_H              8
+#define OVERLAY_TRACKED_FB  4
 
-/* Minimal 8x8 ASCII 0x20–0x5F (extracted style: filled glyphs) */
-static const u8 s_font8x8[96][8] = {
-    {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}, /* space */
-    {0x18,0x3C,0x3C,0x18,0x18,0x00,0x18,0x00},
-    {0x36,0x36,0x00,0x00,0x00,0x00,0x00,0x00},
-    {0x36,0x36,0x7F,0x36,0x7F,0x36,0x36,0x00},
-    {0x0C,0x3E,0x03,0x1E,0x30,0x1F,0x0C,0x00},
-    {0x00,0x63,0x33,0x18,0x0C,0x66,0x63,0x00},
-    {0x1C,0x36,0x1C,0x6E,0x3B,0x33,0x6E,0x00},
-    {0x06,0x06,0x03,0x00,0x00,0x00,0x00,0x00},
-    {0x18,0x0C,0x06,0x06,0x06,0x0C,0x18,0x00},
-    {0x06,0x0C,0x18,0x18,0x18,0x0C,0x06,0x00},
-    {0x00,0x66,0x3C,0xFF,0x3C,0x66,0x00,0x00},
-    {0x00,0x0C,0x0C,0x3F,0x0C,0x0C,0x00,0x00},
-    {0x00,0x00,0x00,0x00,0x00,0x0C,0x06,0x00},
-    {0x00,0x00,0x00,0x3F,0x00,0x00,0x00,0x00},
-    {0x00,0x00,0x00,0x00,0x00,0x0C,0x0C,0x00},
-    {0x60,0x30,0x18,0x0C,0x06,0x03,0x01,0x00},
-    {0x3E,0x63,0x73,0x7B,0x6F,0x67,0x3E,0x00},
-    {0x0C,0x0E,0x0C,0x0C,0x0C,0x0C,0x3F,0x00},
-    {0x1E,0x33,0x30,0x1C,0x06,0x33,0x3F,0x00},
-    {0x1E,0x33,0x30,0x1C,0x30,0x33,0x1E,0x00},
-    {0x38,0x3C,0x36,0x33,0x7F,0x30,0x78,0x00},
-    {0x3F,0x03,0x1F,0x30,0x30,0x33,0x1E,0x00},
-    {0x1C,0x06,0x03,0x1F,0x33,0x33,0x1E,0x00},
-    {0x3F,0x33,0x30,0x18,0x0C,0x0C,0x0C,0x00},
-    {0x1E,0x33,0x33,0x1E,0x33,0x33,0x1E,0x00},
-    {0x1E,0x33,0x33,0x3E,0x30,0x18,0x0E,0x00},
-    {0x00,0x0C,0x0C,0x00,0x00,0x0C,0x0C,0x00},
-    {0x00,0x0C,0x0C,0x00,0x00,0x0C,0x06,0x00},
-    {0x18,0x0C,0x06,0x03,0x06,0x0C,0x18,0x00},
-    {0x00,0x00,0x3F,0x00,0x3F,0x00,0x00,0x00},
-    {0x06,0x0C,0x18,0x30,0x18,0x0C,0x06,0x00},
-    {0x1E,0x33,0x30,0x18,0x0C,0x00,0x0C,0x00},
-    {0x3E,0x63,0x7B,0x7B,0x7B,0x03,0x1E,0x00},
-    {0x0C,0x1E,0x33,0x33,0x3F,0x33,0x33,0x00},
-    {0x1F,0x33,0x33,0x1F,0x33,0x33,0x1F,0x00},
-    {0x1E,0x33,0x03,0x03,0x03,0x33,0x1E,0x00},
-    {0x1F,0x33,0x33,0x33,0x33,0x33,0x1F,0x00},
-    {0x3F,0x03,0x03,0x1F,0x03,0x03,0x3F,0x00},
-    {0x3F,0x03,0x03,0x1F,0x03,0x03,0x03,0x00},
-    {0x1E,0x33,0x03,0x03,0x73,0x33,0x1E,0x00},
-    {0x33,0x33,0x33,0x3F,0x33,0x33,0x33,0x00},
-    {0x1E,0x0C,0x0C,0x0C,0x0C,0x0C,0x1E,0x00},
-    {0x78,0x30,0x30,0x30,0x33,0x33,0x1E,0x00},
-    {0x33,0x36,0x1E,0x0E,0x1E,0x36,0x33,0x00},
-    {0x03,0x03,0x03,0x03,0x03,0x03,0x3F,0x00},
-    {0x63,0x77,0x7F,0x6B,0x63,0x63,0x63,0x00},
-    {0x33,0x3B,0x3F,0x37,0x33,0x33,0x33,0x00},
-    {0x1E,0x33,0x33,0x33,0x33,0x33,0x1E,0x00},
-    {0x1F,0x33,0x33,0x1F,0x03,0x03,0x03,0x00},
-    {0x1E,0x33,0x33,0x33,0x3B,0x36,0x1D,0x00},
-    {0x1F,0x33,0x33,0x1F,0x36,0x33,0x33,0x00},
-    {0x1E,0x03,0x03,0x1E,0x30,0x30,0x1E,0x00},
-    {0x3F,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x00},
-    {0x33,0x33,0x33,0x33,0x33,0x33,0x1E,0x00},
-    {0x33,0x33,0x33,0x33,0x33,0x1E,0x0C,0x00},
-    {0x63,0x63,0x6B,0x7F,0x77,0x63,0x63,0x00},
-    {0x33,0x33,0x1E,0x0C,0x1E,0x33,0x33,0x00},
-    {0x33,0x33,0x33,0x1E,0x0C,0x0C,0x0C,0x00},
-    {0x3F,0x30,0x18,0x0C,0x06,0x03,0x3F,0x00},
-    {0x1E,0x06,0x06,0x06,0x06,0x06,0x1E,0x00},
-    {0x03,0x06,0x0C,0x18,0x30,0x60,0x40,0x00},
-    {0x1E,0x18,0x18,0x18,0x18,0x18,0x1E,0x00},
-    {0x08,0x1C,0x36,0x63,0x00,0x00,0x00,0x00},
-    {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF},
-    {0x0C,0x0C,0x18,0x00,0x00,0x00,0x00,0x00},
-    {0x00,0x00,0x00,0x1E,0x30,0x3E,0x33,0x6E},
-    {0x03,0x03,0x03,0x1F,0x33,0x33,0x1F,0x00},
-    {0x00,0x00,0x00,0x1F,0x33,0x03,0x1E,0x00},
-    {0x38,0x30,0x30,0x3E,0x33,0x33,0x6E,0x00},
-    {0x00,0x00,0x00,0x1E,0x03,0x1F,0x33,0x1E},
-    {0x1C,0x36,0x06,0x0F,0x06,0x06,0x0F,0x00},
-    {0x00,0x00,0x00,0x6E,0x33,0x33,0x3E,0x30},
-    {0x03,0x03,0x03,0x1F,0x33,0x33,0x33,0x00},
-    {0x0C,0x0C,0x00,0x0E,0x0C,0x0C,0x1E,0x00},
-    {0x30,0x30,0x00,0x38,0x30,0x30,0x33,0x1E},
-    {0x03,0x06,0x0C,0x18,0x0C,0x06,0x03,0x00},
-    {0x0E,0x0C,0x0C,0x0C,0x0C,0x0C,0x0E,0x00},
-    {0x03,0x03,0x1B,0x0E,0x1B,0x03,0x03,0x00},
-    {0x33,0x33,0x33,0x3E,0x30,0x30,0x30,0x00},
-    {0x1E,0x33,0x33,0x33,0x33,0x33,0x1E,0x00},
-    {0x0F,0x33,0x33,0x0F,0x03,0x03,0x03,0x00},
-    {0x1E,0x33,0x33,0x33,0x3B,0x1E,0x38,0x00},
-    {0x0F,0x33,0x33,0x0F,0x36,0x33,0x33,0x00},
-    {0x1E,0x03,0x03,0x0E,0x30,0x30,0x1E,0x00},
-    {0x1F,0x0C,0x0C,0x0C,0x0C,0x0C,0x1F,0x00},
-    {0x33,0x33,0x33,0x33,0x33,0x33,0x1E,0x00},
-    {0x33,0x33,0x33,0x33,0x33,0x1E,0x0C,0x00},
-    {0x63,0x63,0x6B,0x7F,0x77,0x63,0x63,0x00},
-    {0x33,0x33,0x1E,0x0C,0x1E,0x33,0x33,0x00},
-    {0x33,0x33,0x33,0x1E,0x0C,0x0C,0x0C,0x00},
-    {0x3F,0x30,0x18,0x0C,0x06,0x03,0x3F,0x00},
-};
+/* 6.60+ / 6.61 sceDisplay_driver */
+#define NID_SET_FRAME_BUF          0xA38B3F89U
+#define NID_SET_FRAME_BUF_LEGACY   0x289D82FEU
+/* sceDisplay_driver_63E22A26 — internal SetFrameBuf (GTA and others) */
+#define NID_SET_FRAME_BUF_INTERNAL 0x3E17FE8DU
 
 static char s_lines[OVERLAY_MAX_LINES][OVERLAY_LINE_LEN];
 static u32 s_visible_until_ms = 0;
 static int s_line_count = 0;
 
-static void put_pixel(u32 *fb, int stride, int x, int y, int w, int h, u32 color) {
-  if (x < 0 || y < 0 || x >= w || y >= h) {
+typedef struct {
+  void *vram;
+  int stride;
+  int format;
+} OverlayFbInfo;
+
+static OverlayFbInfo s_tracked[OVERLAY_TRACKED_FB];
+static int s_tracked_count = 0;
+
+static int (*s_orig_set_frame_buf)(void *fb, int bufferwidth, int pixelformat,
+                                   int sync) = NULL;
+static int (*s_orig_set_frame_buf_internal)(int pri, void *fb, int bufferwidth,
+                                             int pixelformat, int sync) = NULL;
+
+static FunctionPatchData s_setfb_patch;
+static FunctionPatchData s_setfb_internal_patch;
+static int s_hooks_installed = 0;
+
+static void overlay_sanitize_line(char *dst, size_t cap, const char *src) {
+  size_t j = 0;
+  if (!dst || cap == 0 || !src) {
     return;
   }
-  fb[y * stride + x] = color;
-}
 
-static void draw_char(u32 *fb, int stride, int x, int y, int scr_w, int scr_h, char c, u32 color) {
-  if (c < 0x20 || c > 0x5F) {
-    c = '?';
-  }
-  const u8 *glyph = s_font8x8[(u8)c - 0x20];
-  for (int row = 0; row < FONT_H; row++) {
-    u8 bits = glyph[row];
-    for (int col = 0; col < FONT_W; col++) {
-      if (bits & (1 << col)) {
-        put_pixel(fb, stride, x + col, y + row, scr_w, scr_h, color);
+  for (size_t i = 0; src[i] && j + 1 < cap; i++) {
+    unsigned char c = (unsigned char)src[i];
+    if (c >= 0x20 && c <= 0x7E) {
+      dst[j++] = (char)c;
+    } else if (c >= 0x80) {
+      while (src[i + 1] && ((unsigned char)src[i + 1] & 0xC0) == 0x80) {
+        i++;
       }
+      dst[j++] = '?';
+    } else if (c == '\n' || c == '\r' || c == '\t') {
+      dst[j++] = ' ';
     }
   }
+  dst[j] = '\0';
 }
 
-static void draw_text(u32 *fb, int stride, int x, int y, int scr_w, int scr_h, const char *text, u32 color) {
-  if (!text) {
+static int overlay_is_active(void) {
+  u32 now = utils_get_time_ms();
+  return s_visible_until_ms != 0 && now <= s_visible_until_ms;
+}
+
+static void overlay_register_fb(void *vram, int stride, int format) {
+  int i;
+
+  if (!vram || stride <= 0) {
     return;
   }
-  int cx = x;
-  for (const char *p = text; *p; p++) {
-    draw_char(fb, stride, cx, y, scr_w, scr_h, *p, color);
-    cx += FONT_W;
+
+  for (i = 0; i < s_tracked_count; i++) {
+    if (s_tracked[i].vram == vram) {
+      s_tracked[i].stride = stride;
+      s_tracked[i].format = format;
+      return;
+    }
   }
+
+  if (s_tracked_count < OVERLAY_TRACKED_FB) {
+    s_tracked[s_tracked_count].vram = vram;
+    s_tracked[s_tracked_count].stride = stride;
+    s_tracked[s_tracked_count].format = format;
+    s_tracked_count++;
+    return;
+  }
+
+  /* Ring: overwrite oldest slot */
+  s_tracked[0] = s_tracked[1];
+  s_tracked[1] = s_tracked[2];
+  s_tracked[2] = s_tracked[3];
+  s_tracked[3].vram = vram;
+  s_tracked[3].stride = stride;
+  s_tracked[3].format = format;
+}
+
+static void overlay_draw_now(void *vram, int stride, int format) {
+  const char *l1 = (s_line_count >= 1) ? s_lines[0] : NULL;
+  const char *l2 = (s_line_count >= 2) ? s_lines[1] : NULL;
+
+  overlay_blit_draw_to(vram, stride, format, l1, l2, s_line_count);
+}
+
+static void overlay_on_flip(void *vram, int stride, int format) {
+  overlay_register_fb(vram, stride, format);
+  if (overlay_is_active()) {
+    overlay_draw_now(vram, stride, format);
+  }
+}
+
+static int hook_set_frame_buf(void *fb, int bufferwidth, int pixelformat, int sync) {
+  int ret = 0;
+  if (s_orig_set_frame_buf) {
+    ret = s_orig_set_frame_buf(fb, bufferwidth, pixelformat, sync);
+  }
+  overlay_on_flip(fb, bufferwidth, pixelformat);
+  return ret;
+}
+
+static int hook_set_frame_buf_internal(int pri, void *fb, int bufferwidth,
+                                       int pixelformat, int sync) {
+  int ret = 0;
+  (void)pri;
+  if (s_orig_set_frame_buf_internal) {
+    ret = s_orig_set_frame_buf_internal(pri, fb, bufferwidth, pixelformat, sync);
+  }
+  overlay_on_flip(fb, bufferwidth, pixelformat);
+  return ret;
+}
+
+static u32 overlay_find_nid(const u32 *nids, int count) {
+  int i;
+  u32 addr;
+
+  for (i = 0; i < count; i++) {
+    addr = sctrlHENFindFunction("sceDisplay_driver", "sceDisplay", nids[i]);
+    if (addr) {
+      return addr;
+    }
+    addr = sctrlHENFindFunction("sceDisplay", "sceDisplay", nids[i]);
+    if (addr) {
+      return addr;
+    }
+  }
+  return 0;
+}
+
+static void overlay_install_hooks(void) {
+  u32 addr;
+  static const u32 setfb_nids[] = {
+      NID_SET_FRAME_BUF,
+      NID_SET_FRAME_BUF_LEGACY,
+  };
+  static const u32 internal_nids[] = {
+      NID_SET_FRAME_BUF_INTERNAL,
+      0x63E22A26U,
+  };
+
+  if (s_hooks_installed) {
+    return;
+  }
+
+  addr = overlay_find_nid(setfb_nids, 2);
+  if (addr) {
+    sctrlHENHijackFunction(&s_setfb_patch, (void *)addr,
+                           (void *)hook_set_frame_buf,
+                           (void **)&s_orig_set_frame_buf);
+  }
+
+  addr = overlay_find_nid(internal_nids, 2);
+  if (addr) {
+    sctrlHENHijackFunction(&s_setfb_internal_patch, (void *)addr,
+                           (void *)hook_set_frame_buf_internal,
+                           (void **)&s_orig_set_frame_buf_internal);
+  }
+
+  s_hooks_installed = 1;
 }
 
 void overlay_notification_init(void) {
   s_visible_until_ms = 0;
   s_line_count = 0;
+  s_tracked_count = 0;
   memset(s_lines, 0, sizeof(s_lines));
+  memset(s_tracked, 0, sizeof(s_tracked));
+  overlay_install_hooks();
 }
 
 void overlay_notification_shutdown(void) {
@@ -178,96 +223,53 @@ void overlay_notification_show(const char *line1, const char *line2) {
   memset(s_lines, 0, sizeof(s_lines));
 
   if (line1 && line1[0]) {
-    snprintf(s_lines[0], OVERLAY_LINE_LEN, "%s", line1);
-    s_line_count = 1;
+    overlay_sanitize_line(s_lines[0], OVERLAY_LINE_LEN, line1);
+    if (s_lines[0][0]) {
+      s_line_count = 1;
+    }
   }
   if (line2 && line2[0] && s_line_count < OVERLAY_MAX_LINES) {
-    snprintf(s_lines[1], OVERLAY_LINE_LEN, "%s", line2);
-    s_line_count = 2;
+    overlay_sanitize_line(s_lines[1], OVERLAY_LINE_LEN, line2);
+    if (s_lines[1][0]) {
+      s_line_count = 2;
+    }
   }
 
   s_visible_until_ms = utils_get_time_ms() + OVERLAY_HIDE_MS;
 }
 
 void overlay_notification_draw(void) {
-  void *vram = NULL;
-  int buffer_width = 0;
-  int pixel_format = 0;
+  int i;
+  const char *l1;
+  const char *l2;
+  void *seen[OVERLAY_TRACKED_FB + 4];
+  int nseen = 0;
 
-  if (sceDisplayGetFrameBuf(&vram, &buffer_width, &pixel_format,
-                            PSP_DISPLAY_SETBUF_IMMEDIATE) < 0) {
+  if (!overlay_is_active() || s_line_count <= 0) {
     return;
   }
 
-  if (!vram) {
-    return;
-  }
+  l1 = (s_line_count >= 1) ? s_lines[0] : NULL;
+  l2 = (s_line_count >= 2) ? s_lines[1] : NULL;
 
-  const int scr_w = 480;
-  const int scr_h = 272;
-  int stride = buffer_width;
-  if (stride <= 0) {
-    stride = 512;
-  }
+  for (i = 0; i < s_tracked_count; i++) {
+    void *p = s_tracked[i].vram;
+    int j;
+    int dup = 0;
 
-  /* bufferwidth is line stride in pixels (PSPSDK); format varies per game */
-  if (pixel_format != PSP_DISPLAY_PIXEL_FORMAT_8888) {
-    u16 *pixels16 = (u16 *)vram;
-    u16 fg16 = 0xFFFF;
-    u16 bg16 = 0x0000;
-    int y = OVERLAY_MARGIN_Y;
-    for (int i = 0; i < s_line_count; i++) {
-      int x = OVERLAY_MARGIN_X;
-      int len = (int)strlen(s_lines[i]);
-      for (int bx = 0; bx < len * FONT_W + 4; bx++) {
-        for (int by = 0; by < FONT_H + 2; by++) {
-          int px = x + bx - 2;
-          int py = y + by - 1;
-          if (px >= 0 && py >= 0 && px < scr_w && py < scr_h) {
-            pixels16[py * stride + px] = bg16;
-          }
-        }
-      }
-      for (const char *p = s_lines[i]; *p; p++) {
-        if (*p < 0x20 || *p > 0x5F) {
-          continue;
-        }
-        const u8 *glyph = s_font8x8[(u8)*p - 0x20];
-        int cx = x;
-        for (int row = 0; row < FONT_H; row++) {
-          u8 bits = glyph[row];
-          for (int col = 0; col < FONT_W; col++) {
-            if (bits & (1 << col)) {
-              int px = cx + col;
-              int py = y + row;
-              if (px >= 0 && py >= 0 && px < scr_w && py < scr_h) {
-                pixels16[py * stride + px] = fg16;
-              }
-            }
-          }
-        }
-        x += FONT_W;
-      }
-      y += FONT_H + 4;
-    }
-    return;
-  }
-
-  u32 *pixels = (u32 *)vram;
-
-  u32 fg = 0xFFFFFFFF;
-  u32 bg = 0xFF000000;
-
-  int y = OVERLAY_MARGIN_Y;
-  for (int i = 0; i < s_line_count; i++) {
-    int x = OVERLAY_MARGIN_X;
-    int len = (int)strlen(s_lines[i]);
-    for (int bx = 0; bx < len * FONT_W + 4; bx++) {
-      for (int by = 0; by < FONT_H + 2; by++) {
-        put_pixel(pixels, stride, x + bx - 2, y + by - 1, scr_w, scr_h, bg);
+    for (j = 0; j < nseen; j++) {
+      if (seen[j] == p) {
+        dup = 1;
+        break;
       }
     }
-    draw_text(pixels, stride, x, y, scr_w, scr_h, s_lines[i], fg);
-    y += FONT_H + 4;
+    if (dup) {
+      continue;
+    }
+    seen[nseen++] = p;
+    overlay_blit_draw_to(p, s_tracked[i].stride, s_tracked[i].format, l1, l2,
+                         s_line_count);
   }
+
+  overlay_blit_draw_all(l1, l2, s_line_count);
 }
