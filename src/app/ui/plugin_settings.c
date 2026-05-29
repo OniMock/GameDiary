@@ -15,6 +15,7 @@
 
 #include "app/ui/screen.h"
 #include "app/ui/ui_components.h"
+#include "app/ui/ui_text.h"
 #include "app/ui/ui_layout.h"
 #include "app/ui/ui_popup.h"
 #include "app/ui/ui_loading.h"
@@ -147,8 +148,18 @@ static void plugin_settings_draw(void) {
       label = i18n_get(MSG_SETTINGS_PLUGIN_ICONS);
     }
 
-    ui_draw_menu_item_auto(item_rect.x, item_rect.y, item_rect.w, item_rect.h,
-                           label, (idx == g_selection), NULL, NULL);
+    bool selected = (idx == g_selection);
+    if (selected) {
+      renderer_draw_rect(item_rect.x, item_rect.y, item_rect.w, item_rect.h, COLOR_HIGHLIGHT);
+      renderer_draw_rect(item_rect.x, item_rect.y, 3, item_rect.h, COLOR_ACCENT);
+    }
+
+    u32 text_color = selected ? COLOR_ACCENT : COLOR_TEXT;
+    int text_x = item_rect.x + 12;
+    int text_h = 14;
+    int text_y = item_rect.y + (item_rect.h - text_h) / 2;
+    Rect text_rect = {text_x, text_y, item_rect.w - (text_x - item_rect.x) - 40, text_h};
+    ui_draw_game_name_fixed(label, text_rect, text_color, UI_FONT_SIZE_PRIMARY, ALIGN_LEFT);
 
     if (idx == 0) {
       bool state = plugin_dat_get_hotkey_enabled() != 0;
