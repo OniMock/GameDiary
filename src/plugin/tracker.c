@@ -181,7 +181,8 @@ static void handle_combo_event(InputComboEvent ev, const GameMetadata *metadata)
   if (ev == INPUT_COMBO_NOT_READY) {
     debug_log("tracker", "Combo ignored: metadata not ready yet");
     overlay_notification_show("GameDiary - Tracker not ready",
-                              "GameDiary - Please wait...");
+                              "GameDiary - Please wait...",
+                              OVERLAY_NOTIFY_NEUTRAL);
     return;
   }
 
@@ -204,7 +205,8 @@ static void handle_combo_event(InputComboEvent ev, const GameMetadata *metadata)
 
   if (was_tracking) {
     session_pause_tracking();
-    overlay_notification_show("GameDiary - Tracker: OFF", NULL);
+    overlay_notification_show("GameDiary - Tracker: OFF", NULL,
+                              OVERLAY_NOTIFY_TRACKER_OFF);
     debug_log("tracker", "User disabled tracking for %s (cat %u)",
               metadata->game_id, (unsigned int)metadata->category);
   } else {
@@ -228,7 +230,8 @@ static void handle_combo_event(InputComboEvent ev, const GameMetadata *metadata)
 
     if (session_begin_tracking(metadata, new_session) == 0) {
       s_last_tick_ts = now_ts;
-      overlay_notification_show("GameDiary - Tracker: ON", NULL);
+      overlay_notification_show("GameDiary - Tracker: ON", NULL,
+                                OVERLAY_NOTIFY_TRACKER_ON);
       debug_log("tracker", "User enabled tracking for %s (cat %u)",
                 metadata->game_id, (unsigned int)metadata->category);
     } else {

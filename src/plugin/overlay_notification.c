@@ -14,8 +14,8 @@
  *
  * Follows the same approach as missyhud / FPS plugins:
  * - PSPSDK msx font + GetMode/GetFrameBuf blit
- * - Hooks on sceDisplaySetFrameBuf and sceDisplay_driver_63E22A26 (internal flip)
- * - Draw after flip and on both known VRAM buffers (double buffering)
+ * - Hooks on sceDisplaySetFrameBuf and internal flip (draw after flip only)
+ * - Colored bar: dark green (tracker ON), dark red (tracker OFF)
  */
 
 #include "plugin/overlay_notification.h"
@@ -36,6 +36,14 @@
 #define NID_SET_FRAME_BUF_LEGACY   0x289D82FEU
 /* sceDisplay_driver_63E22A26 — internal SetFrameBuf (GTA and others) */
 #define NID_SET_FRAME_BUF_INTERNAL 0x3E17FE8DU
+/* PSP 8888: 0xAABBGGRR */
+#define OVERLAY_MAKE_COLOR(r, g, b) \
+  ((u32)(b) | ((u32)(g) << 8) | ((u32)(r) << 16) | 0xFF000000U)
+
+#define OVERLAY_COLOR_FG           OVERLAY_MAKE_COLOR(0xFF, 0xFF, 0xFF)
+#define OVERLAY_COLOR_BG_ON        OVERLAY_MAKE_COLOR(0x0B, 0x4A, 0x14)
+#define OVERLAY_COLOR_BG_OFF       OVERLAY_MAKE_COLOR(0x4A, 0x0B, 0x0B)
+#define OVERLAY_COLOR_BG_NEUTRAL   OVERLAY_MAKE_COLOR(0x1A, 0x1A, 0x1A)
 
 static char s_lines[OVERLAY_MAX_LINES][OVERLAY_LINE_LEN];
 static u32 s_visible_until_ms = 0;
@@ -118,18 +126,25 @@ static void overlay_register_fb(void *vram, int stride, int format) {
   s_tracked[3].format = format;
 }
 
-static void overlay_draw_now(void *vram, int stride, int format) {
-  const char *l1 = (s_line_count >= 1) ? s_lines[0] : NULL;
-  const char *l2 = (s_line_count >= 2) ? s_lines[1] : NULL;
+static void overlay_apply_style(OverlayNotifyStyle style) {
+  u32 bg = OVERLAY_COLOR_BG_NEUTRAL;
 
-  overlay_blit_draw_to(vram, stride, format, l1, l2, s_line_count);
+  switch (style) {
+  case OVERLAY_NOTIFY_TRACKER_ON:
+    bg = OVERLAY_COLOR_BG_ON;
+    break;
+  case OVERLAY_NOTIFY_TRACKER_OFF:
+    bg = OVERLAY_COLOR_BG_OFF;
+    break;
+  default:
+    break;
+  }
+  overlay_blit_set_colors(OVERLAY_COLOR_FG, bg);
 }
 
 static void overlay_on_flip(void *vram, int stride, int format) {
+  /* Only track pointers here; draw from tracker thread (avoid display re-entry). */
   overlay_register_fb(vram, stride, format);
-  if (overlay_is_active()) {
-    overlay_draw_now(vram, stride, format);
-  }
 }
 
 static int hook_set_frame_buf(void *fb, int bufferwidth, int pixelformat, int sync) {
@@ -179,7 +194,6 @@ static void overlay_install_hooks(void) {
       NID_SET_FRAME_BUF_INTERNAL,
       0x63E22A26U,
   };
-
   if (s_hooks_installed) {
     return;
   }
@@ -218,7 +232,8 @@ int overlay_notification_is_visible(u32 now_ms) {
   return s_visible_until_ms != 0 && now_ms <= s_visible_until_ms;
 }
 
-void overlay_notification_show(const char *line1, const char *line2) {
+void overlay_notification_show(const char *line1, const char *line2,
+                               OverlayNotifyStyle style) {
   s_line_count = 0;
   memset(s_lines, 0, sizeof(s_lines));
 
@@ -235,6 +250,7 @@ void overlay_notification_show(const char *line1, const char *line2) {
     }
   }
 
+  overlay_apply_style(style);
   s_visible_until_ms = utils_get_time_ms() + OVERLAY_HIDE_MS;
 }
 

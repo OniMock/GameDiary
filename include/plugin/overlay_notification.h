@@ -16,7 +16,14 @@
 void overlay_notification_init(void);
 void overlay_notification_shutdown(void);
 
-void overlay_notification_show(const char *line1, const char *line2);
+typedef enum {
+  OVERLAY_NOTIFY_NEUTRAL = 0,
+  OVERLAY_NOTIFY_TRACKER_ON,
+  OVERLAY_NOTIFY_TRACKER_OFF
+} OverlayNotifyStyle;
+
+void overlay_notification_show(const char *line1, const char *line2,
+                               OverlayNotifyStyle style);
 
 /** @brief True while the on-screen message should be shown. */
 int overlay_notification_is_visible(u32 now_ms);
