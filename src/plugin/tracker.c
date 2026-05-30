@@ -36,6 +36,7 @@ static volatile u32 session_total_seconds = 0;
 static SceOff current_session_offset = -1;
 static u32 current_game_uid = 0;
 static u32 session_start_ts = 0;
+static u32 s_last_tick_ts = 0;
 
 static TrackerRuntime g_runtime;
 
@@ -99,37 +100,71 @@ static void session_flush_pending(void) {
   }
 }
 
-static void session_end_tracking(void) {
+/** Local calendar day index (midnight boundary uses PSP timezone). */
+static u32 session_calendar_day(u32 ts) {
+  int local_offset = utils_get_timezone_offset_seconds();
+  return (ts + (u32)local_offset) / 86400U;
+}
+
+static int session_same_calendar_day(u32 ts_a, u32 ts_b) {
+  return session_calendar_day(ts_a) == session_calendar_day(ts_b);
+}
+
+/** Flush current session and open a new DB entry dated from now_ts. */
+static void session_start_new_day(u32 now_ts) {
+  if (current_game_uid == 0) {
+    return;
+  }
+
+  u32 prev_day = session_calendar_day(session_start_ts);
+  u32 new_day = session_calendar_day(now_ts);
+
   session_flush_pending();
-  current_game_uid = 0;
-  current_session_offset = -1;
+  debug_log("tracker", "Day changed (day %u -> %u). Starting new session.",
+            (unsigned int)prev_day, (unsigned int)new_day);
+  session_start_ts = now_ts;
   session_total_seconds = 0;
+  current_session_offset = -1;
   pending_seconds = 0;
 }
 
-static int session_begin_tracking(const GameMetadata *metadata, int reset_session_start) {
+/** Pause tracking; keep session state for same-day resume. */
+static void session_pause_tracking(void) {
+  session_flush_pending();
+  pending_seconds = 0;
+}
+
+static int session_begin_tracking(const GameMetadata *metadata, int new_session) {
   if (!metadata || !g_runtime.storage_ready) {
     return -1;
   }
 
   utils_set_log_context(metadata->game_id);
 
-  int st_res = storage_get_or_create_game(metadata, &current_game_uid);
-  if (st_res < 0) {
-    debug_log("tracker", "storage_get_or_create_game FAILED (res: %d)", st_res);
-    utils_log_error("tracker", "storage_get_or_create_game failed", st_res);
-    current_game_uid = 0;
-    return st_res;
+  if (current_game_uid == 0) {
+    int st_res = storage_get_or_create_game(metadata, &current_game_uid);
+    if (st_res < 0) {
+      debug_log("tracker", "storage_get_or_create_game FAILED (res: %d)", st_res);
+      utils_log_error("tracker", "storage_get_or_create_game failed", st_res);
+      current_game_uid = 0;
+      return st_res;
+    }
+    new_session = 1;
   }
 
-  debug_log("tracker", "Tracking Session Initialized (UID: %u, ID: %s)",
-            current_game_uid, metadata->game_id);
-
-  if (reset_session_start) {
+  if (new_session) {
+    session_flush_pending();
     session_start_ts = utils_get_timestamp();
+    session_total_seconds = 0;
+    current_session_offset = -1;
+    debug_log("tracker", "New session (UID: %u, ID: %s)",
+              current_game_uid, metadata->game_id);
+  } else {
+    debug_log("tracker", "Session resumed (UID: %u, ID: %s, %u s so far)",
+              current_game_uid, metadata->game_id,
+              (unsigned int)session_total_seconds);
   }
-  session_total_seconds = 0;
-  current_session_offset = -1;
+
   pending_seconds = 0;
   return 0;
 }
@@ -144,69 +179,78 @@ static void storage_ensure_initialized(const char *base_dir) {
 
 static void handle_combo_event(InputComboEvent ev, const GameMetadata *metadata) {
   if (ev == INPUT_COMBO_NOT_READY) {
+    debug_log("tracker", "Combo ignored: metadata not ready yet");
     overlay_notification_show("GameDiary - Tracker not ready",
                               "GameDiary - Please wait...");
     return;
   }
 
-  if (ev != INPUT_COMBO_TOGGLE || !metadata) {
+  if (ev != INPUT_COMBO_TOGGLE) {
+    return;
+  }
+
+  if (!metadata) {
+    debug_log("tracker", "Combo toggle ignored: metadata is NULL");
     return;
   }
 
   int was_tracking = tracker_runtime_is_tracking(&g_runtime);
 
   if (!tracker_runtime_toggle(&g_runtime, metadata)) {
+    debug_log("tracker", "Combo toggle failed for %s (cat %u)",
+              metadata->game_id, (unsigned int)metadata->category);
     return;
   }
 
   if (was_tracking) {
-    session_end_tracking();
+    session_pause_tracking();
     overlay_notification_show("GameDiary - Tracker: OFF", NULL);
     debug_log("tracker", "User disabled tracking for %s (cat %u)",
               metadata->game_id, (unsigned int)metadata->category);
   } else {
     const char *prefix = utils_get_device_prefix();
     char base_dir[128];
+    u32 now_ts = utils_get_timestamp();
+    int new_session;
+
     snprintf(base_dir, sizeof(base_dir), "%s%s", prefix, GDIARY_BASE_DIR);
     storage_ensure_initialized(base_dir);
-    if (session_begin_tracking(metadata, 1) == 0) {
+
+    new_session = (current_game_uid == 0) ||
+                  !session_same_calendar_day(session_start_ts, now_ts);
+
+    debug_log("tracker", "Combo ON request for %s (cat %u): new_session=%d "
+              "(uid=%u, session_day=%u, now_day=%u)",
+              metadata->game_id, (unsigned int)metadata->category, new_session,
+              (unsigned int)current_game_uid,
+              (unsigned int)session_calendar_day(session_start_ts),
+              (unsigned int)session_calendar_day(now_ts));
+
+    if (session_begin_tracking(metadata, new_session) == 0) {
+      s_last_tick_ts = now_ts;
       overlay_notification_show("GameDiary - Tracker: ON", NULL);
       debug_log("tracker", "User enabled tracking for %s (cat %u)",
+                metadata->game_id, (unsigned int)metadata->category);
+    } else {
+      debug_log("tracker", "Combo ON failed: session_begin_tracking for %s (cat %u)",
                 metadata->game_id, (unsigned int)metadata->category);
     }
   }
 }
 
-static void playtime_tick(u32 now_ts, u32 *last_tick_ts) {
+static void playtime_tick(u32 now_ts) {
   if (!tracker_runtime_is_tracking(&g_runtime) || current_game_uid == 0) {
-    *last_tick_ts = now_ts;
     return;
   }
 
-  u32 diff = now_ts - *last_tick_ts;
+  u32 diff = now_ts - s_last_tick_ts;
 
-  if (diff >= 10) {
+  /* Midnight while tracker ON: always start a new session for the new day. */
+  if (!session_same_calendar_day(session_start_ts, now_ts)) {
+    session_start_new_day(now_ts);
+  } else if (diff >= 10) {
     debug_log("tracker", "Large time gap detected (%u s). Assuming resume from sleep.", diff);
-
-    session_total_seconds += pending_seconds;
-    pending_seconds = 0;
-    if (session_total_seconds > 0) {
-      storage_log_session(current_game_uid, session_total_seconds,
-                          session_start_ts, &current_session_offset);
-      debug_log("tracker", "Pre-sleep flush (Total: %u s)", session_total_seconds);
-    }
-
-    int local_offset = utils_get_timezone_offset_seconds();
-    u32 start_day = (session_start_ts + local_offset) / 86400;
-    u32 current_day = (now_ts + local_offset) / 86400;
-
-    if (start_day != current_day) {
-      debug_log("tracker", "Day changed during sleep (start_day=%u, current_day=%u). Starting new session.",
-                (unsigned int)start_day, (unsigned int)current_day);
-      session_start_ts = now_ts;
-      session_total_seconds = 0;
-      current_session_offset = -1;
-    }
+    session_flush_pending();
   } else {
     pending_seconds++;
 
@@ -219,7 +263,7 @@ static void playtime_tick(u32 now_ts, u32 *last_tick_ts) {
     }
   }
 
-  *last_tick_ts = now_ts;
+  s_last_tick_ts = now_ts;
 }
 
 static int tracker_thread_main(SceSize args, void *argp) {
@@ -230,7 +274,8 @@ static int tracker_thread_main(SceSize args, void *argp) {
   current_session_offset = -1;
   pending_seconds = 0;
   session_total_seconds = 0;
-  session_start_ts = utils_get_timestamp();
+  u32 boot_ts = utils_get_timestamp();
+  session_start_ts = boot_ts;
 
   const PluginConfigRuntime *cfg = plugin_config_get();
   int hotkey_enabled = cfg && cfg->hotkey_enabled;
@@ -262,11 +307,12 @@ static int tracker_thread_main(SceSize args, void *argp) {
     }
   } else if (tracker_runtime_is_tracking(&g_runtime)) {
     storage_ensure_initialized(base_dir);
-    session_begin_tracking(metadata, 0);
+    session_begin_tracking(metadata, 1);
 
     u32 now_ts = utils_get_timestamp();
-    if (now_ts > session_start_ts) {
-      session_total_seconds = now_ts - session_start_ts;
+    if (now_ts > boot_ts) {
+      session_total_seconds = now_ts - boot_ts;
+      session_start_ts = boot_ts;
       debug_log("tracker", "Backfilled startup time before tracking init (%u s)",
                 (unsigned int)session_total_seconds);
     }
@@ -275,7 +321,7 @@ static int tracker_thread_main(SceSize args, void *argp) {
               metadata->game_id, (unsigned int)metadata->category);
   }
 
-  u32 last_tick_ts = utils_get_timestamp();
+  s_last_tick_ts = utils_get_timestamp();
 
   while (running) {
     metadata = detector_get_metadata();
@@ -310,7 +356,7 @@ static int tracker_thread_main(SceSize args, void *argp) {
     }
 
     u32 now_ts = utils_get_timestamp();
-    playtime_tick(now_ts, &last_tick_ts);
+    playtime_tick(now_ts);
   }
 
   return 0;
