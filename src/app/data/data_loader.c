@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include <stddef.h>
 #include <time.h>
 
 static GameStats *g_games = NULL;
@@ -31,6 +32,80 @@ static u32 g_session_count = 0;
 
 static u16 *g_uid_map = NULL;
 static u32 g_uid_map_size = 0;
+static GameRegistryHeader g_registry_header;
+static int g_registry_header_valid = 0;
+
+static u32 data_calculate_checksum(const void *data, size_t len, size_t skip_offset) {
+    u32 hash = 2166136261U;
+    const unsigned char *p = (const unsigned char *)data;
+
+    for (size_t i = 0; i < len; i++) {
+        if (i >= skip_offset && i < skip_offset + sizeof(u32)) {
+            continue;
+        }
+        hash ^= p[i];
+        hash *= 16777619U;
+    }
+    return hash;
+}
+
+static int data_write_db_files(void) {
+    const char *prefix = utils_get_device_prefix();
+    char games_path[256];
+    char sessions_path[256];
+    SceUID g_fd;
+    SceUID s_fd;
+    GameRegistryHeader h;
+
+    if (!g_registry_header_valid) {
+        return -1;
+    }
+
+    snprintf(games_path, sizeof(games_path), "%s" GDIARY_BASE_DIR "/" GDIARY_DB_DIR "/" GAMES_DAT,
+             prefix);
+    snprintf(sessions_path, sizeof(sessions_path), "%s" GDIARY_BASE_DIR "/" GDIARY_DB_DIR "/"
+                                                       SESSIONS_DAT,
+             prefix);
+
+    g_fd = sceIoOpen(games_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    if (g_fd < 0) {
+        return -2;
+    }
+
+    h = g_registry_header;
+    h.num_entries = g_game_count;
+    h.ready_flag = 0;
+    h.checksum = 0;
+
+    sceIoWrite(g_fd, &h, sizeof(GameRegistryHeader));
+    if (g_game_count > 0 && g_games) {
+        for (u32 i = 0; i < g_game_count; i++) {
+            sceIoWrite(g_fd, &g_games[i].entry, sizeof(GameEntry));
+        }
+    }
+
+    h.ready_flag = GAMEDIARY_MAGIC;
+    h.checksum = data_calculate_checksum(&h, sizeof(GameRegistryHeader),
+                                         offsetof(GameRegistryHeader, checksum));
+    sceIoLseek(g_fd, 0, PSP_SEEK_SET);
+    sceIoWrite(g_fd, &h, sizeof(GameRegistryHeader));
+    sceIoLseek(g_fd, 0, PSP_SEEK_END);
+    sceIoWrite(g_fd, &h, sizeof(GameRegistryHeader));
+    sceIoClose(g_fd);
+
+    g_registry_header = h;
+
+    s_fd = sceIoOpen(sessions_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+    if (s_fd < 0) {
+        return -3;
+    }
+    if (g_session_count > 0 && g_sessions) {
+        sceIoWrite(s_fd, g_sessions, (SceSize)(g_session_count * sizeof(SessionEntry)));
+    }
+    sceIoClose(s_fd);
+
+    return 0;
+}
 
 int data_load_all(void) {
     const char *prefix = utils_get_device_prefix();
@@ -44,6 +119,8 @@ int data_load_all(void) {
 
     GameRegistryHeader header;
     sceIoRead(fd, &header, sizeof(GameRegistryHeader));
+    g_registry_header = header;
+    g_registry_header_valid = 1;
 
     g_game_count = header.num_entries;
     g_games = (GameStats*)calloc(g_game_count, sizeof(GameStats));
@@ -157,6 +234,72 @@ void data_free(void) {
     g_sessions = NULL;
     g_uid_map = NULL;
     g_uid_map_size = 0;
+    g_game_count = 0;
+    g_session_count = 0;
+    g_registry_header_valid = 0;
+}
+
+int data_delete_game_at_index(int game_idx) {
+    u32 uid;
+    u32 write;
+    u32 i;
+    GameStats *shrunk;
+
+    if (game_idx < 0 || (u32)game_idx >= g_game_count || !g_games) {
+        return -1;
+    }
+    if (!g_registry_header_valid) {
+        return -2;
+    }
+
+    uid = g_games[game_idx].entry.uid;
+
+    for (i = (u32)game_idx; i + 1 < g_game_count; i++) {
+        g_games[i] = g_games[i + 1];
+    }
+    g_game_count--;
+
+    if (g_game_count > 0) {
+        shrunk = (GameStats *)realloc(g_games, g_game_count * sizeof(GameStats));
+        if (shrunk) {
+            g_games = shrunk;
+        }
+    } else {
+        free(g_games);
+        g_games = NULL;
+    }
+
+    write = 0;
+    for (i = 0; i < g_session_count; i++) {
+        if (g_sessions[i].game_uid != uid) {
+            if (write != i) {
+                g_sessions[write] = g_sessions[i];
+            }
+            write++;
+        }
+    }
+    g_session_count = write;
+
+    if (g_session_count > 0) {
+        SessionEntry *sess_shrunk =
+            (SessionEntry *)realloc(g_sessions, g_session_count * sizeof(SessionEntry));
+        if (sess_shrunk) {
+            g_sessions = sess_shrunk;
+        }
+    } else {
+        free(g_sessions);
+        g_sessions = NULL;
+    }
+
+    if (g_uid_map && g_uid_map_size > 0) {
+        if (uid < g_uid_map_size) {
+            g_uid_map[uid] = 0xFFFF;
+        }
+        data_rebuild_uid_map();
+    }
+
+    g_registry_header.num_entries = g_game_count;
+    return data_write_db_files();
 }
 
 /**

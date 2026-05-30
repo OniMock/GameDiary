@@ -75,4 +75,11 @@ void data_compute_game_details(u32 game_uid, GameDetailStats *out);
  */
 void data_free(void);
 
+/**
+ * @brief Removes one game and all its sessions from memory and disk.
+ * @param game_idx Index in the current games array (0 .. count-1).
+ * @return 0 on success, negative on error.
+ */
+int data_delete_game_at_index(int game_idx);
+
 #endif // GAMEDIARY_DATA_LOADER_H

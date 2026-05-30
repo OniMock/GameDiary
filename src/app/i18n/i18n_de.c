@@ -168,6 +168,10 @@ const char* g_lang_de_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: Zum Listenanfang",
     [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: Zum Listenende",
     [MSG_HELP_DESC_LEADERBOARD]    = "Bestenliste Ihrer meistgespielten Spiele. Sortiert Spiele nach Spielzeit in jeder Kategorie.",
+    [MSG_GAME_DELETE_WARN]         = "Alle Sitzungen werden dauerhaft gelöscht\nund dieses Spiel aus der Bibliothek entfernt.\nMöchten Sie fortfahren?",
+    [MSG_GAME_DELETE_OK]           = "Spieldaten erfolgreich entfernt.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE] = "[ △ ]: Spieldaten löschen",
+
     [MSG_LOADING]                  = "Wird geladen...",
     [MSG_WARNING]                  = "WARNUNG",
 };

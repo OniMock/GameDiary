@@ -170,6 +170,10 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: リストの先頭",
     [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: リストの最後",
     [MSG_HELP_DESC_LEADERBOARD]    = "最もプレイしたゲームのランキングです。各カテゴリでプレイ時間順にゲームを並べ替えます。",
+    [MSG_GAME_DELETE_WARN]         = "すべてのセッションが完全に削除され、\nこのゲームがライブラリから削除されます。\n続行しますか？",
+    [MSG_GAME_DELETE_OK]           = "ゲームデータを削除しました。",
+    [MSG_HELP_BTN_TRIANGLE_DELETE] = "[ △ ]: ゲームデータを削除",
+
     [MSG_LOADING]                  = "読み込み中...",
     [MSG_WARNING]                  = "警告",
 };

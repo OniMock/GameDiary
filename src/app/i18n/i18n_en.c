@@ -165,6 +165,10 @@ const char* g_lang_en_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: Bottom of list",
     [MSG_HELP_DESC_LEADERBOARD]    = "Leaderboard of your most played games. Sorts games by playtime in each category.",
 
+    [MSG_GAME_DELETE_WARN]         = "This will permanently delete all sessions\nand remove this game from the library.\nDo you want to continue?",
+    [MSG_GAME_DELETE_OK]           = "Game data removed successfully.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE] = "[ △ ]: Delete game data",
+
     [MSG_LOADING]                  = "Loading...",
     [MSG_WARNING]                  = "WARNING",
 };

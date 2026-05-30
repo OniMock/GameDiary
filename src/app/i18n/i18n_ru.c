@@ -166,6 +166,10 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: Начало списка",
     [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: Конец списка",
     [MSG_HELP_DESC_LEADERBOARD]    = "Рейтинг ваших самых популярных игр. Сортирует игры по времени игры в каждой категории.",
+    [MSG_GAME_DELETE_WARN]         = "Все сессии будут удалены безвозвратно,\nа игра исчезнет из библиотеки.\nПродолжить?",
+    [MSG_GAME_DELETE_OK]           = "Данные игры успешно удалены.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE] = "[ △ ]: Удалить данные игры",
+
     [MSG_LOADING]                  = "Загрузка...",
     [MSG_WARNING]                  = "ВНИМАНИЕ",
 };

@@ -166,6 +166,10 @@ const char* g_lang_fr_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: Haut de la liste",
     [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: Bas de la liste",
     [MSG_HELP_DESC_LEADERBOARD]    = "Classement de vos jeux les plus joués. Trie les jeux par temps de jeu dans chaque catégorie.",
+    [MSG_GAME_DELETE_WARN]         = "Toutes les sessions seront supprimées\ndéfinitivement et ce jeu sera retiré.\nVoulez-vous continuer ?",
+    [MSG_GAME_DELETE_OK]           = "Données du jeu supprimées avec succès.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE] = "[ △ ]: Supprimer les données du jeu",
+
     [MSG_LOADING]                  = "Chargement...",
     [MSG_WARNING]                  = "ATTENTION",
 };

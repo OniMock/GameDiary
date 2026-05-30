@@ -167,6 +167,10 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_HELP_BTN_TRIANGLE_TOP]    = "[ △ ]: Inicio de la lista",
     [MSG_HELP_BTN_X_BOTTOM]        = "[ ■ ]: Final de la lista",
     [MSG_HELP_DESC_LEADERBOARD]    = "Clasificación de tus juegos más jugados. Ordena los juegos por tiempo de juego en cada categoría.",
+    [MSG_GAME_DELETE_WARN]         = "Se eliminarán permanentemente todas las sesiones\ny se quitará este juego de la biblioteca.\n¿Deseas continuar?",
+    [MSG_GAME_DELETE_OK]           = "Datos del juego eliminados correctamente.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE] = "[ △ ]: Eliminar datos del juego",
+
     [MSG_LOADING]                  = "Cargando...",
     [MSG_WARNING]                  = "ADVERTENCIA",
 };

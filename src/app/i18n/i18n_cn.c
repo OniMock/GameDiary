@@ -149,6 +149,10 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SETTINGS_FORMATTING]      = "格式化",
     [MSG_FORMATTING_HOURS_ONLY]    = "格式：仅小时",
     [MSG_HELP_DESC_FORMATTING]     = "调整时间的显示方式。隐藏天数，仅显示总小时和分钟。",
+    [MSG_GAME_DELETE_WARN]         = "将永久删除所有会话记录，\n并从库中移除此游戏。\n是否继续？",
+    [MSG_GAME_DELETE_OK]           = "游戏数据已成功删除。",
+    [MSG_HELP_BTN_TRIANGLE_DELETE] = "[ △ ]: 删除游戏数据",
+
     [MSG_LOADING]                  = "加载中…",
 
     [MSG_HELP_DESC_BACKUP]         = "以 JSON 格式导出或导入您的数据备份。",

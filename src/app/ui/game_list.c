@@ -220,6 +220,39 @@ static void draw_stats_block(const GameStats *g,
  * Screen callbacks
  * ----------------------------------------------------------------------- */
 
+void game_list_rebuild_after_data_change(void) {
+    data_calculate_stats(0, 0xFFFFFFFF);
+    stats_sort_by_total();
+
+    s_available_count = game_category_get_available(s_available_filters);
+    if (s_current_filter != FILTER_ALL) {
+        int found = 0;
+        for (int i = 0; i < s_available_count; i++) {
+            if (s_available_filters[i] == s_current_filter) {
+                found = 1;
+                s_filter_pos = i;
+                break;
+            }
+        }
+        if (!found) {
+            s_current_filter = FILTER_ALL;
+            s_filter_pos = -1;
+        }
+    }
+
+    update_filtered_list();
+    carousel_init(&g_cs, s_filtered_count, s_filtered_indices);
+    g_prev_idx = -1;
+    ui_reset_game_daily_graph_animation();
+
+    if (s_filtered_count > 0) {
+        if (g_cs.current_idx >= s_filtered_count) {
+            carousel_set_index(&g_cs, s_filtered_count - 1);
+        }
+        g_prev_idx = ((g_cs.current_idx % s_filtered_count) + s_filtered_count) % s_filtered_count;
+    }
+}
+
 static void game_list_init(void) {
     s_helper_lines[0] = i18n_get(MSG_HELP_CONTROLS);
     s_helper_lines[1] = i18n_get(MSG_HELP_BTN_X_SELECT);
@@ -241,27 +274,7 @@ static void game_list_init(void) {
     /* Enable analog sampling for joystick navigation */
     sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 
-    /* Calculate global stats and correctly sort by playtime */
-    data_calculate_stats(0, 0xFFFFFFFF);
-    stats_sort_by_total();
-
-    /* Identify available categories for filtering */
-    s_available_count = game_category_get_available(s_available_filters);
-
-    /* Ensure the current filter is still valid if data changed */
-    if (s_current_filter != FILTER_ALL) {
-        int found = 0;
-        for (int i = 0; i < s_available_count; i++) {
-            if (s_available_filters[i] == s_current_filter) { found = 1; s_filter_pos = i; break; }
-        }
-        if (!found) { s_current_filter = FILTER_ALL; s_filter_pos = -1; }
-    }
-
-    update_filtered_list();
-
-    carousel_init(&g_cs, s_filtered_count, s_filtered_indices);
-    g_prev_idx = -1;
-    ui_reset_game_daily_graph_animation();
+    game_list_rebuild_after_data_change();
 
     /* Restore selection */
     if (s_last_selected_uid != 0) {

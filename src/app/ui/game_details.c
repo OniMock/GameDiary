@@ -29,6 +29,7 @@
 #include "app/data/game_category.h"
 #include "app/data/stats_calculator.h"
 #include "app/audio/audio_manager.h"
+#include "app/ui/ui_loading.h"
 #include "common/utils.h"
 #include <pspctrl.h>
 #include <stdio.h>
@@ -39,8 +40,17 @@ static Texture* g_game_icon = NULL;
 
 static GameDetailStats s_stats;
 
-static const char* s_helper_lines[8];
+static const char* s_helper_lines[11];
 static PopupData s_helper_data;
+
+static bool s_confirm_delete = false;
+static bool s_is_deleting = false;
+static u32 s_delete_start_ms = 0;
+static int s_delete_pending = 0;
+static int s_delete_result = 0;
+
+static const char* s_delete_result_lines[2];
+static PopupData s_delete_result_popup;
 
 // 0 = Summary, 1 = Weekly, 2 = Monthly, 3 = Last 12 Months, 4 = Yearly
 static int s_details_page = 0;
@@ -54,19 +64,24 @@ void game_details_set_idx(int idx) {
 
 
 static void game_details_init(void) {
+    s_confirm_delete = false;
+    s_is_deleting = false;
+    s_delete_pending = 0;
+
     s_helper_lines[0] = i18n_get(MSG_HELP_CONTROLS);
     s_helper_lines[1] = i18n_get(MSG_HELP_BTN_O_BACK);
     s_helper_lines[2] = i18n_get(MSG_HELP_BTN_ANALOG_NAVIGATE);
-    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_START_MENU);
-    s_helper_lines[4] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
-    s_helper_lines[5] = "";
-    s_helper_lines[6] = i18n_get(MSG_HELP_INFO_LABEL);
-    s_helper_lines[7] = i18n_get(MSG_HELP_DESC_DETAILS);
+    s_helper_lines[3] = i18n_get(MSG_HELP_BTN_TRIANGLE_DELETE);
+    s_helper_lines[4] = i18n_get(MSG_HELP_BTN_START_MENU);
+    s_helper_lines[5] = i18n_get(MSG_HELP_BTN_SELECT_CONFIG);
+    s_helper_lines[6] = "";
+    s_helper_lines[7] = i18n_get(MSG_HELP_INFO_LABEL);
+    s_helper_lines[8] = i18n_get(MSG_HELP_DESC_DETAILS);
 
     s_helper_data.title = i18n_get(MSG_HELP_TITLE);
     s_helper_data.icon = &GD_IMG_ICON_HELPER_32_PNG;
     s_helper_data.lines = s_helper_lines;
-    s_helper_data.line_count = 8;
+    s_helper_data.line_count = 9;
     s_helper_data.show_close_hint = true;
 
     if (g_game_icon) texture_free(g_game_icon);
@@ -87,12 +102,66 @@ static void game_details_init(void) {
     g_current_query.offset = 0;
 }
 
+static void game_details_show_delete_result(int success) {
+    s_delete_result_lines[0] = i18n_get(success ? MSG_GAME_DELETE_OK : MSG_BACKUP_ERROR);
+    s_delete_result_lines[1] = "";
+    s_delete_result_popup.title = i18n_get(success ? MSG_SUCCESS : MSG_ERROR);
+    s_delete_result_popup.title_color = success ? COLOR_SUCCESS : COLOR_DANGER;
+    s_delete_result_popup.icon = &GD_IMG_ICON_HELPER_32_PNG;
+    s_delete_result_popup.lines = s_delete_result_lines;
+    s_delete_result_popup.line_count = 1;
+    s_delete_result_popup.show_close_hint = true;
+    popup_open(&s_delete_result_popup);
+}
+
 static void game_details_update(u32 buttons, u32 pressed) {
     (void)buttons;
-    (void)pressed;
 
     if (pressed & PSP_CTRL_LTRIGGER) {
         popup_open(&s_helper_data);
+        return;
+    }
+
+    if (s_is_deleting) {
+        u32 elapsed = utils_get_time_ms() - s_delete_start_ms;
+
+        if (s_delete_pending && elapsed > 16) {
+            s_delete_result = data_delete_game_at_index(g_game_idx);
+            s_delete_pending = 0;
+        }
+
+        if (!s_delete_pending && elapsed >= 1000) {
+            ui_loading_hide();
+            s_is_deleting = false;
+            s_confirm_delete = false;
+
+            if (s_delete_result == 0) {
+                game_list_rebuild_after_data_change();
+                screen_manager_pop();
+            } else {
+                game_details_show_delete_result(0);
+            }
+        }
+        return;
+    }
+
+    if (s_confirm_delete) {
+        if (pressed & PSP_CTRL_CROSS) {
+            audio_play_sfx(SFX_CONFIRM);
+            ui_loading_show(i18n_get(MSG_LOADING));
+            s_delete_start_ms = utils_get_time_ms();
+            s_is_deleting = true;
+            s_delete_pending = 1;
+        } else if (pressed & PSP_CTRL_CIRCLE) {
+            audio_play_sfx(SFX_CANCEL);
+            s_confirm_delete = false;
+        }
+        return;
+    }
+
+    if (pressed & PSP_CTRL_TRIANGLE) {
+        audio_play_sfx(SFX_NAVIGATE);
+        s_confirm_delete = true;
         return;
     }
 
@@ -130,7 +199,6 @@ static void game_details_update(u32 buttons, u32 pressed) {
         }
     }
 
-    // inputs like Triangle, Start, Select are handled globally by screen_manager
 }
 
 static void draw_stat_row(Rect r, const char* label, const char* value) {
@@ -138,8 +206,81 @@ static void draw_stat_row(Rect r, const char* label, const char* value) {
     ui_draw_text(value, r, COLOR_TEXT, UI_FONT_SIZE_NORMAL, ALIGN_RIGHT);
 }
 
+static void game_details_draw_confirm_delete(void) {
+    Rect card_rect = {20, 80, 440, 150};
+    const char *warn_text;
+    char line1[128];
+    char line2[128];
+    char line3[128];
+    const char *nl;
+    const char *nl2;
+    Rect title_rect;
+    int sep_y;
+    Rect text_rect_1;
+    Rect text_rect_2;
+    Rect text_rect_3;
+
+    ui_draw_card(card_rect, COLOR_CARD, COLOR_BORDER);
+
+    title_rect = (Rect){card_rect.x, card_rect.y + 10, card_rect.w, 30};
+    ui_draw_text(i18n_get(MSG_WARNING), title_rect, COLOR_DANGER, UI_FONT_SIZE_TITLE_HUGE,
+                 ALIGN_CENTER);
+
+    sep_y = card_rect.y + 40;
+    renderer_draw_rect(card_rect.x + 20, sep_y, card_rect.w - 40, 1, COLOR_BORDER);
+
+    warn_text = i18n_get(MSG_GAME_DELETE_WARN);
+    line1[0] = line2[0] = line3[0] = '\0';
+
+    nl = strchr(warn_text, '\n');
+    if (nl) {
+        int len = (int)(nl - warn_text);
+        if (len >= (int)sizeof(line1)) {
+            len = (int)sizeof(line1) - 1;
+        }
+        strncpy(line1, warn_text, (size_t)len);
+        line1[len] = '\0';
+        nl2 = strchr(nl + 1, '\n');
+        if (nl2) {
+            len = (int)(nl2 - (nl + 1));
+            if (len >= (int)sizeof(line2)) {
+                len = (int)sizeof(line2) - 1;
+            }
+            strncpy(line2, nl + 1, (size_t)len);
+            line2[len] = '\0';
+            snprintf(line3, sizeof(line3), "%s", nl2 + 1);
+        } else {
+            snprintf(line2, sizeof(line2), "%s", nl + 1);
+        }
+    } else {
+        snprintf(line1, sizeof(line1), "%s", warn_text);
+    }
+
+    text_rect_1 = (Rect){card_rect.x, sep_y + 12, card_rect.w, 18};
+    text_rect_2 = (Rect){card_rect.x, sep_y + 32, card_rect.w, 18};
+    text_rect_3 = (Rect){card_rect.x, sep_y + 52, card_rect.w, 18};
+
+    ui_draw_text(line1, text_rect_1, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_CENTER);
+    if (line2[0] != '\0') {
+        ui_draw_text(line2, text_rect_2, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_CENTER);
+    }
+    if (line3[0] != '\0') {
+        ui_draw_text(line3, text_rect_3, COLOR_TEXT, UI_FONT_SIZE_PRIMARY, ALIGN_CENTER);
+    }
+
+    if (!s_is_deleting) {
+        ui_draw_hint_footer(i18n_get(MSG_HELP_BTN_X_CONFIRM), 20, COLOR_SUBTEXT);
+        ui_draw_hint_footer(i18n_get(MSG_HELP_BTN_O_BACK), 160, COLOR_SUBTEXT);
+    }
+}
+
 static void game_details_draw(void) {
     renderer_clear(COLOR_BG);
+
+    if (s_confirm_delete) {
+        game_details_draw_confirm_delete();
+        return;
+    }
 
     GameStats* games = data_get_games();
     GameStats* g = &games[g_game_idx];
@@ -285,7 +426,9 @@ static void game_details_draw(void) {
     // Always show navigation indicators for context switching, vertically centered.
     ui_draw_nav_indicators(136, true, true, true, true, s_last_nav_ms, COLOR_ACCENT);
 
-    ui_draw_standard_hints();
+    if (!s_is_deleting) {
+        ui_draw_standard_hints();
+    }
 }
 
 static void game_details_destroy(void) {
@@ -294,6 +437,9 @@ static void game_details_destroy(void) {
         g_game_icon = NULL;
     }
     s_details_page = 0;
+    s_confirm_delete = false;
+    s_is_deleting = false;
+    s_delete_pending = 0;
 }
 
 Screen g_screen_game_details = {

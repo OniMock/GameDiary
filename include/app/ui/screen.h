@@ -34,6 +34,7 @@ void screen_manager_draw(void);
 
 // Screen specific helpers
 void game_details_set_idx(int idx);
+void game_list_rebuild_after_data_change(void);
 
 // Screens
 extern Screen g_screen_splash;
