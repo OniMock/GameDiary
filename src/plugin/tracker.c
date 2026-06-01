@@ -324,6 +324,25 @@ static int tracker_thread_main(SceSize args, void *argp) {
               metadata->game_id, (unsigned int)metadata->category);
   }
 
+  /*
+   * Startup notification: inform the user of the initial tracking state
+   * right after the tracker.dat file is read — only when hotkey is active,
+   * since without it the user has no way to interact with the state anyway.
+   */
+  if (hotkey_enabled) {
+    if (!unresolved_psp && tracker_runtime_is_tracking(&g_runtime)) {
+      overlay_notification_show("GameDiary - Tracker: ON", NULL,
+                                OVERLAY_NOTIFY_TRACKER_ON);
+      debug_log("tracker", "Startup notification: tracking ON for %s",
+                metadata ? metadata->game_id : "?");
+    } else {
+      overlay_notification_show("GameDiary - Tracker: OFF", NULL,
+                                OVERLAY_NOTIFY_TRACKER_OFF);
+      debug_log("tracker", "Startup notification: tracking OFF for %s",
+                metadata ? metadata->game_id : "?");
+    }
+  }
+
   s_last_tick_ts = utils_get_timestamp();
 
   while (running) {
