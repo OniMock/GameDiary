@@ -36,9 +36,9 @@
 #define NID_SET_FRAME_BUF_LEGACY   0x289D82FEU
 /* sceDisplay_driver_63E22A26 — internal SetFrameBuf (GTA and others) */
 #define NID_SET_FRAME_BUF_INTERNAL 0x3E17FE8DU
-/* PSP 8888: 0xAABBGGRR */
+/* PSP 8888: 0xAABBGGRR — R in byte 0, G in byte 1, B in byte 2 */
 #define OVERLAY_MAKE_COLOR(r, g, b) \
-  ((u32)(b) | ((u32)(g) << 8) | ((u32)(r) << 16) | 0xFF000000U)
+  ((u32)(r) | ((u32)(g) << 8) | ((u32)(b) << 16) | 0xFF000000U)
 
 #define OVERLAY_COLOR_FG           OVERLAY_MAKE_COLOR(0xFF, 0xFF, 0xFF)
 #define OVERLAY_COLOR_BG_ON        OVERLAY_MAKE_COLOR(0x0B, 0x4A, 0x14)
