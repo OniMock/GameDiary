@@ -135,10 +135,10 @@ static void game_details_update(u32 buttons, u32 pressed) {
             s_is_deleting = false;
             s_confirm_delete = false;
 
-            if (s_delete_result == 0) {
-                game_list_rebuild_after_data_change();
-                screen_manager_pop();
-            } else {
+            game_list_rebuild_after_data_change();
+            screen_manager_pop();
+
+            if (s_delete_result != 0) {
                 game_details_show_delete_result(0);
             }
         }
@@ -283,6 +283,9 @@ static void game_details_draw(void) {
     }
 
     GameStats* games = data_get_games();
+    if (!games || g_game_idx < 0 || (u32)g_game_idx >= data_get_game_count()) {
+        return;
+    }
     GameStats* g = &games[g_game_idx];
 
     /* ----------------------------------------------------------------
