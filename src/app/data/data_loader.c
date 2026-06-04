@@ -303,6 +303,52 @@ int data_delete_game_at_index(int game_idx) {
 }
 
 /**
+ * @brief Deletes a single play session identified by game_uid + timestamp.
+ *
+ * Searches g_sessions linearly for the first entry with matching game_uid
+ * and timestamp, shifts the trailing entries left by one, decrements the
+ * count, and writes the updated sessions.dat to disk via data_write_db_files().
+ *
+ * @param game_uid  UID of the owning game.
+ * @param timestamp UNIX start timestamp of the session to delete.
+ * @return 0 on success, -1 if not found, -2 if not initialised.
+ */
+int data_delete_session(u32 game_uid, u32 timestamp) {
+    u32 i;
+
+    if (!g_sessions || g_session_count == 0) return -1;
+    if (!g_registry_header_valid)             return -2;
+
+    /* Find the first session that matches both uid and timestamp. */
+    for (i = 0; i < g_session_count; i++) {
+        if (g_sessions[i].game_uid == game_uid &&
+            g_sessions[i].timestamp == timestamp) {
+            break;
+        }
+    }
+
+    if (i == g_session_count) return -1; /* Not found. */
+
+    /* Shift all subsequent entries one position to the left. */
+    for (; i + 1 < g_session_count; i++) {
+        g_sessions[i] = g_sessions[i + 1];
+    }
+    g_session_count--;
+
+    /* Shrink the allocation to avoid memory waste. */
+    if (g_session_count > 0) {
+        SessionEntry *shrunk = (SessionEntry *)realloc(
+            g_sessions, g_session_count * sizeof(SessionEntry));
+        if (shrunk) g_sessions = shrunk;
+    } else {
+        free(g_sessions);
+        g_sessions = NULL;
+    }
+
+    return data_write_db_files();
+}
+
+/**
  * @brief Computes detailed per-period statistics for a single game.
  *
  * Uses utils_get_timestamp() (PSP RTC via sceRtcGetCurrentTick) for all

@@ -51,5 +51,6 @@ extern Screen g_screen_about;
 extern Screen g_screen_support;
 extern Screen g_screen_language_select;
 extern Screen g_screen_plugin_settings;
+extern Screen g_screen_sessions;
 
 #endif // GAMEDIARY_SCREEN_H

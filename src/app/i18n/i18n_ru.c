@@ -172,4 +172,10 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
 
     [MSG_LOADING]                  = "Загрузка...",
     [MSG_WARNING]                  = "ВНИМАНИЕ",
+
+    [MSG_MENU_SESSIONS]                = "Сессии",
+    [MSG_SESSION_DELETE_WARN]          = "Эта сессия будет удалена навсегда.\nПродолжить?",
+    [MSG_SESSION_DELETE_OK]            = "Сессия успешно удалена.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: Удалить сессию",
+    [MSG_HELP_DESC_SESSIONS]           = "Полная история всех игровых сессий для всех игр, отсортированная от самых новых к самым старым. Здесь можно удалять отдельные сессии.",
 };

@@ -174,4 +174,10 @@ const char* g_lang_de_entries[MSG_COUNT] = {
 
     [MSG_LOADING]                  = "Wird geladen...",
     [MSG_WARNING]                  = "WARNUNG",
+
+    [MSG_MENU_SESSIONS]                = "Sitzungen",
+    [MSG_SESSION_DELETE_WARN]          = "Diese Sitzung wird dauerhaft gelöscht.\nMöchten Sie fortfahren?",
+    [MSG_SESSION_DELETE_OK]            = "Sitzung erfolgreich entfernt.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: Sitzung löschen",
+    [MSG_HELP_DESC_SESSIONS]           = "Vollständiger Verlauf aller Spielsitzungen aller Spiele, sortiert von der neuesten zur ältesten. Hier können einzelne Sitzungen gelöscht werden.",
 };

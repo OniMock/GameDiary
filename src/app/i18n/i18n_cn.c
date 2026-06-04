@@ -177,4 +177,10 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SUCCESS]                   = "成功",
     [MSG_ERROR]                     = "错误",
     [MSG_WARNING]                   = "警告",
+
+    [MSG_MENU_SESSIONS]                = "游戏会话",
+    [MSG_SESSION_DELETE_WARN]          = "此操作将永久删除此会话。\n是否继续？",
+    [MSG_SESSION_DELETE_OK]            = "会话已成功删除。",
+    [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: 删除会话",
+    [MSG_HELP_DESC_SESSIONS]           = "所有游戏游玩会话的完整历史记录，按最新到最旧排序。您可以在这里删除单独的会话。",
 };

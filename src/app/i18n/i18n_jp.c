@@ -176,4 +176,10 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
 
     [MSG_LOADING]                  = "読み込み中...",
     [MSG_WARNING]                  = "警告",
+
+    [MSG_MENU_SESSIONS]                = "セッション",
+    [MSG_SESSION_DELETE_WARN]          = "このセッションは完全に削除されます。\n続行しますか？",
+    [MSG_SESSION_DELETE_OK]            = "セッションを削除しました。",
+    [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: セッションを削除",
+    [MSG_HELP_DESC_SESSIONS]           = "すべてのゲームのプレイセッション履歴を最新順に表示します。ここで個別のセッションを削除できます。",
 };

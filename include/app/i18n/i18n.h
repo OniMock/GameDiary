@@ -197,6 +197,14 @@ typedef enum {
     MSG_SUCCESS,
     MSG_ERROR,
     MSG_WARNING,
+
+    /* Sessions screen */
+    MSG_MENU_SESSIONS,
+    MSG_SESSION_DELETE_WARN,
+    MSG_SESSION_DELETE_OK,
+    MSG_HELP_BTN_TRIANGLE_DELETE_SESS,
+    MSG_HELP_DESC_SESSIONS,
+
     MSG_COUNT
 
 } MessageId;

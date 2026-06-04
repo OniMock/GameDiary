@@ -29,7 +29,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define MENU_ITEM_COUNT 6
+#define MENU_ITEM_COUNT 7
 
 static float g_current_index = 0.0f;
 static float g_target_index = 0.0f;
@@ -45,12 +45,13 @@ typedef struct {
 } MainMenuItem;
 
 static const MainMenuItem g_menu_items[MENU_ITEM_COUNT] = {
-    { MSG_MENU_GAMES, &GD_IMG_ICON_GAME_128_PNG, &g_screen_game_list },
-    { MSG_MENU_LEADERBOARD, &GD_IMG_ICON_LEADERBOARD_128_PNG, &g_screen_leaderboard },
-    { MSG_MENU_STATS, &GD_IMG_ICON_STATS_128_PNG, &g_screen_stats },
-    { MSG_MENU_ACTIVITY, &GD_IMG_ICON_ACTIVITY_128_PNG, &g_screen_activity },
-    { MSG_MENU_SETTINGS, &GD_IMG_ICON_SETTINGS_128_PNG, &g_screen_settings },
-    { MSG_MENU_INFO, &GD_IMG_ICON_INFO_128_PNG, &g_screen_info }
+    { MSG_MENU_GAMES,        &GD_IMG_ICON_GAME_128_PNG,        &g_screen_game_list   },
+    { MSG_MENU_LEADERBOARD,  &GD_IMG_ICON_LEADERBOARD_128_PNG, &g_screen_leaderboard },
+    { MSG_MENU_STATS,        &GD_IMG_ICON_STATS_128_PNG,        &g_screen_stats       },
+    { MSG_MENU_ACTIVITY,     &GD_IMG_ICON_ACTIVITY_128_PNG,     &g_screen_activity    },
+    { MSG_MENU_SESSIONS,     &GD_IMG_ICON_MENU_128_PNG,         &g_screen_sessions    },
+    { MSG_MENU_SETTINGS,     &GD_IMG_ICON_SETTINGS_128_PNG,     &g_screen_settings    },
+    { MSG_MENU_INFO,         &GD_IMG_ICON_INFO_128_PNG,         &g_screen_info        },
 };
 
 static void main_menu_init(void) {

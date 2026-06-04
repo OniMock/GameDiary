@@ -82,4 +82,12 @@ void data_free(void);
  */
 int data_delete_game_at_index(int game_idx);
 
+/**
+ * @brief Removes a single play session from memory and disk.
+ * @param game_uid  UID of the target game.
+ * @param timestamp Start UNIX timestamp of the session.
+ * @return 0 on success, negative on error.
+ */
+int data_delete_session(u32 game_uid, u32 timestamp);
+
 #endif // GAMEDIARY_DATA_LOADER_H

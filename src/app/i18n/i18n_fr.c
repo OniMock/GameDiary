@@ -172,4 +172,10 @@ const char* g_lang_fr_entries[MSG_COUNT] = {
 
     [MSG_LOADING]                  = "Chargement...",
     [MSG_WARNING]                  = "ATTENTION",
+
+    [MSG_MENU_SESSIONS]                = "Sessions",
+    [MSG_SESSION_DELETE_WARN]          = "Cette session sera supprimée définitivement.\nVoulez-vous continuer ?",
+    [MSG_SESSION_DELETE_OK]            = "Session supprimée avec succès.",
+    [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: Supprimer la session",
+    [MSG_HELP_DESC_SESSIONS]           = "Historique complet de toutes les sessions de jeu de tous les jeux, classé de la plus récente à la plus ancienne. Vous pouvez supprimer des sessions individuelles ici.",
 };
