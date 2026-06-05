@@ -289,3 +289,7 @@ void overlay_notification_draw(void) {
 
   overlay_blit_draw_all(l1, l2, s_line_count);
 }
+
+int overlay_notification_get_fb_count(void) {
+  return s_tracked_count;
+}

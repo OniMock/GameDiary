@@ -19,6 +19,7 @@
 #include "common/sfo_parser.h"
 #include "common/utils.h"
 #include "common/debug.h"
+#include "plugin/overlay_notification.h"
 #include <pspkernel.h>
 #include <pspsdk/kubridge.h>
 #include <pspsdk/systemctrl.h>
@@ -27,7 +28,7 @@
 
 #define PSP_UMD_READY_FLAG 0x20
 #define SCE_UMD_GET_DRIVE_STAT_NID 0x6B4A146C
-#define PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC 120U
+#define PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC 30U
 #define UMD_READINESS_UNAVAILABLE (-1)
 #define UMD_READINESS_NOT_READY    0
 #define UMD_READINESS_READY        1
@@ -170,7 +171,7 @@ static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
         id_buf[0] = '\0';
         if (pbp_read_sfo_string(metadata->file_path, "DISC_ID", id_buf, sizeof(id_buf)) && id_buf[0] != '\0') {
             // Reject lazy SFO copies! Many homebrew ports (like Mario64) use copied UMD PARAM.SFO files
-            // (e.g. LocoRoco UCJS10041). If it starts with standard Sony regions (UC, UL, NP), 
+            // (e.g. LocoRoco UCJS10041). If it starts with standard Sony regions (UC, UL, NP),
             // reject it so GameDiary forces a unique HBX- hash based on the resolved name.
             if (strncmp(id_buf, "UC", 2) != 0 && strncmp(id_buf, "UL", 2) != 0 && strncmp(id_buf, "NP", 2) != 0) {
                 strncpy(metadata->game_id, id_buf, sizeof(metadata->game_id) - 1);
@@ -190,7 +191,7 @@ static void fetch_homebrew_fallback_id(GameMetadata *metadata) {
     if (strcmp(metadata->game_id, "UNKNOWN-00000") == 0) {
         snprintf(metadata->game_id, sizeof(metadata->game_id), "HBX%08X",
                  (unsigned int)hash_string(metadata->game_name));
-        debug_log("METADATA", "fetch_homebrew_fallback_id: Generated HBX hash ID: '%s' based on TITLE: '%s'", 
+        debug_log("METADATA", "fetch_homebrew_fallback_id: Generated HBX hash ID: '%s' based on TITLE: '%s'",
                   metadata->game_id, metadata->game_name);
     }
 }
@@ -226,12 +227,12 @@ int metadata_fetch(GameMetadata *metadata) {
         case CAT_HOMEBREW:
             // For Homebrews, we first try system metadata
             fetch_system_metadata(metadata);
-            
+
             // Critical CFW spoofing fix:
             // ISO drivers spoof DISC_ID to LocoRoco (UCJS10041). Reject it for HBs.
             // Check if the ID looks like a standard Sony ID (UC/UL/NP)
-            if (strncmp(metadata->game_id, "UC", 2) == 0 || 
-                strncmp(metadata->game_id, "UL", 2) == 0 || 
+            if (strncmp(metadata->game_id, "UC", 2) == 0 ||
+                strncmp(metadata->game_id, "UL", 2) == 0 ||
                 strncmp(metadata->game_id, "NP", 2) == 0) {
                 debug_log("METADATA", "metadata_fetch: Rejected spoofed DISC_ID '%s' for Homebrew.", metadata->game_id);
                 strncpy(metadata->game_id, "UNKNOWN-00000", sizeof(metadata->game_id) - 1);
@@ -272,9 +273,19 @@ static int get_umd_readiness_state(void) {
     static int lookup_done = 0;
 
     if (!lookup_done) {
-        u32 addr = sctrlHENFindFunction("Umd_driver", "sceUmd", SCE_UMD_GET_DRIVE_STAT_NID);
+        // Try all common module and library name combinations for sceUmdGetDriveStat (NID: 0x6B4A146C)
+        u32 addr = sctrlHENFindFunction("sceUmd_Driver", "sceUmd_driver", SCE_UMD_GET_DRIVE_STAT_NID);
+        if (addr == 0) {
+            addr = sctrlHENFindFunction("sceUmd_Driver", "sceUmd", SCE_UMD_GET_DRIVE_STAT_NID);
+        }
+        if (addr == 0) {
+            addr = sctrlHENFindFunction("sceUmd_driver", "sceUmd_driver", SCE_UMD_GET_DRIVE_STAT_NID);
+        }
         if (addr == 0) {
             addr = sctrlHENFindFunction("sceUmd_driver", "sceUmd", SCE_UMD_GET_DRIVE_STAT_NID);
+        }
+        if (addr == 0) {
+            addr = sctrlHENFindFunction("Umd_driver", "sceUmd", SCE_UMD_GET_DRIVE_STAT_NID);
         }
         if (addr == 0) {
             addr = sctrlHENFindFunction("sceUmd_Service", "sceUmdUser", SCE_UMD_GET_DRIVE_STAT_NID);
@@ -332,14 +343,21 @@ int metadata_fetch_from_umd(GameMetadata *metadata) {
             }
 
             u32 waited = now - unsafe_fallback_start_ts;
-            if (waited < PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC) {
-                debug_log("METADATA", "metadata_fetch_from_umd: no READY check for physical UMD; waiting %u/%u s before late disc0 fallback.",
-                          (unsigned int)waited,
-                          (unsigned int)PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC);
+            int fb_count = overlay_notification_get_fb_count();
+
+            // If the game has started active double/triple buffering (fb_count >= 2),
+            // it means the display loop is running and it is safe to bypass/shorten the wait.
+            // Otherwise, we require the full safety delay.
+            u32 required_delay = (fb_count >= 2) ? 10U : PHYSICAL_UMD_UNSAFE_FALLBACK_DELAY_SEC;
+
+            if (waited < required_delay) {
+                debug_log("METADATA", "metadata_fetch_from_umd: no READY check (fb_count: %d); waiting %u/%u s before late disc0 fallback.",
+                          fb_count, (unsigned int)waited, (unsigned int)required_delay);
                 return 0;
             }
 
-            debug_log("METADATA", "metadata_fetch_from_umd: no READY check available; allowing late physical UMD disc0 fallback.");
+            debug_log("METADATA", "metadata_fetch_from_umd: no READY check available (waited %u s, fb_count: %d); allowing physical UMD disc0 fallback.",
+                      (unsigned int)waited, fb_count);
         }
     }
 

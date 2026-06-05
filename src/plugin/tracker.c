@@ -23,10 +23,10 @@
 static SceUID tracker_thid = -1;
 static int running = 0;
 
-#define TRACKER_BASE_SETTLE_US       (15 * 1000 * 1000)
-#define TRACKER_UMD_EXTRA_SETTLE_US  (30 * 1000 * 1000)
-#define TRACKER_UMD_RETRY_DELAY_US   (15 * 1000 * 1000)
-#define TRACKER_UMD_MAX_ATTEMPTS     16
+#define TRACKER_BASE_SETTLE_US       (5 * 1000 * 1000)
+#define TRACKER_UMD_EXTRA_SETTLE_US  (2 * 1000 * 1000)
+#define TRACKER_UMD_RETRY_DELAY_US   (3 * 1000 * 1000)
+#define TRACKER_UMD_MAX_ATTEMPTS     60
 #define TRACKER_INPUT_SLICE_US       (100 * 1000)
 #define TRACKER_INPUT_SLICES_PER_SEC 10
 #define UNKNOWN_GAME_ID              "UNKNOWN-00000"
@@ -269,6 +269,24 @@ static void playtime_tick(u32 now_ts) {
   s_last_tick_ts = now_ts;
 }
 
+static void wait_for_display_init(void) {
+  void *vram = NULL;
+  int stride = 0;
+  int fmt = 0;
+
+  debug_log("tracker", "Waiting for game framebuffer to initialize...");
+
+  while (running) {
+    if (sceDisplayGetFrameBuf(&vram, &stride, &fmt, PSP_DISPLAY_SETBUF_IMMEDIATE) >= 0) {
+      if (vram != NULL && stride > 0) {
+        debug_log("tracker", "Framebuffer active at %p (stride: %d)", vram, stride);
+        break;
+      }
+    }
+    sceKernelDelayThread(100 * 1000); // Wait 100ms
+  }
+}
+
 static int tracker_thread_main(SceSize args, void *argp) {
   (void)args;
   (void)argp;
@@ -285,6 +303,7 @@ static int tracker_thread_main(SceSize args, void *argp) {
 
   overlay_notification_init();
 
+  wait_for_display_init();
   sceKernelDelayThread(TRACKER_BASE_SETTLE_US);
   resolve_late_umd_metadata();
 
@@ -330,16 +349,22 @@ static int tracker_thread_main(SceSize args, void *argp) {
    * since without it the user has no way to interact with the state anyway.
    */
   if (hotkey_enabled) {
-    if (!unresolved_psp && tracker_runtime_is_tracking(&g_runtime)) {
-      overlay_notification_show("GameDiary - Tracker: ON", NULL,
-                                OVERLAY_NOTIFY_TRACKER_ON);
-      debug_log("tracker", "Startup notification: tracking ON for %s",
-                metadata ? metadata->game_id : "?");
+    if (!unresolved_psp) {
+      if (tracker_runtime_is_tracking(&g_runtime)) {
+        overlay_notification_show("GameDiary - Tracker: ON", NULL,
+                                  OVERLAY_NOTIFY_TRACKER_ON);
+        debug_log("tracker", "Startup notification: tracking ON for %s",
+                  metadata ? metadata->game_id : "?");
+      } else {
+        overlay_notification_show("GameDiary - Tracker: OFF", NULL,
+                                  OVERLAY_NOTIFY_TRACKER_OFF);
+        debug_log("tracker", "Startup notification: tracking OFF for %s",
+                  metadata ? metadata->game_id : "?");
+      }
     } else {
-      overlay_notification_show("GameDiary - Tracker: OFF", NULL,
-                                OVERLAY_NOTIFY_TRACKER_OFF);
-      debug_log("tracker", "Startup notification: tracking OFF for %s",
-                metadata ? metadata->game_id : "?");
+      overlay_notification_show("GameDiary - Tracker: Unavailable", "UMD not identified",
+                                OVERLAY_NOTIFY_NEUTRAL);
+      debug_log("tracker", "Startup notification: tracking unavailable (unresolved UMD)");
     }
   }
 

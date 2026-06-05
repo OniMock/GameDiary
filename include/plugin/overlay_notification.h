@@ -31,4 +31,7 @@ int overlay_notification_is_visible(u32 now_ms);
 /** @brief Redraw text on the current framebuffer (call once per vblank). */
 void overlay_notification_draw(void);
 
+/** @brief Get the number of unique framebuffers registered by the game. */
+int overlay_notification_get_fb_count(void);
+
 #endif /* _PLUGIN_OVERLAY_NOTIFICATION_H_ */
