@@ -65,6 +65,8 @@ static int (*s_orig_set_frame_buf_internal)(int pri, void *fb, int bufferwidth,
 
 static FunctionPatchData s_setfb_patch;
 static FunctionPatchData s_setfb_internal_patch;
+static int (*s_orig_wait_vblank_start)(void) = NULL;
+static FunctionPatchData s_vblank_patch;
 static int s_hooks_installed = 0;
 
 static void overlay_sanitize_line(char *dst, size_t cap, const char *src) {
@@ -142,6 +144,59 @@ static void overlay_apply_style(OverlayNotifyStyle style) {
   overlay_blit_set_colors(OVERLAY_COLOR_FG, bg);
 }
 
+static int s_was_active = 0;
+
+static void overlay_draw_on_hook(void *fb, int bufferwidth, int pixelformat) {
+  int active = overlay_is_active() && s_line_count > 0;
+  if (active) {
+    const char *l1 = (s_line_count >= 1) ? s_lines[0] : NULL;
+    const char *l2 = (s_line_count >= 2) ? s_lines[1] : NULL;
+    overlay_blit_draw_to(fb, bufferwidth, pixelformat, l1, l2, s_line_count);
+    s_was_active = OVERLAY_TRACKED_FB;
+  } else if (s_was_active > 0) {
+    if (s_line_count > 0) {
+      u32 old_fg, old_bg;
+      overlay_blit_get_colors(&old_fg, &old_bg);
+      /* Erase the overlay by drawing a black box of the exact same size */
+      overlay_blit_set_colors(0xFF000000U, 0xFF000000U);
+      const char *l1 = (s_line_count >= 1) ? s_lines[0] : NULL;
+      const char *l2 = (s_line_count >= 2) ? s_lines[1] : NULL;
+      overlay_blit_draw_to(fb, bufferwidth, pixelformat, l1, l2, s_line_count);
+      overlay_blit_set_colors(old_fg, old_bg);
+    }
+    s_was_active--;
+  }
+}
+
+static int hook_wait_vblank_start(void) {
+  int ret = 0;
+  if (s_orig_wait_vblank_start) {
+    ret = s_orig_wait_vblank_start();
+  }
+  
+  int active = overlay_is_active() && s_line_count > 0;
+  if (active) {
+    const char *l1 = (s_line_count >= 1) ? s_lines[0] : NULL;
+    const char *l2 = (s_line_count >= 2) ? s_lines[1] : NULL;
+    overlay_blit_draw_all(l1, l2, s_line_count);
+    s_was_active = 10;
+  } else if (s_was_active > 0) {
+    if (s_line_count > 0) {
+      u32 old_fg, old_bg;
+      overlay_blit_get_colors(&old_fg, &old_bg);
+      /* Clear the overlay area on VBlank by drawing a black box of the exact same size */
+      overlay_blit_set_colors(0xFF000000U, 0xFF000000U);
+      const char *l1 = (s_line_count >= 1) ? s_lines[0] : NULL;
+      const char *l2 = (s_line_count >= 2) ? s_lines[1] : NULL;
+      overlay_blit_draw_all(l1, l2, s_line_count);
+      overlay_blit_set_colors(old_fg, old_bg);
+    }
+    s_was_active--;
+  }
+  
+  return ret;
+}
+
 static void overlay_on_flip(void *vram, int stride, int format) {
   /* Only track pointers here; draw from tracker thread (avoid display re-entry). */
   overlay_register_fb(vram, stride, format);
@@ -152,6 +207,7 @@ static int hook_set_frame_buf(void *fb, int bufferwidth, int pixelformat, int sy
   if (s_orig_set_frame_buf) {
     ret = s_orig_set_frame_buf(fb, bufferwidth, pixelformat, sync);
   }
+  overlay_draw_on_hook(fb, bufferwidth, pixelformat);
   overlay_on_flip(fb, bufferwidth, pixelformat);
   return ret;
 }
@@ -163,6 +219,7 @@ static int hook_set_frame_buf_internal(int pri, void *fb, int bufferwidth,
   if (s_orig_set_frame_buf_internal) {
     ret = s_orig_set_frame_buf_internal(pri, fb, bufferwidth, pixelformat, sync);
   }
+  overlay_draw_on_hook(fb, bufferwidth, pixelformat);
   overlay_on_flip(fb, bufferwidth, pixelformat);
   return ret;
 }
@@ -210,6 +267,17 @@ static void overlay_install_hooks(void) {
     sctrlHENHijackFunction(&s_setfb_internal_patch, (void *)addr,
                            (void *)hook_set_frame_buf_internal,
                            (void **)&s_orig_set_frame_buf_internal);
+  }
+
+  /* Hook sceDisplayWaitVblankStart (NID: 0x984C27E7) */
+  addr = sctrlHENFindFunction("sceDisplay_driver", "sceDisplay", 0x984C27E7U);
+  if (addr == 0) {
+    addr = sctrlHENFindFunction("sceDisplay", "sceDisplay", 0x984C27E7U);
+  }
+  if (addr) {
+    sctrlHENHijackFunction(&s_vblank_patch, (void *)addr,
+                           (void *)hook_wait_vblank_start,
+                           (void **)&s_orig_wait_vblank_start);
   }
 
   s_hooks_installed = 1;

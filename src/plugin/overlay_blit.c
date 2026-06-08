@@ -67,6 +67,15 @@ void overlay_blit_set_colors(u32 fg_argb, u32 bg_argb) {
   s_bg_col = bg_argb;
 }
 
+void overlay_blit_get_colors(u32 *fg_argb, u32 *bg_argb) {
+  if (fg_argb) {
+    *fg_argb = s_fg_col;
+  }
+  if (bg_argb) {
+    *bg_argb = s_bg_col;
+  }
+}
+
 static int blit_line_char_count(const char *msg) {
   int n = 0;
   if (!msg) {
