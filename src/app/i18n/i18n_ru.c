@@ -178,4 +178,8 @@ const char* g_lang_ru_entries[MSG_COUNT] = {
     [MSG_SESSION_DELETE_OK]            = "Сессия успешно удалена.",
     [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: Удалить сессию",
     [MSG_HELP_DESC_SESSIONS]           = "Полная история всех игровых сессий для всех игр, отсортированная от самых новых к самым старым. Здесь можно удалять отдельные сессии.",
+    [MSG_HEADER_GAME]                  = "Игра",
+    [MSG_HEADER_START]                 = "Начало",
+    [MSG_HEADER_END]                   = "Конец",
+    [MSG_HEADER_DURATION]              = "Время",
 };

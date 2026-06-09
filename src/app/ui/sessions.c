@@ -36,7 +36,7 @@
 #define VISIBLE_ROWS 5
 #define ROW_HEIGHT 30
 #define ROW_GAP 4
-#define START_Y 80
+#define START_Y 68
 #define MAX_SESSIONS 4096
 
 /* Module State */
@@ -388,12 +388,25 @@ static void sessions_draw(void) {
 
     bool show_scroll = (s_session_count > VISIBLE_ROWS);
     int card_w = 440;
-    int name_x = 28;
-    int name_w = 135;
-    int time_x = 168;
-    int time_w = 222;
-    int duration_x = 395;
-    int duration_w = 55;
+    int col_jogo_x = 28;
+    int col_jogo_w = 110;
+    int col_inicio_x = 145;
+    int col_inicio_w = 115;
+    int col_fim_x = 265;
+    int col_fim_w = 115;
+    int col_tempo_x = 385;
+    int col_tempo_w = 65;
+
+    /* Draw Column Headers at Y = 50 */
+    Rect header_game_rect = {col_jogo_x, 50, col_jogo_w, 14};
+    Rect header_start_rect = {col_inicio_x, 50, col_inicio_w, 14};
+    Rect header_end_rect = {col_fim_x, 50, col_fim_w, 14};
+    Rect header_time_rect = {col_tempo_x, 50, col_tempo_w, 14};
+
+    ui_draw_text(i18n_get(MSG_HEADER_GAME), header_game_rect, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_HEADER_START), header_start_rect, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_HEADER_END), header_end_rect, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_LEFT);
+    ui_draw_text(i18n_get(MSG_HEADER_DURATION), header_time_rect, COLOR_SUBTEXT, UI_FONT_SIZE_TINY, ALIGN_RIGHT);
 
     int render_count = (s_session_count - s_scroll_offset < VISIBLE_ROWS)
                        ? s_session_count - s_scroll_offset
@@ -431,11 +444,10 @@ static void sessions_draw(void) {
         }
 
         /* 1. Game Name — auto scroll/marquee when highlighted */
-        Rect name_rect = {name_x, row_y + 8, name_w, 14};
+        Rect name_rect = {col_jogo_x, row_y + 8, col_jogo_w, 14};
         ui_draw_game_name_fixed(game_name, name_rect, name_col, UI_FONT_SIZE_TINY, ALIGN_LEFT, (idx == s_selected_idx));
 
         /* 2. Format Start -> End Date/Time string using localized date format */
-        char time_str[128];
         time_t start = (time_t)s->timestamp;
         time_t end = (time_t)(s->timestamp + s->duration);
         struct tm tm_start = *localtime(&start);
@@ -448,16 +460,17 @@ static void sessions_draw(void) {
         char end_str[32];
         strftime(start_str, sizeof(start_str), format_str, &tm_start);
         strftime(end_str, sizeof(end_str), format_str, &tm_end);
-        snprintf(time_str, sizeof(time_str), "%s -> %s", start_str, end_str);
 
-        Rect time_rect = {time_x, row_y + 8, time_w, 14};
-        ui_draw_text(time_str, time_rect, name_col, UI_FONT_SIZE_TINY, ALIGN_LEFT);
+        Rect start_rect = {col_inicio_x, row_y + 8, col_inicio_w, 14};
+        Rect end_rect = {col_fim_x, row_y + 8, col_fim_w, 14};
+        ui_draw_text(start_str, start_rect, name_col, UI_FONT_SIZE_TINY, ALIGN_LEFT);
+        ui_draw_text(end_str, end_rect, name_col, UI_FONT_SIZE_TINY, ALIGN_LEFT);
 
         /* 3. Formatted Duration String — right-aligned */
         char duration_str[32];
         ui_format_duration(s->duration, duration_str, sizeof(duration_str));
 
-        Rect duration_rect = {duration_x, row_y + 8, duration_w, 14};
+        Rect duration_rect = {col_tempo_x, row_y + 8, col_tempo_w, 14};
         ui_draw_text(duration_str, duration_rect, name_col, UI_FONT_SIZE_NORMAL, ALIGN_RIGHT);
     }
 

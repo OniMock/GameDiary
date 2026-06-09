@@ -183,4 +183,8 @@ const char* g_lang_cn_entries[MSG_COUNT] = {
     [MSG_SESSION_DELETE_OK]            = "会话已成功删除。",
     [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: 删除会话",
     [MSG_HELP_DESC_SESSIONS]           = "所有游戏游玩会话的完整历史记录，按最新到最旧排序。您可以在这里删除单独的会话。",
+    [MSG_HEADER_GAME]                  = "游戏",
+    [MSG_HEADER_START]                 = "开始",
+    [MSG_HEADER_END]                   = "结束",
+    [MSG_HEADER_DURATION]              = "时长",
 };

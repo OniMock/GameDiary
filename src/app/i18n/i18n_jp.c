@@ -182,4 +182,8 @@ const char* g_lang_jp_entries[MSG_COUNT] = {
     [MSG_SESSION_DELETE_OK]            = "セッションを削除しました。",
     [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: セッションを削除",
     [MSG_HELP_DESC_SESSIONS]           = "すべてのゲームのプレイセッション履歴を最新順に表示します。ここで個別のセッションを削除できます。",
+    [MSG_HEADER_GAME]                  = "ゲーム",
+    [MSG_HEADER_START]                 = "開始",
+    [MSG_HEADER_END]                   = "終了",
+    [MSG_HEADER_DURATION]              = "時間",
 };

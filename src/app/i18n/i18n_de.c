@@ -180,4 +180,8 @@ const char* g_lang_de_entries[MSG_COUNT] = {
     [MSG_SESSION_DELETE_OK]            = "Sitzung erfolgreich entfernt.",
     [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: Sitzung löschen",
     [MSG_HELP_DESC_SESSIONS]           = "Vollständiger Verlauf aller Spielsitzungen aller Spiele, sortiert von der neuesten zur ältesten. Hier können einzelne Sitzungen gelöscht werden.",
+    [MSG_HEADER_GAME]                  = "Spiel",
+    [MSG_HEADER_START]                 = "Start",
+    [MSG_HEADER_END]                   = "Ende",
+    [MSG_HEADER_DURATION]              = "Zeit",
 };

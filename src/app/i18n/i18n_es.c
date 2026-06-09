@@ -179,4 +179,8 @@ const char* g_lang_es_entries[MSG_COUNT] = {
     [MSG_SESSION_DELETE_OK]            = "Sesión eliminada correctamente.",
     [MSG_HELP_BTN_TRIANGLE_DELETE_SESS]= "[ △ ]: Eliminar sesión",
     [MSG_HELP_DESC_SESSIONS]           = "Historial completo de todas las sesiones de juego de todos los juegos, ordenado de la más reciente a la más antigua. Aquí puedes eliminar sesiones individuales.",
+    [MSG_HEADER_GAME]                  = "Juego",
+    [MSG_HEADER_START]                 = "Inicio",
+    [MSG_HEADER_END]                   = "Fin",
+    [MSG_HEADER_DURATION]              = "Tiempo",
 };
