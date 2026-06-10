@@ -344,25 +344,35 @@ void ui_reset_stats_graph_animation(void) {
 
 static float g_session_anim[MAX_SESSION_BARS] = {0.0f};
 
-void ui_reset_game_daily_graph_animation(void) {
-  memset(g_session_anim, 0, sizeof(g_session_anim));
-}
-
 typedef struct {
   time_t day_start; /* Normalized to local midnight */
   u32 duration;
 } DailyPlayData;
+
+/* Cache for ui_draw_game_daily_graph to avoid recalculating daily stats every frame */
+static bool s_daily_graph_cache_valid = false;
+static u32 s_cached_game_uid = 0;
+static int s_cached_day_count = 0;
+static u32 s_cached_max_dur = 0;
+static DailyPlayData s_cached_daily_data[MAX_SESSION_BARS];
+
+void ui_reset_game_daily_graph_animation(void) {
+  memset(g_session_anim, 0, sizeof(g_session_anim));
+  s_daily_graph_cache_valid = false;
+}
 
 static int compute_game_daily_data(const SessionEntry *sessions, int count,
                                    u32 game_uid, int max_days,
                                    DailyPlayData aggregated[], u32 *max_dur_out) {
   /* Step 1: Collect unique "day starts" that any session overlaps.
    * We use the session END time (timestamp + duration) to detect midnight
-   * crossings and register both the start day and any subsequent days. */
-  time_t day_candidates[MAX_SESSION_BARS * 2]; /* generous upper-bound */
+   * crossings and register both the start day and any subsequent days.
+   * We scan sessions in reverse (newest first) to ensure we collect the
+   * most recent days. */
+  time_t day_candidates[128];
   int cand_count = 0;
 
-  for (int i = 0; i < count; i++) {
+  for (int i = count - 1; i >= 0; i--) {
     if (sessions[i].game_uid != game_uid || sessions[i].duration == 0)
       continue;
 
@@ -380,7 +390,7 @@ static int compute_game_daily_data(const SessionEntry *sessions, int count,
       for (int d = 0; d < cand_count; d++) {
         if (day_candidates[d] == day_cur) { found = 1; break; }
       }
-      if (!found && cand_count < MAX_SESSION_BARS * 2) {
+      if (!found && cand_count < 128) {
         day_candidates[cand_count++] = day_cur;
       }
       day_cur += 86400; /* advance one calendar day */
@@ -443,14 +453,10 @@ void ui_draw_game_daily_graph(const SessionEntry *sessions, int count,
   if (max_bars <= 0 || max_bars > MAX_SESSION_BARS)
     max_bars = MAX_SESSION_BARS;
 
-  static u32 s_cached_game_uid = 0;
-  static int s_cached_day_count = 0;
-  static u32 s_cached_max_dur = 0;
-  static DailyPlayData s_cached_daily_data[MAX_SESSION_BARS];
-
-  if (s_cached_game_uid != game_uid) {
+  if (!s_daily_graph_cache_valid || s_cached_game_uid != game_uid) {
     s_cached_day_count = compute_game_daily_data(sessions, count, game_uid, max_bars, s_cached_daily_data, &s_cached_max_dur);
     s_cached_game_uid = game_uid;
+    s_daily_graph_cache_valid = true;
   }
 
   int day_count = s_cached_day_count;
