@@ -186,13 +186,32 @@ static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
 
 /**
  * @brief Generates a unique ID for Homebrews using a hash of their title.
+ *
+ * The name is normalized before hashing (spaces stripped, lowercased) so that
+ * folder name variations like "GameDiary", "Game Diary" or "gamediary" all
+ * produce the same stable HBX identifier across different PSP units.
  */
 static void fetch_homebrew_fallback_id(GameMetadata *metadata) {
     if (strcmp(metadata->game_id, "UNKNOWN-00000") == 0) {
+        /* Normalize: copy name, strip spaces and lowercase ASCII A-Z.
+         * NOTE: Multi-byte UTF-8 sequences (CJK, Hebrew, Cyrillic, etc.) have byte
+         * values > 127 (which appear as negative values in signed chars). They bypass
+         * this ASCII check and remain unchanged, which is acceptable since case 
+         * folding for non-Latin scripts is not required for standard PSP homebrew naming. */
+        char normalized[sizeof(metadata->game_name)];
+        int out = 0;
+        for (int i = 0; metadata->game_name[i] != '\0' && out < (int)sizeof(normalized) - 1; i++) {
+            char c = metadata->game_name[i];
+            if (c == ' ') continue;                      /* strip spaces */
+            if (c >= 'A' && c <= 'Z') c = c + ('a' - 'A'); /* to lowercase */
+            normalized[out++] = c;
+        }
+        normalized[out] = '\0';
+
         snprintf(metadata->game_id, sizeof(metadata->game_id), "HBX%08X",
-                 (unsigned int)hash_string(metadata->game_name));
-        debug_log("METADATA", "fetch_homebrew_fallback_id: Generated HBX hash ID: '%s' based on TITLE: '%s'",
-                  metadata->game_id, metadata->game_name);
+                 (unsigned int)hash_string(normalized));
+        debug_log("METADATA", "fetch_homebrew_fallback_id: Generated HBX hash ID: '%s' based on normalized TITLE: '%s' (original: '%s')",
+                  metadata->game_id, normalized, metadata->game_name);
     }
 }
 

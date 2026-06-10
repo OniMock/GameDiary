@@ -21,7 +21,7 @@
 #define GDIARY_BASE_DIR "/PSP/COMMON/GameDiary"
 #define GDIARY_ICON_DIR "icons"
 #define GDIARY_DB_DIR "db"
-#define GDIARY_SELF_ID "HBX7F0342D8"
+#define GDIARY_SELF_ID "HBX0E9162F8"  /* djb2 hash of "gamediary" (normalized: no spaces, lowercase) */
 #define BACKUP_JSON_FILENAME "/backup.json"
 
 // Database files
