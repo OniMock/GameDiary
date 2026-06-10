@@ -94,7 +94,12 @@ static void session_flush_pending(void) {
   session_total_seconds += pending_seconds;
   pending_seconds = 0;
 
-  if (session_total_seconds > 0) {
+  /* Only write/update the session in storage if we have accumulated at least 60 seconds of
+   * playtime in total, or if we have already created a database record (offset != -1)
+   * and need to update it with the final/current total playtime. This prevents
+   * polluting the database with extremely short sessions (e.g. accidentally launching
+   * a game and exiting/disabling it immediately). */
+  if (session_total_seconds >= 60 || current_session_offset != -1) {
     storage_log_session(current_game_uid, session_total_seconds,
                         session_start_ts, &current_session_offset);
   }
@@ -420,11 +425,6 @@ void tracker_thread_start(void) {
 
 void tracker_thread_stop(void) {
   running = 0;
-  if (pending_seconds > 0 && current_game_uid > 0) {
-    session_total_seconds += pending_seconds;
-    storage_log_session(current_game_uid, session_total_seconds,
-                        session_start_ts, &current_session_offset);
-    pending_seconds = 0;
-  }
+  session_flush_pending();
   overlay_notification_shutdown();
 }
