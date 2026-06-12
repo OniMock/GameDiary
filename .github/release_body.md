@@ -4,16 +4,6 @@ New version available.
 
 ---
 
-## ❤️ Special Thanks
-
-Huge thanks to these Reddit users for helping test GameDiary PSP and providing valuable feedback during development:
-
-- u/jham1213
-
-Your testing, bug reports, and patience helped improve compatibility and stability across different PSP models and CFWs.
-
----
-
 ## 📦 Download
 
 - **GameDiary.zip** (PRX + EBOOT) - Standard release.
