@@ -307,7 +307,7 @@ static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
         id_buf[0] = '\0';
         if (pbp_read_sfo_string(metadata->file_path, "DISC_ID", id_buf, sizeof(id_buf)) && id_buf[0] != '\0') {
             /* Reject lazy SFO copies (LocoRoco UCJS10041) unless this is a real
-             * PSP/APP launch, where NP*/UC*/UL* is the authentic content ID. */
+             * PSP/APP launch, where NP*, UC* or UL* is the authentic content ID. */
             if (prefer_sfo_title || !is_sony_region_prefix(id_buf)) {
                 strncpy(metadata->game_id, id_buf, sizeof(metadata->game_id) - 1);
                 metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
