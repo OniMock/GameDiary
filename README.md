@@ -262,7 +262,7 @@ GameDiary data is stored inside the `ms0:/PSP/COMMON/GameDiary/` directory to ke
 - `sessions.dat`: Session log for each game.
 - `config.dat`: User-defined preferences. You can override system language strings or toggle UI features here.
 - `icons/`: Cloned icons representing your played games, automatically managed by the plugin.
-- `plugin.dat`: Plugin runtime options, shared between the PRX and the App. Stores whether the **in-game hotkey** (`L+R+SELECT`) is enabled and whether **automatic icon capture** is active. Missing or invalid file is treated as hotkey off and icons on (safe defaults).
+- `plugin.dat`: Plugin runtime options, shared between the PRX and the App. Stores whether the **in-game hotkey** (`L+R+SELECT`) is enabled, whether **automatic icon capture** is active, and which content types the plugin records (**PSP games**, **PS1**, **Homebrew**, **PSP/APP**, **Unknown**). Missing or invalid file is treated as hotkey off, icons on, and all capture types on. Older files without the capture fields keep every type enabled.
 - `tracker.dat`: Game blocklist used by the plugin. When the hotkey is active and the user toggles tracking off for the current game, that game ID is written here so the plugin skips it on future boots. Automatically managed — no manual editing required.
 
 ### ⏱️ Hotkey Availability (L+R+SELECT)

@@ -236,6 +236,22 @@ static int is_official_app_launch(const char *path, const char *folder_name) {
     return path_contains_ci(path, "/psp/app/") || is_sony_title_id(folder_name);
 }
 
+int metadata_is_psp_app(const GameMetadata *metadata) {
+    char folder_name[64];
+
+    if (!metadata) {
+        return 0;
+    }
+
+    /* sceKernelInitApitype MS_APP — CFW may still report CAT_PS1 for 0x143. */
+    if (strcmp(metadata->apitype_str, "0x143") == 0) {
+        return 1;
+    }
+
+    extract_parent_folder_name(metadata->file_path, folder_name, sizeof(folder_name));
+    return is_official_app_launch(metadata->file_path, folder_name);
+}
+
 /**
  * @brief Reads TITLE and DISC_ID from the SFO embedded in a homebrew EBOOT.PBP.
  *

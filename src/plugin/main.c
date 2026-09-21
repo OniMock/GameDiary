@@ -58,6 +58,12 @@ int module_start(SceSize args, void *argp) {
     return 1;
   }
 
+  if (!plugin_config_should_capture(meta)) {
+    debug_log("main", "Capture disabled for %s (cat %u, apitype %s), skipping tracker.",
+              meta->game_id, (unsigned int)meta->category, meta->apitype_str);
+    return 1;
+  }
+
   // Start background tracker thread
   debug_log("main", "Starting tracker thread...");
   tracker_thread_start();

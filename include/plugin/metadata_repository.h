@@ -22,6 +22,12 @@
 int metadata_fetch(GameMetadata *metadata);
 
 /**
+ * @brief True for official XMB apps (PSP/APP path, Sony title-ID folder, or MS_APP 0x143).
+ * Does not change the persisted CAT_HOMEBREW / CAT_PS1 category.
+ */
+int metadata_is_psp_app(const GameMetadata *metadata);
+
+/**
  * @brief Late fetch from disc0:/UMD_DATA.BIN (after UMD is ready).
  *        Used as a fallback when early fetch returned UNKNOWN.
  * @param metadata Pointer to the struct to fill.
