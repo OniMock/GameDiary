@@ -15,6 +15,10 @@
 
 /**
  * @brief Attempts to capture the game icon (ICON0.PNG) and save it to dest_path.
+ *
+ * Only ICON0 is considered (disc0, PBP section, or sidecar). PIC0/PIC1 and
+ * flash0 firmware resources are not used; a missing file is the placeholder.
+ *
  * @param game_id The ID of the game (used for naming).
  * @param category The game category (PSP, PS1, etc).
  * @param dest_dir The directory where to save the icon.

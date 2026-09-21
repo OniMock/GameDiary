@@ -113,6 +113,129 @@ static void fetch_ps1_metadata(GameMetadata *metadata, const char *path) {
     }
 }
 
+static int ascii_is_letter(char c) {
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+static int ascii_is_digit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+static char ascii_tolower(char c) {
+    if (c >= 'A' && c <= 'Z') {
+        return (char)(c + ('a' - 'A'));
+    }
+    return c;
+}
+
+/**
+ * @brief Sony content IDs are 9 characters: 4 letters + 5 digits (e.g. NPIA00013).
+ */
+static int is_sony_title_id(const char *s) {
+    int i;
+
+    if (!s) {
+        return 0;
+    }
+
+    for (i = 0; i < 9; i++) {
+        if (s[i] == '\0') {
+            return 0;
+        }
+        if (i < 4) {
+            if (!ascii_is_letter(s[i])) {
+                return 0;
+            }
+        } else if (!ascii_is_digit(s[i])) {
+            return 0;
+        }
+    }
+
+    return s[9] == '\0';
+}
+
+static int is_sony_region_prefix(const char *id) {
+    return strncmp(id, "UC", 2) == 0 ||
+           strncmp(id, "UL", 2) == 0 ||
+           strncmp(id, "NP", 2) == 0;
+}
+
+static int is_generic_homebrew_title(const char *name) {
+    return name[0] == '\0' ||
+           strcmp(name, "Unknown Game") == 0 ||
+           strcmp(name, "GAME") == 0;
+}
+
+/**
+ * @brief Case-insensitive substring search (needle must already be lowercase).
+ */
+static int path_contains_ci(const char *haystack, const char *needle_lower) {
+    if (!haystack || !needle_lower || needle_lower[0] == '\0') {
+        return 0;
+    }
+
+    for (const char *p = haystack; *p != '\0'; p++) {
+        int i = 0;
+        while (needle_lower[i] != '\0' && p[i] != '\0') {
+            if (ascii_tolower(p[i]) != needle_lower[i]) {
+                break;
+            }
+            i++;
+        }
+        if (needle_lower[i] == '\0') {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Copies the parent folder of an executable path (EBOOT.PBP → folder name).
+ */
+static void extract_parent_folder_name(const char *path, char *out, size_t out_size) {
+    char path_copy[256];
+    char *last_slash;
+    char *prev_slash;
+    const char *dir_name;
+
+    if (!out || out_size == 0) {
+        return;
+    }
+    out[0] = '\0';
+    if (!path || path[0] == '\0') {
+        return;
+    }
+
+    strncpy(path_copy, path, sizeof(path_copy) - 1);
+    path_copy[sizeof(path_copy) - 1] = '\0';
+
+    last_slash = strrchr(path_copy, '/');
+    if (!last_slash) {
+        return;
+    }
+    *last_slash = '\0';
+
+    prev_slash = strrchr(path_copy, '/');
+    dir_name = prev_slash ? prev_slash + 1 : path_copy;
+    if (dir_name[0] == '\0') {
+        return;
+    }
+
+    strncpy(out, dir_name, out_size - 1);
+    out[out_size - 1] = '\0';
+}
+
+/**
+ * @brief Official XMB apps live in PSP/APP (SenseMe, Comic Reader).
+ *
+ * CFW often launches those with MS_GAME (0x141) instead of MS_APP (0x143), so
+ * category stays CAT_HOMEBREW. Detect them from the path / title-ID folder.
+ */
+static int is_official_app_launch(const char *path, const char *folder_name) {
+    return path_contains_ci(path, "/psp/app/") || is_sony_title_id(folder_name);
+}
+
 /**
  * @brief Reads TITLE and DISC_ID from the SFO embedded in a homebrew EBOOT.PBP.
  *
@@ -121,62 +244,74 @@ static void fetch_ps1_metadata(GameMetadata *metadata, const char *path) {
  * This function directly parses the PBP header and embedded SFO, which is the
  * same approach already used for PS1 EBOOTs.
  *
- * If the embedded SFO also has no usable TITLE (e.g. a minimal homebrew),
- * the game folder name is extracted from the executable path as a last resort.
+ * Regular homebrew prefers the folder name so dirty SFO titles
+ * (e.g. "sm64-port d98e233-dirty") do not leak into the UI. Official apps in
+ * PSP/APP (and folders named like a Sony title ID) invert that: the folder is
+ * NPIA00013, so TITLE comes from the EBOOT and the Sony DISC_ID is kept.
  */
 static void fetch_homebrew_sfo_metadata(GameMetadata *metadata) {
+    char folder_name[64];
+    int prefer_sfo_title;
+
     if (metadata->file_path[0] == '\0') {
         debug_log("METADATA", "fetch_homebrew_sfo_metadata: file_path is empty, skipping SFO parse.");
         return;
     }
 
-    debug_log("METADATA", "fetch_homebrew_sfo_metadata: Parsing homebrew path and SFO from '%s'", metadata->file_path);
+    extract_parent_folder_name(metadata->file_path, folder_name, sizeof(folder_name));
+    prefer_sfo_title = is_official_app_launch(metadata->file_path, folder_name);
 
-    /* --- 1. First priority: Use the game folder name from the path ---
-     * Users often name their folders cleanly (e.g. "Super Mario 64").
-     * This avoids dirty embedded SFO titles like "sm64-port d98e233-dirty". */
-    if (metadata->game_name[0] == '\0' || strcmp(metadata->game_name, "Unknown Game") == 0) {
-        char path_copy[256];
-        strncpy(path_copy, metadata->file_path, sizeof(path_copy) - 1);
-        path_copy[sizeof(path_copy) - 1] = '\0';
+    debug_log("METADATA", "fetch_homebrew_sfo_metadata: Parsing homebrew path and SFO from '%s' (folder: '%s', prefer_sfo: %d)",
+              metadata->file_path, folder_name, prefer_sfo_title);
 
-        char *last_slash = strrchr(path_copy, '/');
-        if (last_slash) {
-            *last_slash = '\0';
-            char *prev_slash = strrchr(path_copy, '/');
-            const char *dir_name = prev_slash ? prev_slash + 1 : path_copy;
-            if (dir_name[0] != '\0') {
-                strncpy(metadata->game_name, dir_name, sizeof(metadata->game_name) - 1);
-                metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
-                debug_log("METADATA", "fetch_homebrew_sfo_metadata: Extracted folder name as TITLE: '%s'", metadata->game_name);
-            }
-        }
-    }
-
-    /* --- 2. Fallback: Try TITLE from the SFO embedded inside EBOOT.PBP ---
-     * Only if folder name extraction failed or resulted in something generic like "GAME" */
-    if (metadata->game_name[0] == '\0' || strcmp(metadata->game_name, "Unknown Game") == 0 || strcmp(metadata->game_name, "GAME") == 0) {
+    if (prefer_sfo_title) {
+        /* SenseMe-style launches: folder is a content ID, not a display name. */
         char title_buf[128];
         title_buf[0] = '\0';
         if (pbp_read_sfo_string(metadata->file_path, "TITLE", title_buf, sizeof(title_buf)) && title_buf[0] != '\0') {
             strncpy(metadata->game_name, title_buf, sizeof(metadata->game_name) - 1);
             metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
-            debug_log("METADATA", "fetch_homebrew_sfo_metadata: Fallback to SFO TITLE: '%s'", metadata->game_name);
+            debug_log("METADATA", "fetch_homebrew_sfo_metadata: Using EBOOT TITLE for official-app folder: '%s'", metadata->game_name);
+        } else if (is_generic_homebrew_title(metadata->game_name) && folder_name[0] != '\0') {
+            strncpy(metadata->game_name, folder_name, sizeof(metadata->game_name) - 1);
+            metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
+            debug_log("METADATA", "fetch_homebrew_sfo_metadata: EBOOT TITLE missing; using folder name: '%s'", metadata->game_name);
+        }
+    } else {
+        /* First priority: game folder name (users name these cleanly). */
+        if (is_generic_homebrew_title(metadata->game_name) && folder_name[0] != '\0') {
+            strncpy(metadata->game_name, folder_name, sizeof(metadata->game_name) - 1);
+            metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
+            debug_log("METADATA", "fetch_homebrew_sfo_metadata: Extracted folder name as TITLE: '%s'", metadata->game_name);
+        }
+
+        /* Fallback: TITLE from the SFO if the folder was missing or generic ("GAME"). */
+        if (is_generic_homebrew_title(metadata->game_name)) {
+            char title_buf[128];
+            title_buf[0] = '\0';
+            if (pbp_read_sfo_string(metadata->file_path, "TITLE", title_buf, sizeof(title_buf)) && title_buf[0] != '\0') {
+                strncpy(metadata->game_name, title_buf, sizeof(metadata->game_name) - 1);
+                metadata->game_name[sizeof(metadata->game_name) - 1] = '\0';
+                debug_log("METADATA", "fetch_homebrew_sfo_metadata: Fallback to SFO TITLE: '%s'", metadata->game_name);
+            }
         }
     }
 
-    /* --- 3. Try DISC_ID from the same embedded SFO --- */
-    if (strcmp(metadata->game_id, "UNKNOWN-00000") == 0) {
+    if (is_sony_title_id(folder_name)) {
+        /* Persist the on-disk content ID (NPIA00013) instead of an HBX hash. */
+        strncpy(metadata->game_id, folder_name, sizeof(metadata->game_id) - 1);
+        metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
+        debug_log("METADATA", "fetch_homebrew_sfo_metadata: Using title-ID folder as DISC_ID: '%s'", metadata->game_id);
+    } else if (strcmp(metadata->game_id, "UNKNOWN-00000") == 0) {
         char id_buf[16];
         id_buf[0] = '\0';
         if (pbp_read_sfo_string(metadata->file_path, "DISC_ID", id_buf, sizeof(id_buf)) && id_buf[0] != '\0') {
-            // Reject lazy SFO copies! Many homebrew ports (like Mario64) use copied UMD PARAM.SFO files
-            // (e.g. LocoRoco UCJS10041). If it starts with standard Sony regions (UC, UL, NP),
-            // reject it so GameDiary forces a unique HBX- hash based on the resolved name.
-            if (strncmp(id_buf, "UC", 2) != 0 && strncmp(id_buf, "UL", 2) != 0 && strncmp(id_buf, "NP", 2) != 0) {
+            /* Reject lazy SFO copies (LocoRoco UCJS10041) unless this is a real
+             * PSP/APP launch, where NP*/UC*/UL* is the authentic content ID. */
+            if (prefer_sfo_title || !is_sony_region_prefix(id_buf)) {
                 strncpy(metadata->game_id, id_buf, sizeof(metadata->game_id) - 1);
                 metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
-                debug_log("METADATA", "fetch_homebrew_sfo_metadata: Successfully parsed custom DISC_ID from SFO: '%s'", metadata->game_id);
+                debug_log("METADATA", "fetch_homebrew_sfo_metadata: Successfully parsed DISC_ID from SFO: '%s'", metadata->game_id);
             } else {
                 debug_log("METADATA", "fetch_homebrew_sfo_metadata: SFO DISC_ID '%s' rejected (Sony region copy).", id_buf);
             }
@@ -243,24 +378,29 @@ int metadata_fetch(GameMetadata *metadata) {
             fetch_system_metadata(metadata);
             break;
 
-        case CAT_HOMEBREW:
+        case CAT_HOMEBREW: {
+            char folder_name[64];
+            int keep_sony_id;
+
             // For Homebrews, we first try system metadata
             fetch_system_metadata(metadata);
 
-            // Critical CFW spoofing fix:
-            // ISO drivers spoof DISC_ID to LocoRoco (UCJS10041). Reject it for HBs.
-            // Check if the ID looks like a standard Sony ID (UC/UL/NP)
-            if (strncmp(metadata->game_id, "UC", 2) == 0 ||
-                strncmp(metadata->game_id, "UL", 2) == 0 ||
-                strncmp(metadata->game_id, "NP", 2) == 0) {
+            extract_parent_folder_name(metadata->file_path, folder_name, sizeof(folder_name));
+            keep_sony_id = is_official_app_launch(metadata->file_path, folder_name);
+
+            /* ISO drivers spoof DISC_ID to LocoRoco (UCJS10041). Reject UC/UL/NP
+             * for real homebrew, but keep them for PSP/APP / title-ID folders. */
+            if (!keep_sony_id && is_sony_region_prefix(metadata->game_id)) {
                 debug_log("METADATA", "metadata_fetch: Rejected spoofed DISC_ID '%s' for Homebrew.", metadata->game_id);
                 strncpy(metadata->game_id, "UNKNOWN-00000", sizeof(metadata->game_id) - 1);
+                metadata->game_id[sizeof(metadata->game_id) - 1] = '\0';
             }
 
-            /* Resolve name from folder and PBP SFO, then hash if needed */
+            /* Resolve name from folder and PBP SFO, then hash if still unknown */
             fetch_homebrew_sfo_metadata(metadata);
             fetch_homebrew_fallback_id(metadata);
             break;
+        }
 
         default:
             // VSH or UNKNOWN

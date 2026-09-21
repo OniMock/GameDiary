@@ -11,6 +11,11 @@
 /**
  * @file icon_capture.c
  * @brief Icon capture implementation.
+ *
+ * Sources, in order: disc0 ICON0 (UMD/ISO), PBP ICON0 section, sidecar
+ * ICON0.PNG next to the EBOOT. Official apps such as SenseMe often have
+ * none of these. PIC0/PIC1 and flash0/RCO firmware art are intentionally
+ * not used — the app draws GD_IMG_ICON_NOT_FOUND_PNG ("NO ICON") instead.
  */
 
 #include "plugin/icon_capture.h"
@@ -48,4 +53,6 @@ void utils_capture_icon(const char *game_id, u8 category, const char *dest_dir, 
       if (sc2 == 0) return;
     }
   }
+
+  /* No ICON0: leave dest missing. Do not extract PIC0/PIC1 or firmware icons. */
 }

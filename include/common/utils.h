@@ -86,8 +86,8 @@ void utils_log_trace(const char *module, const char *msg);
 
 #ifdef GDIARY_PLUGIN
 /**
- * @brief Captures/extracts a game icon to the destination directory.
- * Only available in Plugin context.
+ * @brief Captures/extracts ICON0 to the destination directory (plugin only).
+ * PIC0/PIC1 and firmware icons are not used; missing ICON0 leaves no file.
  */
 void utils_capture_icon(const char *game_id, u8 category, const char *dest_dir, const char *executable_path);
 #endif
