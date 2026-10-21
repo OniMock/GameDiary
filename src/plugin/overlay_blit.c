@@ -40,25 +40,25 @@ extern u8 msx[];
 
 /* PSP 8888 framebuffer layout: 0xAABBGGRR */
 static u16 convert_psp8888_to_565(u32 color) {
-  int r = (int)((color >> 16) & 0xFF);
+  int r = (int)(color & 0xFF);
   int g = (int)((color >> 8) & 0xFF);
-  int b = (int)(color & 0xFF);
+  int b = (int)((color >> 16) & 0xFF);
   return (u16)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
 }
 
 static u16 convert_psp8888_to_5551(u32 color) {
   int a = (color & 0xFF000000U) ? 0x8000 : 0;
-  int r = (int)((color >> 16) & 0xFF);
+  int r = (int)(color & 0xFF);
   int g = (int)((color >> 8) & 0xFF);
-  int b = (int)(color & 0xFF);
+  int b = (int)((color >> 16) & 0xFF);
   return (u16)(a | ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3));
 }
 
 static u16 convert_psp8888_to_4444(u32 color) {
   int a = (int)((color >> 24) & 0xF);
-  int r = (int)((color >> 16) & 0xFF);
+  int r = (int)(color & 0xFF);
   int g = (int)((color >> 8) & 0xFF);
-  int b = (int)(color & 0xFF);
+  int b = (int)((color >> 16) & 0xFF);
   return (u16)((a << 12) | ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4));
 }
 

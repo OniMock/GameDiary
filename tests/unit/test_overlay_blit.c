@@ -34,8 +34,8 @@ static void test_overlay_color_conversion_565_red_channel(void) {
     /* Render text to 565 framebuffer */
     overlay_blit_draw_to(fb, 512, PSP_DISPLAY_PIXEL_FORMAT_565, "A", NULL, 1);
 
-    /* Sample a background pixel rendered inside the HUD box */
-    u16 pixel = fb[PSP_SCREEN_WIDTH - 20];
+    /* Sample a background pixel rendered inside the HUD box (x=5, y=5) */
+    u16 pixel = fb[5 * 512 + 5];
 
     /* In standard 16-bit RGB 565 format:
      * Bits 11..15: Red (5 bits)
