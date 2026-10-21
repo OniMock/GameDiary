@@ -85,3 +85,14 @@ jobs:
           name: coverage-report
           path: coverage_filtered.info
           if-no-files-found: ignore
+
+      # -------------------------------------------------------
+      # ☁️ Upload Coverage to Codecov
+      # -------------------------------------------------------
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage_filtered.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: OniMock/GameDiary
+          fail_ci_if_error: false
