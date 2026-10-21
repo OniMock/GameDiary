@@ -465,7 +465,12 @@ static int get_umd_readiness_state(void) {
         if (addr == 0) {
             addr = sctrlHENFindFunction("sceUmd_Service", "sceUmdUser", SCE_UMD_GET_DRIVE_STAT_NID);
         }
-        get_drive_stat = (SceUmdGetDriveStatFn)addr;
+#ifdef TESTING
+        int sceUmdGetDriveStat(void);
+        get_drive_stat = sceUmdGetDriveStat;
+#else
+        get_drive_stat = (SceUmdGetDriveStatFn)(uintptr_t)addr;
+#endif
         lookup_done = 1;
         debug_log("METADATA", "metadata_fetch_from_umd: sceUmdGetDriveStat lookup -> 0x%X",
                   (unsigned int)addr);

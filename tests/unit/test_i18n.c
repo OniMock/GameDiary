@@ -56,6 +56,89 @@ static void test_i18n_auto_detect_psp_system(void) {
     mock_hardware_set_system_language(PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE);
     i18n_switch_language(LANG_AUTO);
     ASSERT_EQ(i18n_current_lang(), LANG_PT);
+
+    // Spanish
+    mock_hardware_set_system_language(PSP_SYSTEMPARAM_LANGUAGE_SPANISH);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_ES);
+
+    // Russian
+    mock_hardware_set_system_language(PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_RU);
+
+    // Chinese Traditional
+    mock_hardware_set_system_language(PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_CN);
+
+    // German
+    mock_hardware_set_system_language(PSP_SYSTEMPARAM_LANGUAGE_GERMAN);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_DE);
+
+    // Italian
+    mock_hardware_set_system_language(PSP_SYSTEMPARAM_LANGUAGE_ITALIAN);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_IT);
+
+    // English
+    mock_hardware_set_system_language(PSP_SYSTEMPARAM_LANGUAGE_ENGLISH);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_EN);
+
+    // Unknown language code -> fallback to English
+    mock_hardware_set_system_language(999);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_EN);
+}
+
+static void test_i18n_flags_and_init(void) {
+    mock_pspsdk_reset();
+
+    // Initialize with German
+    i18n_init(LANG_DE);
+    ASSERT_EQ(i18n_current_lang(), LANG_DE);
+
+    // Current flag should be valid
+    const ImageResource *flag = i18n_get_current_flag();
+    ASSERT_NOT_NULL(flag);
+
+    // Specific language flags
+    ASSERT_NOT_NULL(i18n_get_lang_flag(LANG_EN));
+    ASSERT_NOT_NULL(i18n_get_lang_flag(LANG_CN));
+    ASSERT_NOT_NULL(i18n_get_lang_flag(LANG_JP));
+
+    // Bounds checking on flags
+    ASSERT_NULL(i18n_get_lang_flag(-1));
+    ASSERT_NULL(i18n_get_lang_flag(LANG_COUNT));
+    ASSERT_NULL(i18n_get_lang_flag(999));
+
+    // Font reload call
+    i18n_reload_font();
+}
+
+static void test_i18n_bounds_and_unknowns(void) {
+    mock_pspsdk_reset();
+
+    // Out of bounds switch -> defaults to English
+    i18n_switch_language(-5);
+    ASSERT_EQ(i18n_current_lang(), LANG_EN);
+
+    i18n_switch_language(100);
+    ASSERT_EQ(i18n_current_lang(), LANG_EN);
+
+    // Out of bounds set -> defaults to English
+    i18n_set_language(-1);
+    ASSERT_EQ(i18n_current_lang(), LANG_EN);
+
+    i18n_set_language(999);
+    ASSERT_EQ(i18n_current_lang(), LANG_EN);
+
+    // Out of bounds language name -> returns "Unknown"
+    ASSERT_STR_EQ(i18n_get_lang_name(-1), "Unknown");
+    ASSERT_STR_EQ(i18n_get_lang_name(LANG_COUNT), "Unknown");
+    ASSERT_STR_EQ(i18n_get_lang_name(999), "Unknown");
 }
 
 static void test_i18n_sorted_indices(void) {
@@ -72,17 +155,16 @@ static void test_i18n_alphabetical_order(void) {
      * "Sorted alphabetically by language name:
      *   0 Chinese  (LANG_CN)
      *   1 English  (LANG_EN)
-     *   2 German   (LANG_DE)
-     *   3 French   (LANG_FR) ... "
+     *   2 French   (LANG_FR)
+     *   3 German   (LANG_DE) ... "
      * In the English alphabet, "French" comes before "German".
-     * Therefore, index 2 ("German") and index 3 ("French") are inverted in production! */
+     * Therefore, index 2 ("French") and index 3 ("German") must be strictly alphabetical. */
     const char *name_2 = i18n_get_lang_name(i18n_get_sorted_lang_index(2));
     const char *name_3 = i18n_get_lang_name(i18n_get_sorted_lang_index(3));
     ASSERT_STR_EQ(name_2, "French");
     ASSERT_STR_EQ(name_3, "German");
 
-    /* Strict A-Z assertion: name_2 must be lexicographically before name_3.
-     * This will detect BUG-05 because "German" > "French". */
+    /* Strict A-Z assertion: name_2 must be lexicographically before name_3. */
     ASSERT_TRUE(strcmp(name_2, name_3) < 0);
 }
 
@@ -90,6 +172,8 @@ void run_test_i18n(void) {
     TEST_SUITE_BEGIN("Internationalization (i18n) Module");
     TEST_RUN(test_i18n_switching_and_retrieval);
     TEST_RUN(test_i18n_auto_detect_psp_system);
+    TEST_RUN(test_i18n_flags_and_init);
+    TEST_RUN(test_i18n_bounds_and_unknowns);
     TEST_RUN(test_i18n_sorted_indices);
     TEST_RUN(test_i18n_alphabetical_order);
     TEST_SUITE_END();

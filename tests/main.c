@@ -32,6 +32,10 @@ void run_test_i18n(void);
 void run_test_metadata_repository(void);
 void run_test_overlay_blit(void);
 void run_test_tracker_time_accounting(void);
+void run_detector_tests(void);
+void run_icon_capture_tests(void);
+void run_test_psp_hardware(void);
+void run_test_debug(void);
 
 /* Integration Test Suite Prototypes */
 void run_test_integration_tracker_pipeline(void);
@@ -73,6 +77,10 @@ int main(int argc, char **argv) {
     run_test_metadata_repository();
     run_test_overlay_blit();
     run_test_tracker_time_accounting();
+    run_detector_tests();
+    run_icon_capture_tests();
+    run_test_psp_hardware();
+    run_test_debug();
 
     /* Integration Tests */
     run_test_integration_tracker_pipeline();

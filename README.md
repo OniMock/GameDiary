@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/OniMock/GameDiary/build.yml?branch=main)](https://github.com/OniMock/GameDiary/actions)
 [![Tests Status](https://img.shields.io/github/actions/workflow/status/OniMock/GameDiary/test.yml?branch=main&label=Tests)](https://github.com/OniMock/GameDiary/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/Coverage-70.5%25-brightgreen.svg)](https://github.com/OniMock/GameDiary/actions)
+[![Coverage](https://img.shields.io/badge/Coverage-88.0%25-brightgreen.svg)](https://github.com/OniMock/GameDiary/actions)
 [![Version](https://img.shields.io/github/v/tag/OniMock/GameDiary?label=Version)](https://github.com/OniMock/GameDiary/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: PSP](https://img.shields.io/badge/Platform-PSP-informational.svg)](https://en.wikipedia.org/wiki/PlayStation_Portable)
@@ -322,7 +322,7 @@ The user-mode application can be tested using [PPSSPP](https://www.ppsspp.org/).
 GameDiary features a comprehensive automated test suite capable of running on any standard PC (Linux, macOS, Windows) or CI environment without requiring physical PSP hardware.
 
 - **PSP SDK Mock Harness**: Intercepts and simulates Sony PSP SDK kernel/user APIs (`sceIo*`, `sceKernel*`, `sceCtrl*`, `sceDisplay*`, `scePower*`), redirecting filesystem I/O to a safe sandboxed directory.
-- **Coverage (70.5%+)**: Rigorously tests database schemas, endianness, time tracking & sleep heuristics, SFO parsing, internationalization tables, backup/restore pipelines, and crash recovery.
+- **Coverage (88.0%+)**: 91 unit and integration tests rigorously verifying database schemas, endianness, time tracking & sleep heuristics, SFO parsing, internationalization tables, backup/restore pipelines, and crash recovery.
 
 #### Run Tests Locally
 

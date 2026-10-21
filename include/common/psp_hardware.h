@@ -29,4 +29,11 @@ int is_psp_1000(void);
  */
 int is_psp_low_end(void);
 
+#ifdef TESTING
+/**
+ * @brief Resets the cached low-end RAM detection flag (testing only).
+ */
+void psp_hardware_reset_cache(void);
+#endif
+
 #endif // _COMMON_PSP_HARDWARE_H_

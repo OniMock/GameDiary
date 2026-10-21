@@ -5,7 +5,7 @@
 CC ?= gcc
 CFLAGS ?= -O0 -g -Wall -Wextra -Wno-unused-parameter -std=c99
 INCLUDES = -Itests/mock_pspsdk -Iinclude -Iinclude/app -Ilib -Itests
-DEFINES = -DGDIARY_PLUGIN -D_PSP_FW_VERSION=661 -DTESTING=1
+DEFINES = -DGDIARY_PLUGIN -DGDIARY_DEBUG=1 -D_PSP_FW_VERSION=661 -DTESTING=1
 LIBS = -lm
 
 ifeq ($(COVERAGE), 1)
@@ -42,6 +42,10 @@ SRCS = \
 	tests/unit/test_metadata_repository.c \
 	tests/unit/test_overlay_blit.c \
 	tests/unit/test_tracker_time_accounting.c \
+	tests/unit/test_detector.c \
+	tests/unit/test_icon_capture.c \
+	tests/unit/test_psp_hardware.c \
+	tests/unit/test_debug.c \
 	tests/integration/test_integration_tracker_pipeline.c \
 	tests/integration/test_integration_storage_recovery.c \
 	tests/integration/test_integration_data_lifecycle.c \

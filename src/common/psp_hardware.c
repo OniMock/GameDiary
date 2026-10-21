@@ -51,3 +51,9 @@ int is_psp_1000(void) {
 int is_psp_low_end(void) {
     return detect_low_end();
 }
+
+#ifdef TESTING
+void psp_hardware_reset_cache(void) {
+    s_is_low_end_cached = -1;
+}
+#endif

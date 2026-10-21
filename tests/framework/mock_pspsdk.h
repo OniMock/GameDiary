@@ -66,6 +66,9 @@ u32  mock_ctrl_get_buttons(void);
 void mock_display_set_active_fb(void *vram, int stride, int format);
 int  mock_display_get_vblank_count(void);
 
+/* UMD mocks */
+int sceUmdGetDriveStat(void);
+
 #ifdef __cplusplus
 }
 #endif

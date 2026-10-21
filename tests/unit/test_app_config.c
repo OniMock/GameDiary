@@ -48,6 +48,10 @@ static void test_config_save_and_reload(void) {
     ASSERT_EQ(cfg->sfx_enabled, 0);
     ASSERT_EQ(cfg->theme, 1);
     ASSERT_EQ(cfg->format_hours_only, 1);
+
+    // Test config_save() API
+    res = config_save();
+    ASSERT_EQ(res, 0);
 }
 
 static void test_config_legacy_migration(void) {
@@ -79,10 +83,38 @@ static void test_config_legacy_migration(void) {
     ASSERT_EQ(cfg->format_hours_only, 0);
 }
 
+static void test_config_corrupt_and_errors(void) {
+    mock_pspsdk_reset();
+    config_init("ms0:/PSP/GAME/GameDiary/EBOOT.PBP");
+
+    // Empty file (0 bytes read -> res == 0 != sizeof(AppConfig))
+    mock_vfs_map_file("ms0:/PSP/GAME/GameDiary/config.dat", "", 0);
+
+    int res = config_load();
+    ASSERT_EQ(res, -1);
+
+    AppConfig *cfg = config_get();
+    ASSERT_EQ(cfg->language, -1);
+    ASSERT_EQ(cfg->sfx_enabled, 1);
+
+    // Fail open during write
+    mock_vfs_fail_open(true);
+    res = config_write_file(cfg);
+    ASSERT_EQ(res, -1);
+    mock_vfs_fail_open(false);
+
+    // Fail write
+    mock_vfs_fail_write(true);
+    res = config_write_file(cfg);
+    ASSERT_EQ(res, -2);
+    mock_vfs_fail_write(false);
+}
+
 void run_test_app_config(void) {
     TEST_SUITE_BEGIN("App Configuration Module");
     TEST_RUN(test_config_missing_file_defaults);
     TEST_RUN(test_config_save_and_reload);
     TEST_RUN(test_config_legacy_migration);
+    TEST_RUN(test_config_corrupt_and_errors);
     TEST_SUITE_END();
 }

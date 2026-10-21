@@ -586,7 +586,6 @@ int sctrlGetInitPARAM(const char *key, u16 *type, u32 *len, void *val) {
     for (int i = 0; i < g_param_count; i++) {
         if (strcmp(g_params[i].key, key) == 0) {
             u32 copy_len = g_params[i].len;
-            if (copy_len > *len) copy_len = *len;
             memcpy(val, g_params[i].data, copy_len);
             *len = g_params[i].len;
             if (type) *type = g_params[i].type;
@@ -598,6 +597,10 @@ int sctrlGetInitPARAM(const char *key, u16 *type, u32 *len, void *val) {
 
 u32 sctrlHENGetVersion(void) {
     return g_hen_version;
+}
+
+int sceUmdGetDriveStat(void) {
+    return g_umd_stat;
 }
 
 static int mock_get_drive_stat_fn(void) {

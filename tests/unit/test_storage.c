@@ -142,11 +142,37 @@ static void test_storage_session_repair_on_init(void) {
     ASSERT_EQ(repaired_e->duration, 1800U);
 }
 
+static void test_storage_fault_injection(void) {
+    mock_pspsdk_reset();
+    storage_init(k_base_dir);
+
+    // Test write failure during session logging
+    mock_vfs_fail_write(true);
+    SceOff offset = -1;
+    int res = storage_log_session(1, 60, 1700000000U, &offset);
+    ASSERT_TRUE(res < 0);
+    mock_vfs_fail_write(false);
+
+    // Test open failure during game creation
+    mock_vfs_fail_open(true);
+    GameMetadata meta = {
+        .game_id = "ULUS99999",
+        .game_name = "Fail Test",
+        .category = CAT_PSP,
+        .file_path = "ms0:/ISO/fail.iso"
+    };
+    u32 uid = 0;
+    res = storage_get_or_create_game(&meta, &uid);
+    ASSERT_TRUE(res < 0);
+    mock_vfs_fail_open(false);
+}
+
 void run_test_storage(void) {
     TEST_SUITE_BEGIN("Storage & Persistence Module");
     TEST_RUN(test_storage_init_creates_files);
     TEST_RUN(test_storage_get_or_create_game);
     TEST_RUN(test_storage_log_session);
     TEST_RUN(test_storage_session_repair_on_init);
+    TEST_RUN(test_storage_fault_injection);
     TEST_SUITE_END();
 }
