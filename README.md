@@ -1,6 +1,8 @@
 <div align="center">
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/OniMock/GameDiary/build.yml?branch=main)](https://github.com/OniMock/GameDiary/actions)
+[![Tests Status](https://img.shields.io/github/actions/workflow/status/OniMock/GameDiary/test.yml?branch=main&label=Tests)](https://github.com/OniMock/GameDiary/actions/workflows/test.yml)
+[![Coverage](https://img.shields.io/badge/Coverage-70.5%25-brightgreen.svg)](https://github.com/OniMock/GameDiary/actions)
 [![Version](https://img.shields.io/github/v/tag/OniMock/GameDiary?label=Version)](https://github.com/OniMock/GameDiary/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: PSP](https://img.shields.io/badge/Platform-PSP-informational.svg)](https://en.wikipedia.org/wiki/PlayStation_Portable)
@@ -249,6 +251,7 @@ GameDiary/
 │   │   └── main.c          # Plugin entry point
 │   │
 │   └── common/             # Shared logic (Data logging, parser utilities)
+├── tests/                  # Automated unit, integration, and regression test suite with mock PSP SDK
 └── tools/                  # Build and asset processing tools (e.g., resource and font converters)
 ```
 
@@ -313,6 +316,34 @@ docker run --rm -it -v "${PWD}:/workspace" pspdev/pspdev Make clean all
 ### 🖥️ Running on Emulator
 
 The user-mode application can be tested using [PPSSPP](https://www.ppsspp.org/). Testing the kernel-plugin typically requires a real PSP, though specific module debugging can sometimes be simulated with advanced emulator setups.
+
+### 🧪 Automated Testing & Code Coverage
+
+GameDiary features a comprehensive automated test suite capable of running on any standard PC (Linux, macOS, Windows) or CI environment without requiring physical PSP hardware.
+
+- **PSP SDK Mock Harness**: Intercepts and simulates Sony PSP SDK kernel/user APIs (`sceIo*`, `sceKernel*`, `sceCtrl*`, `sceDisplay*`, `scePower*`), redirecting filesystem I/O to a safe sandboxed directory.
+- **Coverage (70.5%+)**: Rigorously tests database schemas, endianness, time tracking & sleep heuristics, SFO parsing, internationalization tables, backup/restore pipelines, and crash recovery.
+
+#### Run Tests Locally
+
+```bash
+make -f tests/Makefile test
+```
+
+#### Measure Code Coverage (gcov / lcov)
+
+```bash
+make -f tests/Makefile clean
+make -f tests/Makefile test COVERAGE=1
+cd tests/build && gcov -n src/common/*.o src/plugin/*.o src/app/**/*.o
+```
+
+#### Run in Docker
+
+```bash
+docker run --rm -v "${PWD}:/workspace" -w /workspace alpine:latest sh -c \
+  "apk add build-base python3 && make -f tests/Makefile test"
+```
 
 ---
 
