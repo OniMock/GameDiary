@@ -161,8 +161,8 @@ const char *i18n_get_lang_name(int index) {
  * Sorted alphabetically by language name:
  *   0 Chinese  (LANG_CN)
  *   1 English  (LANG_EN)
- *   2 German   (LANG_DE)
- *   3 French   (LANG_FR)
+ *   2 French   (LANG_FR)
+ *   3 German   (LANG_DE)
  *   4 Italian  (LANG_IT)
  *   5 Japanese (LANG_JP)
  *   6 Portuguese (LANG_PT)
@@ -175,8 +175,8 @@ const char *i18n_get_lang_name(int index) {
 static const LanguageId g_lang_sorted_order[LANG_COUNT] = {
     LANG_CN,  /* Chinese    */
     LANG_EN,  /* English    */
-    LANG_DE,  /* German     */
     LANG_FR,  /* French     */
+    LANG_DE,  /* German     */
     LANG_IT,  /* Italian    */
     LANG_JP,  /* Japanese   */
     LANG_PT,  /* Portuguese */

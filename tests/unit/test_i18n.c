@@ -78,8 +78,8 @@ static void test_i18n_alphabetical_order(void) {
      * Therefore, index 2 ("German") and index 3 ("French") are inverted in production! */
     const char *name_2 = i18n_get_lang_name(i18n_get_sorted_lang_index(2));
     const char *name_3 = i18n_get_lang_name(i18n_get_sorted_lang_index(3));
-    ASSERT_STR_EQ(name_2, "German");
-    ASSERT_STR_EQ(name_3, "French");
+    ASSERT_STR_EQ(name_2, "French");
+    ASSERT_STR_EQ(name_3, "German");
 
     /* Strict A-Z assertion: name_2 must be lexicographically before name_3.
      * This will detect BUG-05 because "German" > "French". */
