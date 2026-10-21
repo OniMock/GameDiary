@@ -1,0 +1,87 @@
+name: Automated Tests & Coverage
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'lib/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+      - 'VERSION'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'lib/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+      - 'VERSION'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # -------------------------------------------------------
+      # 📥 Checkout
+      # -------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------
+      # 📦 Dependencies
+      # -------------------------------------------------------
+      - name: Install build tools and lcov
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc make lcov python3
+
+      # -------------------------------------------------------
+      # 🔍 Validate Language Keys
+      # -------------------------------------------------------
+      - name: Validate Language Keys
+        run: |
+          python3 .github/scripts/check_lang_keys.py
+
+      # -------------------------------------------------------
+      # 🧪 Run Automated Test Suite
+      # -------------------------------------------------------
+      - name: Build & Run Tests
+        run: |
+          make -f tests/Makefile clean
+          make -f tests/Makefile test
+
+      # -------------------------------------------------------
+      # 📊 Measure Code Coverage
+      # -------------------------------------------------------
+      - name: Measure Code Coverage (gcov)
+        run: |
+          make -f tests/Makefile clean
+          make -f tests/Makefile test COVERAGE=1
+          cd tests/build
+          gcov -n src/common/*.o src/plugin/*.o src/app/**/*.o || true
+          cd ../..
+
+      # -------------------------------------------------------
+      # 📈 Generate Coverage Summary
+      # -------------------------------------------------------
+      - name: Generate LCOV Report
+        run: |
+          lcov --capture --directory tests/build --output-file coverage.info || true
+          lcov --remove coverage.info 'tests/*' 'lib/*' '/usr/*' --output-file coverage_filtered.info || true
+          lcov --list coverage_filtered.info || true
+
+      # -------------------------------------------------------
+      # 📤 Upload Coverage Artifact
+      # -------------------------------------------------------
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage_filtered.info
+          if-no-files-found: ignore

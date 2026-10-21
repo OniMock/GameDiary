@@ -6,6 +6,9 @@ on:
     paths:
       - 'VERSION'
       - 'src/**'
+      - 'include/**'
+      - 'lib/**'
+      - 'tests/**'
       - 'Makefile*'
       - '.github/workflows/**'
   pull_request:
@@ -38,6 +41,14 @@ jobs:
       - name: Validate Language Keys
         run: |
           python3 .github/scripts/check_lang_keys.py
+
+      # -------------------------------------------------------
+      # 🧪 Run Automated Tests
+      # -------------------------------------------------------
+      - name: Run Automated Tests
+        run: |
+          make -f tests/Makefile clean
+          make -f tests/Makefile test
 
       # -------------------------------------------------------
       # 🛠️ Build

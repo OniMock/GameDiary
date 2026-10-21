@@ -43,6 +43,8 @@ build/
 dist/
 out/
 test/
+tests/build/
+tests/bin/
 
 # Runtime files (database, saves)
 
