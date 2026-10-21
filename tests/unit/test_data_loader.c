@@ -1,0 +1,158 @@
+/**
+ * Unit tests for src/app/data/data_loader.c
+ */
+
+#include "../framework/test_framework.h"
+#include "../framework/mock_pspsdk.h"
+#include "app/data/data_loader.h"
+#include "common/db_schema.h"
+#include "common/models.h"
+
+static const char *k_base_dir = "ms0:/PSP/COMMON/GameDiary";
+
+static u32 calc_hdr_checksum(const GameRegistryHeader *h) {
+    u32 hash = 2166136261U;
+    const unsigned char *p = (const unsigned char *)h;
+    size_t skip_offset = offsetof(GameRegistryHeader, checksum);
+    for (size_t i = 0; i < sizeof(GameRegistryHeader); i++) {
+        if (i >= skip_offset && i < skip_offset + 4) continue;
+        hash ^= p[i];
+        hash *= 16777619U;
+    }
+    return hash;
+}
+
+static void setup_mock_database(void) {
+    mock_pspsdk_reset();
+
+    char games_path[256], sessions_path[256];
+    snprintf(games_path, sizeof(games_path), "%s/db/%s", k_base_dir, GAMES_DAT);
+    snprintf(sessions_path, sizeof(sessions_path), "%s/db/%s", k_base_dir, SESSIONS_DAT);
+
+    // Build games.dat with 2 games
+    GameRegistryHeader h;
+    memset(&h, 0, sizeof(h));
+    h.magic = GAMEDIARY_MAGIC;
+    h.version = DB_VERSION;
+    h.num_entries = 2;
+    h.next_uid = 3;
+    h.ready_flag = GAMEDIARY_MAGIC;
+    h.checksum = calc_hdr_checksum(&h);
+
+    GameEntry entries[2];
+    memset(entries, 0, sizeof(entries));
+
+    entries[0].uid = 1;
+    strncpy(entries[0].game_id, "ULUS-10041", sizeof(entries[0].game_id) - 1);
+    strncpy(entries[0].game_name, "Grand Theft Auto", sizeof(entries[0].game_name) - 1);
+    entries[0].category = CAT_PSP;
+
+    entries[1].uid = 2;
+    strncpy(entries[1].game_id, "SLUS-00067", sizeof(entries[1].game_id) - 1);
+    strncpy(entries[1].game_name, "Castlevania SotN", sizeof(entries[1].game_name) - 1);
+    entries[1].category = CAT_PS1;
+
+    u8 g_buf[sizeof(GameRegistryHeader) + sizeof(entries) + sizeof(GameRegistryHeader)];
+    memcpy(g_buf, &h, sizeof(h));
+    memcpy(g_buf + sizeof(h), entries, sizeof(entries));
+    memcpy(g_buf + sizeof(h) + sizeof(entries), &h, sizeof(h)); // backup header
+    mock_vfs_map_file(games_path, g_buf, sizeof(g_buf));
+
+    // Build sessions.dat with 3 sessions
+    SessionEntry sessions[3];
+    memset(sessions, 0, sizeof(sessions));
+
+    // Game 1: 1800s at t=100000
+    sessions[0].game_uid = 1;
+    sessions[0].duration = 1800;
+    sessions[0].timestamp = 100000;
+
+    // Game 1: 3600s at t=200000
+    sessions[1].game_uid = 1;
+    sessions[1].duration = 3600;
+    sessions[1].timestamp = 200000;
+
+    // Game 2: 1200s at t=150000
+    sessions[2].game_uid = 2;
+    sessions[2].duration = 1200;
+    sessions[2].timestamp = 150000;
+
+    mock_vfs_map_file(sessions_path, sessions, sizeof(sessions));
+}
+
+static void test_data_loader_load_and_stats(void) {
+    setup_mock_database();
+
+    int res = data_load_all();
+    ASSERT_EQ(res, 0);
+
+    ASSERT_EQ(data_get_game_count(), 2U);
+    ASSERT_EQ(data_get_session_count(), 3U);
+
+    GameStats *games = data_get_games();
+    ASSERT_NOT_NULL(games);
+    ASSERT_EQ(games[0].entry.uid, 1U);
+    ASSERT_STR_EQ(games[0].entry.game_id, "ULUS-10041");
+    ASSERT_EQ(games[1].entry.uid, 2U);
+    ASSERT_STR_EQ(games[1].entry.game_id, "SLUS-00067");
+
+    // Calculate stats over all time (0 to 300000)
+    data_calculate_stats(0, 300000);
+
+    // Game 1: total playtime = 1800 + 3600 = 5400s, 2 sessions
+    ASSERT_EQ(games[0].total_playtime, 5400U);
+    ASSERT_EQ(games[0].session_count, 2U);
+    // last_played_ts is session 1 end: 200000 + 3600 = 203600
+    ASSERT_EQ(games[0].last_played_ts, 203600U);
+    ASSERT_EQ(games[0].period_playtime, 5400U);
+
+    // Game 2: total playtime = 1200s, 1 session
+    ASSERT_EQ(games[1].total_playtime, 1200U);
+    ASSERT_EQ(games[1].session_count, 1U);
+    ASSERT_EQ(games[1].last_played_ts, 151200U);
+
+    // Period filter: [120000, 180000] -> only session 2 (Game 2 at 150000) matches
+    data_calculate_stats(120000, 180000);
+    ASSERT_EQ(games[0].period_playtime, 0U);
+    ASSERT_EQ(games[1].period_playtime, 1200U);
+
+    data_free();
+}
+
+static void test_data_loader_delete_operations(void) {
+    setup_mock_database();
+    data_load_all();
+
+    // Delete session 0 of Game 1 (timestamp 100000)
+    int del_sess = data_delete_session(1, 100000);
+    ASSERT_EQ(del_sess, 0);
+    ASSERT_EQ(data_get_session_count(), 2U);
+
+    // Delete non-existent session
+    del_sess = data_delete_session(1, 999999);
+    ASSERT_EQ(del_sess, -1);
+
+    // Delete Game 1 (index 0)
+    int del_game = data_delete_game_at_index(0);
+    ASSERT_EQ(del_game, 0);
+    ASSERT_EQ(data_get_game_count(), 1U);
+
+    // Game 2 should now be at index 0 and its sessions preserved
+    GameStats *remaining = data_get_games();
+    ASSERT_EQ(remaining[0].entry.uid, 2U);
+    ASSERT_STR_EQ(remaining[0].entry.game_id, "SLUS-00067");
+
+    // Associated sessions for Game 1 must have been purged
+    ASSERT_EQ(data_get_session_count(), 1U);
+    SessionEntry *sess = data_get_sessions();
+    ASSERT_EQ(sess[0].game_uid, 2U);
+
+    data_free();
+}
+
+void run_test_data_loader(void) {
+    TEST_SUITE_BEGIN("Data Loader & Query Module");
+    TEST_RUN(test_data_loader_load_and_stats);
+    TEST_RUN(test_data_loader_delete_operations);
+    TEST_SUITE_END();
+}
