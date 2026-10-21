@@ -22,6 +22,7 @@ enum PspDisplayPixelFormats {
 
 int sceDisplayGetFrameBuf(void **topaddr, int *bufferwidth, int *pixelformat, int sync);
 int sceDisplaySetFrameBuf(void *topaddr, int bufferwidth, int pixelformat, int sync);
+int sceDisplayGetMode(int *mode, int *width, int *height);
 int sceDisplayWaitVblankStart(void);
 
 #ifdef __cplusplus

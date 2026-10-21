@@ -40,6 +40,8 @@ SRCS = \
 	tests/unit/test_stats_calculator.c \
 	tests/unit/test_i18n.c \
 	tests/unit/test_metadata_repository.c \
+	tests/unit/test_overlay_blit.c \
+	tests/unit/test_tracker_time_accounting.c \
 	tests/integration/test_integration_tracker_pipeline.c \
 	tests/integration/test_integration_storage_recovery.c \
 	tests/integration/test_integration_data_lifecycle.c \
@@ -55,6 +57,9 @@ SRCS = \
 	src/plugin/input_combo.c \
 	src/plugin/icon_capture.c \
 	src/plugin/metadata_repository.c \
+	src/plugin/detector.c \
+	src/plugin/overlay_blit.c \
+	src/plugin/overlay_msx_font.c \
 	src/app/config/config.c \
 	src/app/config/plugin_dat.c \
 	src/app/data/game_category.c \

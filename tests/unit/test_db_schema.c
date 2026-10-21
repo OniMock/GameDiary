@@ -10,7 +10,18 @@
 static void test_struct_sizes_and_alignment(void) {
     // Binary database structures must have exact fixed sizes across compilers
     ASSERT_EQ(sizeof(GameRegistryHeader), 32U);
-    ASSERT_EQ(sizeof(GameEntry), 88U);
+
+    /* GameEntry layout in db_schema.h (DB_VERSION 3):
+     * uid (4) + game_id (16) + game_name (64) + apitype_str (8) + category (1) + reserved (3) = 96 bytes.
+     * Note: Earlier documentation referenced 88 bytes prior to the addition of apitype_str[8]. */
+    ASSERT_EQ(sizeof(GameEntry), 96U);
+    ASSERT_EQ(offsetof(GameEntry, uid), 0U);
+    ASSERT_EQ(offsetof(GameEntry, game_id), 4U);
+    ASSERT_EQ(offsetof(GameEntry, game_name), 20U);
+    ASSERT_EQ(offsetof(GameEntry, apitype_str), 84U);
+    ASSERT_EQ(offsetof(GameEntry, category), 92U);
+    ASSERT_EQ(offsetof(GameEntry, reserved), 93U);
+
     ASSERT_EQ(sizeof(SessionEntry), 12U);
 
     // Config file sizes

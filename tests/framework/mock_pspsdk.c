@@ -556,6 +556,13 @@ int sceDisplaySetFrameBuf(void *topaddr, int bufferwidth, int pixelformat, int s
     return 0;
 }
 
+int sceDisplayGetMode(int *mode, int *width, int *height) {
+    if (mode) *mode = 0;
+    if (width) *width = 480;
+    if (height) *height = 272;
+    return 0;
+}
+
 int sceDisplayWaitVblankStart(void) {
     g_vblank_count++;
     return 0;

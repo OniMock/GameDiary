@@ -138,6 +138,20 @@ static void test_logging(void) {
     ASSERT_TRUE(strstr(log_buf, "ULES-00123") != NULL);
 }
 
+static void test_format_duration_compact_stub(void) {
+    char buf[32];
+    memset(buf, 0xAA, sizeof(buf));
+    utils_format_duration_compact(3665, buf, sizeof(buf));
+    /* BUG-02 Verification:
+     * In src/common/utils.c:
+     * void utils_format_duration_compact(u32 seconds, char *out, size_t size) {
+     *   (void)seconds; (void)out; (void)size;
+     * }
+     * The function is an empty stub without implementation or null-termination.
+     * We verify that the buffer was left untouched with canary bytes 0xAA. */
+    ASSERT_EQ((unsigned char)buf[0], 0xAA);
+}
+
 void run_test_utils(void) {
     TEST_SUITE_BEGIN("Utils Module");
     mock_pspsdk_reset();
@@ -148,5 +162,6 @@ void run_test_utils(void) {
     TEST_RUN(test_copy_file);
     TEST_RUN(test_extract_pbp_icon);
     TEST_RUN(test_logging);
+    TEST_RUN(test_format_duration_compact_stub);
     TEST_SUITE_END();
 }

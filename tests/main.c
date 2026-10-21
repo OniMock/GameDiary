@@ -30,6 +30,8 @@ void run_test_data_backup(void);
 void run_test_stats_calculator(void);
 void run_test_i18n(void);
 void run_test_metadata_repository(void);
+void run_test_overlay_blit(void);
+void run_test_tracker_time_accounting(void);
 
 /* Integration Test Suite Prototypes */
 void run_test_integration_tracker_pipeline(void);
@@ -69,6 +71,8 @@ int main(int argc, char **argv) {
     run_test_stats_calculator();
     run_test_i18n();
     run_test_metadata_repository();
+    run_test_overlay_blit();
+    run_test_tracker_time_accounting();
 
     /* Integration Tests */
     run_test_integration_tracker_pipeline();

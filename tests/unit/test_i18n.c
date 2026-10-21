@@ -65,10 +65,32 @@ static void test_i18n_sorted_indices(void) {
     ASSERT_EQ(i18n_get_sorted_lang_index(100), LANG_EN);
 }
 
+static void test_i18n_alphabetical_order(void) {
+    /* BUG-05 Verification:
+     * In src/app/i18n/i18n.c:
+     * g_lang_sorted_order is documented as:
+     * "Sorted alphabetically by language name:
+     *   0 Chinese  (LANG_CN)
+     *   1 English  (LANG_EN)
+     *   2 German   (LANG_DE)
+     *   3 French   (LANG_FR) ... "
+     * In the English alphabet, "French" comes before "German".
+     * Therefore, index 2 ("German") and index 3 ("French") are inverted in production! */
+    const char *name_2 = i18n_get_lang_name(i18n_get_sorted_lang_index(2));
+    const char *name_3 = i18n_get_lang_name(i18n_get_sorted_lang_index(3));
+    ASSERT_STR_EQ(name_2, "German");
+    ASSERT_STR_EQ(name_3, "French");
+
+    /* Strict A-Z assertion: name_2 must be lexicographically before name_3.
+     * This will detect BUG-05 because "German" > "French". */
+    ASSERT_TRUE(strcmp(name_2, name_3) < 0);
+}
+
 void run_test_i18n(void) {
     TEST_SUITE_BEGIN("Internationalization (i18n) Module");
     TEST_RUN(test_i18n_switching_and_retrieval);
     TEST_RUN(test_i18n_auto_detect_psp_system);
     TEST_RUN(test_i18n_sorted_indices);
+    TEST_RUN(test_i18n_alphabetical_order);
     TEST_SUITE_END();
 }
