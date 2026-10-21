@@ -89,9 +89,56 @@ static void test_tracker_db_legacy_format(void) {
     ASSERT_EQ(hdr.entry_count, 1U);
 }
 
+static void test_tracker_db_errors_and_edge_cases(void) {
+    mock_pspsdk_reset();
+
+    // 1. Unset path
+    tracker_db_set_path(NULL);
+    ASSERT_EQ(tracker_db_contains("ULUS-10041"), 0);
+    ASSERT_EQ(tracker_db_add("ULUS-10041"), -1);
+    ASSERT_EQ(tracker_db_remove("ULUS-10041"), -1);
+
+    // 2. Invalid or NULL game IDs
+    tracker_db_set_path(k_tracker_path);
+    ASSERT_EQ(tracker_db_contains(NULL), 0);
+    ASSERT_EQ(tracker_db_contains(""), 0);
+    ASSERT_EQ(tracker_db_add(NULL), -1);
+    ASSERT_EQ(tracker_db_add(""), -1);
+    ASSERT_EQ(tracker_db_remove(NULL), -1);
+    ASSERT_EQ(tracker_db_remove(""), -1);
+
+    // 3. Corrupted header recovery in add
+    TrackerHeader bad_hdr;
+    memset(&bad_hdr, 0, sizeof(bad_hdr));
+    bad_hdr.magic = 0xBAD00BAD;
+    bad_hdr.version = 999;
+    mock_vfs_map_file(k_tracker_path, &bad_hdr, sizeof(bad_hdr));
+
+    int res = tracker_db_add("RECOVERED_ID");
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(tracker_db_contains("RECOVERED_ID"), 1);
+
+    // 4. File I/O fault injection on add
+    mock_vfs_fail_open(true);
+    ASSERT_EQ(tracker_db_add("FAIL_GAME"), -1);
+    mock_vfs_fail_open(false);
+
+    // 5. Fail creating .tmp during remove
+    mock_vfs_fail_path(".tmp");
+    ASSERT_EQ(tracker_db_remove("RECOVERED_ID"), -1);
+    mock_vfs_fail_path(NULL);
+
+    // 6. Fail write during fresh entry creation
+    mock_pspsdk_reset();
+    mock_vfs_fail_write(true);
+    ASSERT_EQ(tracker_db_add("FAIL_WRITE"), -1);
+    mock_vfs_fail_write(false);
+}
+
 void run_test_tracker_db(void) {
     TEST_SUITE_BEGIN("Tracker Database (Blocklist) Module");
     TEST_RUN(test_tracker_db_lifecycle);
     TEST_RUN(test_tracker_db_legacy_format);
+    TEST_RUN(test_tracker_db_errors_and_edge_cases);
     TEST_SUITE_END();
 }

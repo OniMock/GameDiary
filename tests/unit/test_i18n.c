@@ -6,6 +6,8 @@
 #include "../framework/mock_pspsdk.h"
 #include "app/i18n/i18n.h"
 
+extern const char **g_i18n_msg;
+
 static void test_i18n_switching_and_retrieval(void) {
     mock_pspsdk_reset();
 
@@ -37,6 +39,19 @@ static void test_i18n_switching_and_retrieval(void) {
     // Invalid message ID handling
     ASSERT_STR_EQ(i18n_get((MessageId)-1), "<?>");
     ASSERT_STR_EQ(i18n_get((MessageId)9999), "<?>");
+
+    // NULL message table check
+    const char **saved_msg = g_i18n_msg;
+    g_i18n_msg = NULL;
+    ASSERT_STR_EQ(i18n_get(MSG_MENU_GAMES), "<?>");
+
+    // Fallback to English when string is missing in table
+    const char *mock_incomplete[MSG_COUNT];
+    memset(mock_incomplete, 0, sizeof(mock_incomplete));
+    g_i18n_msg = mock_incomplete;
+    ASSERT_STR_EQ(i18n_get(MSG_MENU_GAMES), "Games");
+
+    g_i18n_msg = saved_msg;
 }
 
 static void test_i18n_auto_detect_psp_system(void) {
@@ -89,6 +104,11 @@ static void test_i18n_auto_detect_psp_system(void) {
 
     // Unknown language code -> fallback to English
     mock_hardware_set_system_language(999);
+    i18n_switch_language(LANG_AUTO);
+    ASSERT_EQ(i18n_current_lang(), LANG_EN);
+
+    // sceUtilityGetSystemParamInt failure -> fallback to English
+    mock_hardware_set_system_language(-1);
     i18n_switch_language(LANG_AUTO);
     ASSERT_EQ(i18n_current_lang(), LANG_EN);
 }

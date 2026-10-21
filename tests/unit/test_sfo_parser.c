@@ -134,6 +134,31 @@ static void test_pbp_read_sfo_string(void) {
     mock_vfs_map_file("ms0:/BAD.PBP", bad_pbp, sizeof(bad_pbp));
     res = pbp_read_sfo_string("ms0:/BAD.PBP", "TITLE", out, sizeof(out));
     ASSERT_EQ(res, 0);
+
+    // Non-existent PBP file
+    ASSERT_EQ(pbp_read_sfo_string("ms0:/NON_EXISTENT.PBP", "TITLE", out, sizeof(out)), 0);
+
+    // Truncated PBP (< 12 bytes)
+    u8 tiny_pbp[6] = { 0x00, 'P', 'B', 'P' };
+    mock_vfs_map_file("ms0:/TINY.PBP", tiny_pbp, sizeof(tiny_pbp));
+    ASSERT_EQ(pbp_read_sfo_string("ms0:/TINY.PBP", "TITLE", out, sizeof(out)), 0);
+}
+
+static void test_sfo_non_existent_and_buffer_truncation(void) {
+    char out[10];
+
+    // Non-existent SFO
+    ASSERT_EQ(sfo_read_string("ms0:/DOES_NOT_EXIST.SFO", "TITLE", out, sizeof(out)), 0);
+
+    // Buffer smaller than title (truncation test)
+    u8 sfo_buf[512];
+    size_t sfo_size = build_mock_sfo(sfo_buf, sizeof(sfo_buf), "A Very Long Game Title Here", "ABCD12345");
+    mock_vfs_map_file("ms0:/LONG_TITLE.SFO", sfo_buf, sfo_size);
+
+    char short_buf[6] = {0};
+    int res = sfo_read_string("ms0:/LONG_TITLE.SFO", "TITLE", short_buf, sizeof(short_buf));
+    ASSERT_EQ(res, 1);
+    ASSERT_EQ(strlen(short_buf), 5); // 5 chars + null terminator
 }
 
 void run_test_sfo_parser(void) {
@@ -143,5 +168,6 @@ void run_test_sfo_parser(void) {
     TEST_RUN(test_sfo_truncated_file);
     TEST_RUN(test_sfo_invalid_magic);
     TEST_RUN(test_pbp_read_sfo_string);
+    TEST_RUN(test_sfo_non_existent_and_buffer_truncation);
     TEST_SUITE_END();
 }

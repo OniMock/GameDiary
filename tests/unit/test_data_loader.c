@@ -7,6 +7,7 @@
 #include "app/data/data_loader.h"
 #include "common/db_schema.h"
 #include "common/models.h"
+#include <time.h>
 
 static const char *k_base_dir = "ms0:/PSP/COMMON/GameDiary";
 
@@ -147,6 +148,82 @@ static void test_data_loader_delete_operations(void) {
     SessionEntry *sess = data_get_sessions();
     ASSERT_EQ(sess[0].game_uid, 2U);
 
+    // Delete remaining Game 2 (index 0) -> 0 games remain
+    del_game = data_delete_game_at_index(0);
+    ASSERT_EQ(del_game, 0);
+    ASSERT_EQ(data_get_game_count(), 0U);
+    ASSERT_NULL(data_get_games());
+    ASSERT_EQ(data_get_session_count(), 0U);
+
+    data_free();
+}
+
+static void test_data_loader_compute_game_details(void) {
+    setup_mock_database();
+
+    // Set time to 2026-04-20 12:00:00 (timestamp 1776686400)
+    mock_rtc_set_unix_time(1776686400U);
+
+    // Remap sessions for Game 1 at current timestamps
+    char sessions_path[256];
+    snprintf(sessions_path, sizeof(sessions_path), "%s/db/%s", k_base_dir, SESSIONS_DAT);
+
+    SessionEntry sessions[3];
+    memset(sessions, 0, sizeof(sessions));
+
+    // Session 1: Today (2 hours)
+    sessions[0].game_uid = 1;
+    sessions[0].timestamp = 1776686400U - 7200;
+    sessions[0].duration = 7200;
+
+    // Session 2: 3 days ago (1 hour)
+    sessions[1].game_uid = 1;
+    sessions[1].timestamp = 1776686400U - (3 * 86400);
+    sessions[1].duration = 3600;
+
+    // Session 3: 40 days ago (2 hours)
+    sessions[2].game_uid = 1;
+    sessions[2].timestamp = 1776686400U - (40 * 86400);
+    sessions[2].duration = 7200;
+
+    mock_vfs_map_file(sessions_path, sessions, sizeof(sessions));
+
+    data_load_all();
+
+    GameDetailStats details;
+    data_compute_game_details(1, &details);
+
+    // Week: Session 1 (7200) + Session 2 (3600) = 10800s
+    ASSERT_EQ(details.playtime_week, 10800U);
+    // Month: Session 1 (7200) + Session 2 (3600) = 10800s
+    ASSERT_EQ(details.playtime_month, 10800U);
+    // Year: All 3 sessions = 18000s
+    ASSERT_EQ(details.playtime_year, 18000U);
+
+    ASSERT_EQ(details.first_played, sessions[2].timestamp);
+    ASSERT_EQ(details.last_played, sessions[0].timestamp + sessions[0].duration);
+
+    data_free();
+}
+
+static void test_data_loader_errors_and_edge_cases(void) {
+    mock_pspsdk_reset();
+
+    // Calling before load
+    ASSERT_EQ(data_delete_game_at_index(0), -1);
+    ASSERT_EQ(data_delete_game_at_index(-1), -1);
+    ASSERT_EQ(data_delete_session(1, 100), -1);
+
+    // Load when games.dat does not exist -> returns -1
+    int res = data_load_all();
+    ASSERT_EQ(res, -1);
+    ASSERT_EQ(data_get_game_count(), 0U);
+    ASSERT_EQ(data_get_session_count(), 0U);
+
+    // Calling delete on out-of-bounds index
+    ASSERT_EQ(data_delete_game_at_index(0), -1);
+    ASSERT_EQ(data_delete_session(1, 100), -1);
+
     data_free();
 }
 
@@ -154,5 +231,7 @@ void run_test_data_loader(void) {
     TEST_SUITE_BEGIN("Data Loader & Query Module");
     TEST_RUN(test_data_loader_load_and_stats);
     TEST_RUN(test_data_loader_delete_operations);
+    TEST_RUN(test_data_loader_compute_game_details);
+    TEST_RUN(test_data_loader_errors_and_edge_cases);
     TEST_SUITE_END();
 }

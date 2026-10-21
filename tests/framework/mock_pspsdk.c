@@ -575,6 +575,7 @@ void sceGuColor(u32 color) { (void)color; }
 
 int sceUtilityGetSystemParamInt(int id, int *val) {
     if (id == PSP_SYSTEMPARAM_ID_INT_LANGUAGE && val) {
+        if (g_sys_lang < 0) return -1;
         *val = g_sys_lang;
         return 0;
     }

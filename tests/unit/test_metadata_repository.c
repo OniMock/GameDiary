@@ -233,6 +233,89 @@ static void test_metadata_fetch_ps1_fallbacks(void) {
     ASSERT_STR_EQ(meta.game_name, "PT: EBOOT.PBP");
 }
 
+static void test_metadata_fetch_homebrew_sfo_and_folders(void) {
+    mock_pspsdk_reset();
+
+    // 1. Official App launched from PSP/APP/NPIA00013
+    u8 sfo_buf[512];
+    size_t sfo_size = build_test_sfo(sfo_buf, sizeof(sfo_buf), "Comic Reader", "NPIA00013");
+
+    u8 pbp[1024] = {0};
+    pbp[0] = 0x00; pbp[1] = 'P'; pbp[2] = 'B'; pbp[3] = 'P';
+    pbp[4] = 0x00; pbp[5] = 0x00; pbp[6] = 0x01; pbp[7] = 0x00;
+    u32 sfo_offset = 64;
+    memcpy(&pbp[8], &sfo_offset, 4);
+    memcpy(&pbp[sfo_offset], sfo_buf, sfo_size);
+
+    mock_vfs_map_file("ms0:/PSP/APP/NPIA00013/EBOOT.PBP", pbp, sizeof(pbp));
+    mock_cfw_set_executable_path("ms0:/PSP/APP/NPIA00013/EBOOT.PBP");
+    mock_cfw_set_apitype(0x141);
+
+    GameMetadata meta;
+    memset(&meta, 0, sizeof(meta));
+    int res = metadata_fetch(&meta);
+    ASSERT_EQ(res, 1);
+    ASSERT_STR_EQ(meta.game_id, "NPIA00013");
+    ASSERT_STR_EQ(meta.game_name, "Comic Reader");
+
+    // 2. Homebrew with generic TITLE in folder ms0:/PSP/GAME/CaveStory/EBOOT.PBP
+    sfo_size = build_test_sfo(sfo_buf, sizeof(sfo_buf), "Unknown Game", "MYHB00001");
+    memcpy(&pbp[sfo_offset], sfo_buf, sfo_size);
+    mock_vfs_map_file("ms0:/PSP/GAME/CaveStory/EBOOT.PBP", pbp, sizeof(pbp));
+    mock_cfw_set_executable_path("ms0:/PSP/GAME/CaveStory/EBOOT.PBP");
+
+    memset(&meta, 0, sizeof(meta));
+    res = metadata_fetch(&meta);
+    ASSERT_EQ(res, 1);
+    ASSERT_STR_EQ(meta.game_name, "CaveStory");
+    ASSERT_STR_EQ(meta.game_id, "MYHB00001");
+}
+
+static void test_metadata_fetch_vsh_and_umd_edge_cases(void) {
+    mock_pspsdk_reset();
+
+    // 1. VSH / Unknown apitype
+    mock_cfw_set_apitype(0x210); // VSH
+    GameMetadata meta;
+    memset(&meta, 0, sizeof(meta));
+    int res = metadata_fetch(&meta);
+    ASSERT_EQ(res, 1);
+    ASSERT_EQ(meta.category, CAT_VSH);
+    ASSERT_STR_EQ(meta.game_id, "UNKNOWN-00000");
+
+    // Also test CAT_UNKNOWN (e.g. apitype 0x100)
+    mock_cfw_set_apitype(0x100);
+    memset(&meta, 0, sizeof(meta));
+    res = metadata_fetch(&meta);
+    ASSERT_EQ(res, 1);
+    ASSERT_EQ(meta.category, CAT_UNKNOWN);
+    ASSERT_STR_EQ(meta.game_id, "UNKNOWN-00000");
+
+    // 2. UMD_DATA.BIN empty file (< 0 bytes or 0 bytes)
+    mock_cfw_set_umd_file(""); // Physical UMD
+    mock_cfw_set_umd_stat(0x20); // Ready
+    mock_vfs_map_file("disc0:/UMD_DATA.BIN", "", 0);
+
+    memset(&meta, 0, sizeof(meta));
+    meta.category = CAT_PSP;
+    ASSERT_EQ(metadata_fetch_from_umd(&meta), 0);
+
+    // 3. UMD_DATA.BIN with empty DISC_ID ("|1.00")
+    const char *bad_umd = "|1.00\r\n";
+    mock_vfs_map_file("disc0:/UMD_DATA.BIN", bad_umd, strlen(bad_umd));
+    memset(&meta, 0, sizeof(meta));
+    meta.category = CAT_PSP;
+    ASSERT_EQ(metadata_fetch_from_umd(&meta), 0);
+    ASSERT_STR_EQ(meta.game_id, "UNKNOWN-00000");
+
+    // 4. metadata_is_psp_app NULL and 0x143 check
+    ASSERT_EQ(metadata_is_psp_app(NULL), 0);
+    GameMetadata meta_app;
+    memset(&meta_app, 0, sizeof(meta_app));
+    strncpy(meta_app.apitype_str, "0x143", sizeof(meta_app.apitype_str) - 1);
+    ASSERT_EQ(metadata_is_psp_app(&meta_app), 1);
+}
+
 void run_test_metadata_repository(void) {
     TEST_SUITE_BEGIN("Metadata Repository Module");
     TEST_RUN(test_metadata_is_psp_app);
@@ -244,5 +327,7 @@ void run_test_metadata_repository(void) {
     TEST_RUN(test_metadata_fetch_from_umd_drive_stat_ready);
     TEST_RUN(test_metadata_fetch_from_umd_drive_stat_not_ready);
     TEST_RUN(test_metadata_fetch_ps1_fallbacks);
+    TEST_RUN(test_metadata_fetch_homebrew_sfo_and_folders);
+    TEST_RUN(test_metadata_fetch_vsh_and_umd_edge_cases);
     TEST_SUITE_END();
 }

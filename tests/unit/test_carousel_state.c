@@ -5,6 +5,10 @@
 #include "../framework/test_framework.h"
 #include "../framework/mock_pspsdk.h"
 #include "app/ui/carousel_state.h"
+#include "app/data/data_loader.h"
+#include "common/storage.h"
+#include <stdlib.h>
+#include <string.h>
 
 static void test_carousel_count_days_active(void) {
     SessionEntry sessions[6];
@@ -68,9 +72,6 @@ static void test_carousel_count_days_overflow(void) {
     int res129 = carousel_count_days_active(sessions, 129, 5);
     ASSERT_EQ(res129, -1);
 }
-
-#include "app/data/data_loader.h"
-#include "common/storage.h"
 
 static void setup_carousel_games(void) {
     mock_pspsdk_reset();
@@ -174,6 +175,57 @@ static void test_carousel_icon_cache_and_generation(void) {
     carousel_destroy(&cs);
 }
 
+static void test_carousel_empty_and_pending_checks(void) {
+    CarouselState cs;
+    memset(&cs, 0, sizeof(cs));
+
+    // 1. Empty carousel checks
+    carousel_init(&cs, 0, NULL);
+    ASSERT_NULL(carousel_get_icon(&cs, 0));
+    ASSERT_EQ(carousel_get_icon_state(&cs, 0), CACHE_SLOT_EMPTY);
+    carousel_set_index(&cs, 0);
+    carousel_destroy(&cs);
+
+    // 2. Carousel with items pending check
+    setup_carousel_games();
+    carousel_init(&cs, 4, NULL);
+    int pending = carousel_is_slot_pending(&cs, 0, 0);
+    ASSERT_TRUE(pending == 0 || pending == 1);
+    carousel_destroy(&cs);
+
+    // Apply icon when mutex is destroyed
+    Texture *dummy_tex = (Texture *)calloc(1, sizeof(Texture));
+    carousel_apply_loaded_icon(&cs, 0, 0, 0, dummy_tex);
+}
+
+static void test_carousel_fast_scroll_and_set_index(void) {
+    setup_carousel_games();
+    CarouselState cs;
+    memset(&cs, 0, sizeof(cs));
+    carousel_init(&cs, 4, NULL);
+
+    // Set index explicitly
+    carousel_set_index(&cs, 2);
+    ASSERT_EQ(cs.current_idx, 2);
+
+    // Hold right button beyond CAROUSEL_HOLD_THRESHOLD (30 frames)
+    for (int i = 0; i < 40; i++) {
+        carousel_update(&cs, PSP_CTRL_RIGHT, 0);
+    }
+    ASSERT_TRUE(cs.current_idx > 2);
+
+    // Release button
+    carousel_update(&cs, 0, 0);
+    ASSERT_EQ(cs.hold_frames, 0);
+
+    // Re-initialization with pre-existing textures
+    cs.cache[0].tex = (Texture *)calloc(1, sizeof(Texture));
+    carousel_init(&cs, 4, NULL);
+    ASSERT_NULL(cs.cache[0].tex); // was safely freed
+
+    carousel_destroy(&cs);
+}
+
 void run_test_carousel_state(void) {
     TEST_SUITE_BEGIN("Carousel State Module");
     TEST_RUN(test_carousel_count_days_active);
@@ -181,7 +233,7 @@ void run_test_carousel_state(void) {
     TEST_RUN(test_carousel_init_and_destroy);
     TEST_RUN(test_carousel_navigation_and_settle);
     TEST_RUN(test_carousel_icon_cache_and_generation);
+    TEST_RUN(test_carousel_empty_and_pending_checks);
+    TEST_RUN(test_carousel_fast_scroll_and_set_index);
     TEST_SUITE_END();
 }
-
-

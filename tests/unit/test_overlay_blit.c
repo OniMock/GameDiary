@@ -66,6 +66,19 @@ static void test_overlay_formats_and_multiline(void) {
     overlay_blit_draw_to(fb8888, 512, PSP_DISPLAY_PIXEL_FORMAT_8888, "Test", NULL, 0);
 }
 
+static void test_overlay_wrapping_and_special_chars(void) {
+    static u16 fb565[512 * 272];
+    memset(fb565, 0, sizeof(fb565));
+
+    // Long line > 60 chars triggers word wrap to next line
+    const char *long_msg = "This is a remarkably long line of text designed to exceed sixty columns on screen!";
+    overlay_blit_draw_to(fb565, 512, PSP_DISPLAY_PIXEL_FORMAT_565, long_msg, "Newline\nCarriage\rUnprintable\x01\x1F", 2);
+    ASSERT_TRUE(fb565[5 * 512 + 5] != 0);
+
+    // Unknown pixel format fallback branch
+    overlay_blit_draw_to(fb565, 512, 999, "Unknown Pixel Format", NULL, 1);
+}
+
 static void test_overlay_blit_draw_all_and_fallbacks(void) {
     static u32 mock_vram[512 * 272];
     mock_display_set_active_fb(mock_vram, 512, PSP_DISPLAY_PIXEL_FORMAT_8888);
@@ -75,6 +88,10 @@ static void test_overlay_blit_draw_all_and_fallbacks(void) {
 
     // Test fallbacks stub
     overlay_blit_draw_fallbacks("Test", NULL, 1);
+
+    // When framebuffer is unavailable
+    mock_display_set_active_fb(NULL, 0, 0);
+    overlay_blit_draw_all("No Framebuffer", NULL, 1);
 }
 
 void run_test_overlay_blit(void) {
@@ -82,6 +99,7 @@ void run_test_overlay_blit(void) {
     TEST_RUN(test_overlay_colors_get_set);
     TEST_RUN(test_overlay_color_conversion_565_red_channel);
     TEST_RUN(test_overlay_formats_and_multiline);
+    TEST_RUN(test_overlay_wrapping_and_special_chars);
     TEST_RUN(test_overlay_blit_draw_all_and_fallbacks);
     TEST_SUITE_END();
 }
