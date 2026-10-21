@@ -70,12 +70,6 @@ u32 utils_time_overlap_secs(time_t a_start, time_t a_end, time_t b_start, time_t
   return (e > s) ? (u32)(e - s) : 0u;
 }
 
-void utils_format_duration_compact(u32 seconds, char *out, size_t size) {
-  (void)seconds;
-  (void)out;
-  (void)size;
-}
-
 const char *utils_get_device_prefix(void) {
   static const char *cached = NULL;
   if (cached)

@@ -70,7 +70,6 @@ u32 utils_get_time_ms(void);
  */
 u32 utils_time_overlap_secs(time_t a_start, time_t a_end, time_t b_start, time_t b_end);
 
-void utils_format_duration_compact(u32 seconds, char *out, size_t size);
 const char* utils_get_device_prefix(void);
 void utils_ensure_storage_dirs(const char* prefix);
 
