@@ -36,9 +36,46 @@ static void test_category_names(void) {
     ASSERT_STR_EQ(n_vsh, n_psp);
 }
 
+#include "app/data/data_loader.h"
+#include "common/storage.h"
+
+static void test_category_get_available(void) {
+    mock_pspsdk_reset();
+    const char *k_base_dir = "ms0:" GDIARY_BASE_DIR;
+    storage_init(k_base_dir);
+
+    GameMetadata m1 = { .category = CAT_PSP, .game_id = "ULES-00123" };
+    GameMetadata m2 = { .category = CAT_PS1, .game_id = "SLUS-00001" };
+    GameMetadata m3 = { .category = CAT_HOMEBREW, .game_id = "HBX-12345" };
+
+    u32 uid1 = 0, uid2 = 0, uid3 = 0;
+    storage_get_or_create_game(&m1, &uid1);
+    storage_get_or_create_game(&m2, &uid2);
+    storage_get_or_create_game(&m3, &uid3);
+
+    data_load_all();
+
+    u8 available_cats[CAT_UNKNOWN + 1];
+    memset(available_cats, 0xFF, sizeof(available_cats));
+    int count = game_category_get_available(available_cats);
+    ASSERT_EQ(count, 3);
+
+    int has_psp = 0, has_ps1 = 0, has_hb = 0;
+    for (int i = 0; i < count; i++) {
+        if (available_cats[i] == CAT_PSP) has_psp = 1;
+        if (available_cats[i] == CAT_PS1) has_ps1 = 1;
+        if (available_cats[i] == CAT_HOMEBREW) has_hb = 1;
+    }
+    ASSERT_TRUE(has_psp);
+    ASSERT_TRUE(has_ps1);
+    ASSERT_TRUE(has_hb);
+}
+
 void run_test_game_category(void) {
     TEST_SUITE_BEGIN("Game Category Module");
     TEST_RUN(test_category_normalization);
     TEST_RUN(test_category_names);
+    TEST_RUN(test_category_get_available);
     TEST_SUITE_END();
 }
+

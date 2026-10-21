@@ -95,7 +95,7 @@ $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $(DEFINES) -c $< -o $@
 
 test: $(TARGET)
-	@./$(TARGET)
+	@$(TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)

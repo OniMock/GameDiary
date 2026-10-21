@@ -74,9 +74,39 @@ static void test_homebrew_fallback_id_normalization(void) {
     }
 }
 
+static void test_metadata_fetch_from_umd_skipped_non_psp(void) {
+    mock_pspsdk_reset();
+    GameMetadata meta;
+    memset(&meta, 0, sizeof(meta));
+    meta.category = CAT_HOMEBREW;
+    ASSERT_EQ(metadata_fetch_from_umd(&meta), 0);
+    ASSERT_EQ(metadata_fetch_from_umd(NULL), 0);
+}
+
+static void test_metadata_fetch_from_umd_success(void) {
+    mock_pspsdk_reset();
+    mock_cfw_set_umd_file("ms0:/ISO/GranTurismo.iso");
+
+    // Write UMD_DATA.BIN
+    const char *umd_data = "UCUS-98732|1.00\r\n";
+    mock_vfs_map_file("disc0:/UMD_DATA.BIN", umd_data, strlen(umd_data));
+
+    GameMetadata meta;
+    memset(&meta, 0, sizeof(meta));
+    meta.category = CAT_PSP;
+
+    int ret = metadata_fetch_from_umd(&meta);
+    ASSERT_EQ(ret, 1);
+    ASSERT_STR_EQ(meta.game_id, "UCUS98732");
+    ASSERT_EQ(meta.category, CAT_PSP);
+}
+
 void run_test_metadata_repository(void) {
     TEST_SUITE_BEGIN("Metadata Repository Module");
     TEST_RUN(test_metadata_is_psp_app);
     TEST_RUN(test_homebrew_fallback_id_normalization);
+    TEST_RUN(test_metadata_fetch_from_umd_skipped_non_psp);
+    TEST_RUN(test_metadata_fetch_from_umd_success);
     TEST_SUITE_END();
 }
+

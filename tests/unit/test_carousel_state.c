@@ -69,9 +69,119 @@ static void test_carousel_count_days_overflow(void) {
     ASSERT_EQ(res129, -1);
 }
 
+#include "app/data/data_loader.h"
+#include "common/storage.h"
+
+static void setup_carousel_games(void) {
+    mock_pspsdk_reset();
+    const char *base = "ms0:" GDIARY_BASE_DIR;
+    storage_init(base);
+
+    GameMetadata m1 = { .category = CAT_PSP, .game_id = "ULES-00123", .game_name = "Game 1" };
+    GameMetadata m2 = { .category = CAT_PSP, .game_id = "ULES-00124", .game_name = "Game 2" };
+    GameMetadata m3 = { .category = CAT_PSP, .game_id = "ULES-00125", .game_name = "Game 3" };
+    GameMetadata m4 = { .category = CAT_PSP, .game_id = "ULES-00126", .game_name = "Game 4" };
+
+    u32 uid = 0;
+    storage_get_or_create_game(&m1, &uid);
+    storage_get_or_create_game(&m2, &uid);
+    storage_get_or_create_game(&m3, &uid);
+    storage_get_or_create_game(&m4, &uid);
+
+    data_load_all();
+}
+
+static void test_carousel_init_and_destroy(void) {
+    mock_pspsdk_reset();
+    CarouselState cs;
+    memset(&cs, 0, sizeof(cs));
+    carousel_init(&cs, 0, NULL);
+    ASSERT_EQ(cs.total, 0);
+    ASSERT_EQ(cs.current_idx, 0);
+    ASSERT_TRUE(carousel_is_settled(&cs));
+    carousel_destroy(&cs);
+
+    setup_carousel_games();
+    memset(&cs, 0, sizeof(cs));
+    carousel_init(&cs, 4, NULL);
+    ASSERT_EQ(cs.total, 4);
+    ASSERT_EQ(cs.current_idx, 0);
+    ASSERT_TRUE(carousel_is_settled(&cs));
+    carousel_destroy(&cs);
+}
+
+static void test_carousel_navigation_and_settle(void) {
+    setup_carousel_games();
+    CarouselState cs;
+    memset(&cs, 0, sizeof(cs));
+    carousel_init(&cs, 4, NULL);
+
+    ASSERT_EQ(cs.current_idx, 0);
+    ASSERT_TRUE(carousel_is_settled(&cs));
+
+    // Navigate right (+1)
+    carousel_navigate(&cs, +1);
+    ASSERT_EQ(cs.current_idx, 1);
+    ASSERT_FALSE(carousel_is_settled(&cs));
+
+    // Update repeatedly with no button input to allow easing to settle
+    for (int i = 0; i < 60; i++) {
+        carousel_update(&cs, 0, 0);
+    }
+    ASSERT_TRUE(carousel_is_settled(&cs));
+
+    // Navigate left (-1)
+    carousel_navigate(&cs, -1);
+    ASSERT_EQ(cs.current_idx, 0);
+
+    // Navigate left again (unbounded index goes to -1)
+    carousel_navigate(&cs, -1);
+    ASSERT_EQ(cs.current_idx, -1);
+
+    // Direct index set
+    carousel_set_index(&cs, 3);
+    ASSERT_EQ(cs.current_idx, 3);
+    ASSERT_TRUE(carousel_is_settled(&cs));
+
+    carousel_destroy(&cs);
+}
+
+static void test_carousel_icon_cache_and_generation(void) {
+    setup_carousel_games();
+    CarouselState cs;
+    memset(&cs, 0, sizeof(cs));
+    carousel_init(&cs, 4, NULL);
+    int gen = cs.generation;
+
+    CacheSlotState st = carousel_get_icon_state(&cs, 0);
+    ASSERT_TRUE(st == CACHE_SLOT_PENDING || st == CACHE_SLOT_QUEUED || st == CACHE_SLOT_EMPTY);
+
+    // Stale generation apply should be rejected and freed
+    Texture *dummy_tex1 = (Texture *)calloc(1, sizeof(Texture));
+    carousel_apply_loaded_icon(&cs, 0, 0, gen - 1, dummy_tex1);
+    ASSERT_TRUE(carousel_get_icon(&cs, 0) == NULL);
+
+    // Valid generation apply
+    Texture *dummy_tex2 = (Texture *)calloc(1, sizeof(Texture));
+    carousel_apply_loaded_icon(&cs, 0, 0, gen, dummy_tex2);
+    if (cs.cache[0].inf_idx == 0) {
+        ASSERT_EQ(carousel_get_icon_state(&cs, 0), CACHE_SLOT_LOADED);
+        ASSERT_TRUE(carousel_get_icon(&cs, 0) == dummy_tex2);
+    } else {
+        free(dummy_tex2);
+    }
+
+    carousel_destroy(&cs);
+}
+
 void run_test_carousel_state(void) {
     TEST_SUITE_BEGIN("Carousel State Module");
     TEST_RUN(test_carousel_count_days_active);
     TEST_RUN(test_carousel_count_days_overflow);
+    TEST_RUN(test_carousel_init_and_destroy);
+    TEST_RUN(test_carousel_navigation_and_settle);
+    TEST_RUN(test_carousel_icon_cache_and_generation);
     TEST_SUITE_END();
 }
+
+
