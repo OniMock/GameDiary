@@ -72,9 +72,9 @@ jobs:
       # -------------------------------------------------------
       - name: Generate LCOV Report
         run: |
-          lcov --capture --directory tests/build --output-file coverage.info || true
-          lcov --remove coverage.info 'tests/*' 'lib/*' '/usr/*' --output-file coverage_filtered.info || true
-          lcov --list coverage_filtered.info || true
+          lcov --ignore-errors unused,inconsistent --capture --directory tests/build --output-file coverage.info
+          lcov --ignore-errors unused,inconsistent --remove coverage.info '*tests/*' '*lib/*' --output-file coverage_filtered.info
+          lcov --list coverage_filtered.info
 
       # -------------------------------------------------------
       # 📤 Upload Coverage Artifact
