@@ -29,6 +29,7 @@ static int running = 0;
 #define TRACKER_UMD_MAX_ATTEMPTS     60
 #define TRACKER_INPUT_SLICE_US       (100 * 1000)
 #define TRACKER_INPUT_SLICES_PER_SEC 10
+#define TRACKER_SLEEP_GAP_SECS       120
 #define UNKNOWN_GAME_ID              "UNKNOWN-00000"
 
 static volatile u32 pending_seconds = 0;
@@ -252,15 +253,18 @@ static void playtime_tick(u32 now_ts) {
   }
 
   u32 diff = now_ts - s_last_tick_ts;
+  if (diff == 0) {
+    return;
+  }
 
   /* Midnight while tracker ON: always start a new session for the new day. */
   if (!session_same_calendar_day(session_start_ts, now_ts)) {
     session_start_new_day(now_ts);
-  } else if (diff >= 10) {
+  } else if (diff > TRACKER_SLEEP_GAP_SECS) {
     debug_log("tracker", "Large time gap detected (%u s). Assuming resume from sleep.", diff);
     session_flush_pending();
   } else {
-    pending_seconds++;
+    pending_seconds += diff;
 
     if (pending_seconds >= 60) {
       session_total_seconds += pending_seconds;
