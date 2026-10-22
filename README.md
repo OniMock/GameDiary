@@ -36,8 +36,8 @@
 
 1. [Overview](#overview)
 2. [Features](#features)
-3. [Compatibility List](#-compatibility-list)
-4. [Official Website & Web Tools](#-official-website--web-tools)
+3. [Compatibility List](#compatibility-list)
+4. [Official Website & Web Tools](#official-website-web-tools)
 5. [Screenshots / UI](#screenshots--ui)
 6. [How It Works](#how-it-works)
 7. [Installation](#installation)
@@ -55,7 +55,7 @@
 
 ---
 
-## 📖 Overview
+## <a id="overview"></a>📖 Overview
 
 **GameDiary** is a background kernel-mode plugin (PRX) and a premium user-mode application (EBOOT) for the PlayStation Portable (PSP).
 
@@ -69,7 +69,7 @@ It exists to give PSP power-users modern, console-like play tracking capabilitie
 
 ---
 
-## ✨ Features
+## <a id="features"></a>✨ Features
 
 ### ⚙️ Core
 
@@ -90,7 +90,7 @@ It exists to give PSP power-users modern, console-like play tracking capabilitie
 
 ---
 
-## 📋 Compatibility List
+## <a id="compatibility-list"></a>📋 Compatibility List
 
 Curious if your favorite game is supported? We maintain an actively updated **[Community Compatibility List (Google Sheets)](https://docs.google.com/spreadsheets/d/1rcNE7YMPR731JNituGIee5ARop7di-FBcygmstWmvJk/edit?usp=sharing)**.
 
@@ -98,7 +98,7 @@ This spreadsheet contains all UMDs, PS1 classics, and Homebrews tested by us and
 
 ---
 
-## 🌐 Official Website & Web Tools
+## <a id="official-website-web-tools"></a>🌐 Official Website & Web Tools
 
 Extend your GameDiary experience with our **[Official Web App](https://gamediary.onimock.com/)**, designed to manage and refine your collection beyond the handheld.
 
@@ -111,7 +111,7 @@ By using the **Backup / Export** feature in the PSP application, you can generat
 > [!TIP]
 > Go to **Settings > Backup > Export** in the PSP app to generate the file needed for the web tools.
 
-## 🖼️ Screenshots / UI
+## <a id="screenshots--ui"></a>🖼️ Screenshots / UI
 
 <p align="center">
   <img src="./.github/sources/output.gif" width="360" />
@@ -124,7 +124,7 @@ By using the **Backup / Export** feature in the PSP application, you can generat
 
 ---
 
-## ⚙️ How It Works
+## <a id="how-it-works"></a>⚙️ How It Works
 
 GameDiary operates in two layers:
 
@@ -133,7 +133,7 @@ GameDiary operates in two layers:
 2. User Application (EBOOT)
    - Reads and visualizes collected data
 
-## 📦 Installation
+## <a id="installation"></a>📦 Installation
 
 ### 📋 Requirements
 
@@ -199,7 +199,7 @@ Ensure you have the latest release downloaded from the [Releases](https://github
 
 ---
 
-## 🚀 Usage
+## <a id="usage"></a>🚀 Usage
 
 ### ▶️ Launching the App
 
@@ -224,7 +224,7 @@ Simply navigate to your PSP's **Game** menu on the XMB and launch **GameDiary** 
 
 ---
 
-## 🏗️ Project Structure
+## <a id="project-structure"></a>🏗️ Project Structure
 
 A clean, modular architecture separating kernel plugin operations from user-mode presentation.
 
@@ -257,7 +257,7 @@ GameDiary/
 
 ---
 
-## 🛠️ Configuration
+## <a id="configuration"></a>🛠️ Configuration
 
 GameDiary data is stored inside the `ms0:/PSP/COMMON/GameDiary/` directory to keep your Memory Stick tidy.
 
@@ -286,7 +286,7 @@ During the initial boot wait time, pressing `L+R+SELECT` will do **absolutely no
 
 ---
 
-## 👨‍💻 Development
+## <a id="development"></a>👨‍💻 Development
 
 GameDiary is built using the standard [pspdev implementation of the PSPSDK](https://github.com/pspdev/pspdev).
 
@@ -347,7 +347,7 @@ docker run --rm -v "${PWD}:/workspace" -w /workspace alpine:latest sh -c \
 
 ---
 
-## 🔌 Plugin Details
+## <a id="plugin-details"></a>🔌 Plugin Details
 
 The tracking system relies on kernel thread manipulation and syscall hooks to calculate precise uptime accurately.
 
@@ -357,7 +357,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 
 ---
 
-## 🗺️ Roadmap
+## <a id="roadmap"></a>🗺️ Roadmap
 
 - [x] Background play tracking and database mapping.
 - [x] MSDF font rendering with full Latin, Cyrillic, and CJK fallback chains.
@@ -376,7 +376,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 
 ---
 
-## 🤝 Contributing
+## <a id="contributing"></a>🤝 Contributing
 
 We welcome contributions! Please adhere to the following guidelines:
 
@@ -388,7 +388,7 @@ We welcome contributions! Please adhere to the following guidelines:
 
 ---
 
-## ☕ Support
+## <a id="support"></a>☕ Support
 
 If you like this project and want to support its continuous development, consider buying me a coffee or sending a crypto donation!
 
@@ -405,20 +405,20 @@ If you like this project and want to support its continuous development, conside
   </tr>
 </table>
 
-## 📝 License
+## <a id="license"></a>📝 License
 
 This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## 🌟 Credits
+## <a id="credits"></a>🌟 Credits
 
 - [pspdev](https://github.com/pspdev/pspdev) SDK and community for maintaining modern PSP toolchains.
 - Developers of PRO / ARK-4 CFW for mapping the boundaries of modern PSP kernel development.
 - Members of the Reddit [PSP](https://www.reddit.com/r/PSP/) community for testing, feedback, and support throughout development.
 - [Gamebrew](https://www.gamebrew.org/wiki/GameDiary_PSP) and [PSPunk](https://www.pspunk.com/psp-homebrew/) for hosting and showcasing the project within the PSP homebrew scene.
 
-## 👤 Author
+## <a id="author"></a>👤 Author
 
 Developed by [OniMock](https://github.com/OniMock).
 
