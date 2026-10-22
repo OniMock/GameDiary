@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stdint.h>
 
 void debug_init(void) {
 #ifdef GDIARY_DEBUG
@@ -89,6 +90,16 @@ static int mini_vsnprintf(char* buffer, size_t n, const char* format, va_list ar
             } else if (*f == 'c') {
                 int val = va_arg(arg, int);
                 if (p < end) *p++ = (char)val;
+            } else if (*f == 'p') {
+                void* ptr = va_arg(arg, void*);
+                if (!ptr) {
+                    const char* nil = "(nil)";
+                    while (*nil && p < end) *p++ = *nil++;
+                } else {
+                    if (p < end) *p++ = '0';
+                    if (p < end) *p++ = 'x';
+                    p = mini_utoa((unsigned int)(uintptr_t)ptr, p, end, width ? width : 8, 16, 0);
+                }
             } else if (*f == '%') {
                 *p++ = '%';
             } else if (*f != '\0') {
