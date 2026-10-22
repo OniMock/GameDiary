@@ -69,7 +69,11 @@ static int data_write_db_files(void) {
 
     g_fd = sceIoOpen(games_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (g_fd < 0) {
-        return -2;
+        /* PRO-C CFW workaround: PSP_O_TRUNC can fail if file descriptor cache is stale */
+        g_fd = sceIoOpen(games_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
+        if (g_fd < 0) {
+            return -2;
+        }
     }
 
     h = g_registry_header;
@@ -97,7 +101,10 @@ static int data_write_db_files(void) {
 
     s_fd = sceIoOpen(sessions_path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
     if (s_fd < 0) {
-        return -3;
+        s_fd = sceIoOpen(sessions_path, PSP_O_RDWR | PSP_O_CREAT, 0777);
+        if (s_fd < 0) {
+            return -3;
+        }
     }
     if (g_session_count > 0 && g_sessions) {
         sceIoWrite(s_fd, g_sessions, (SceSize)(g_session_count * sizeof(SessionEntry)));
@@ -111,6 +118,9 @@ int data_load_all(void) {
     const char *prefix = utils_get_device_prefix();
     utils_ensure_storage_dirs(prefix);
 
+    /* Free any previously loaded data to ensure an idempotent, clean state */
+    data_free();
+
     // 1. Load games.dat
     char path[256];
     snprintf(path, sizeof(path), "%s" GDIARY_BASE_DIR "/" GDIARY_DB_DIR "/" GAMES_DAT, prefix);
@@ -118,31 +128,84 @@ int data_load_all(void) {
     if (fd < 0) return -1;
 
     GameRegistryHeader header;
-    sceIoRead(fd, &header, sizeof(GameRegistryHeader));
+    int read_bytes = sceIoRead(fd, &header, sizeof(GameRegistryHeader));
+    int header_ok = 0;
+
+    /* Validate primary header: magic, version, and ready_flag */
+    if (read_bytes == (int)sizeof(GameRegistryHeader) &&
+        header.magic == GAMEDIARY_MAGIC &&
+        header.version <= DB_VERSION &&
+        header.ready_flag == GAMEDIARY_MAGIC) {
+        header_ok = 1;
+    } else {
+        /* Primary header is invalid or in-flight write was interrupted.
+         * Attempt recovery using the trailing backup header at the end of the file. */
+        SceOff file_size = sceIoLseek(fd, 0, PSP_SEEK_END);
+        if (file_size > (SceOff)sizeof(GameRegistryHeader)) {
+            sceIoLseek(fd, file_size - sizeof(GameRegistryHeader), PSP_SEEK_SET);
+            if (sceIoRead(fd, &header, sizeof(GameRegistryHeader)) == sizeof(GameRegistryHeader)) {
+                if (header.magic == GAMEDIARY_MAGIC &&
+                    header.version <= DB_VERSION &&
+                    header.ready_flag == GAMEDIARY_MAGIC) {
+                    header_ok = 1;
+                }
+            }
+        }
+    }
+
+    if (!header_ok) {
+        sceIoClose(fd);
+        return -2;
+    }
+
+    /* Validate num_entries against actual file size to guard against corrupted or huge counts.
+     * Prevents multi-megabyte heap allocation failures on memory-constrained models (e.g. PSP-1000). */
+    SceOff total_size = sceIoLseek(fd, 0, PSP_SEEK_END);
+    SceOff min_expected = (SceOff)sizeof(GameRegistryHeader) + (SceOff)header.num_entries * sizeof(GameEntry);
+    if (total_size < min_expected) {
+        sceIoClose(fd);
+        return -2;
+    }
+
     g_registry_header = header;
     g_registry_header_valid = 1;
-
     g_game_count = header.num_entries;
-    g_games = (GameStats*)calloc(g_game_count, sizeof(GameStats));
 
     /**
-    * Block Read:
-    * On PSP (Memory Stick), reading the entire file in a single sceIoRead call
-    * is hundreds of times faster than looping and calling sceIoRead for each
-    * individual GameEntry.
-    */
+     * Block Read:
+     * On PSP (Memory Stick), reading the entire file in a single sceIoRead call
+     * is hundreds of times faster than looping and calling sceIoRead for each
+     * individual GameEntry.
+     */
     if (g_game_count > 0) {
+        g_games = (GameStats*)calloc(g_game_count, sizeof(GameStats));
+        if (!g_games) {
+            sceIoClose(fd);
+            g_game_count = 0;
+            g_registry_header_valid = 0;
+            return -3;
+        }
+
+        /* Rewind to the first GameEntry right after primary header */
+        sceIoLseek(fd, sizeof(GameRegistryHeader), PSP_SEEK_SET);
+
         GameEntry *temp_entries = (GameEntry*)malloc(g_game_count * sizeof(GameEntry));
         if (temp_entries) {
-            sceIoRead(fd, temp_entries, g_game_count * sizeof(GameEntry));
-            for (u32 i = 0; i < g_game_count; i++) {
+            int entry_bytes = sceIoRead(fd, temp_entries, g_game_count * sizeof(GameEntry));
+            u32 count_read = (entry_bytes > 0) ? (u32)(entry_bytes / sizeof(GameEntry)) : 0;
+            if (count_read > g_game_count) count_read = g_game_count;
+            for (u32 i = 0; i < count_read; i++) {
                 g_games[i].entry = temp_entries[i];
             }
+            g_game_count = count_read;
             free(temp_entries);
         } else {
-            /* Fallback seguro caso não haja RAM suficiente no momento */
+            /* Safe fallback if heap is too fragmented for the temporary block buffer */
             for (u32 i = 0; i < g_game_count; i++) {
-                sceIoRead(fd, &g_games[i].entry, sizeof(GameEntry));
+                if (sceIoRead(fd, &g_games[i].entry, sizeof(GameEntry)) != sizeof(GameEntry)) {
+                    g_game_count = i;
+                    break;
+                }
             }
         }
     }
@@ -150,17 +213,23 @@ int data_load_all(void) {
 
     /* Build O(1) mapping table for UID -> array index.
      * UIDs are generally sequential, so max_uid is close to g_game_count. */
-    if (g_game_count > 0) {
+    if (g_game_count > 0 && g_games) {
         u32 max_uid = 0;
         for (u32 i = 0; i < g_game_count; i++) {
             if (g_games[i].entry.uid > max_uid) max_uid = g_games[i].entry.uid;
         }
-        g_uid_map_size = max_uid + 1;
-        g_uid_map = (u16*)malloc(g_uid_map_size * sizeof(u16));
-        if (g_uid_map) {
-            memset(g_uid_map, 0xFF, g_uid_map_size * sizeof(u16)); /* 0xFFFF means empty */
-            for (u32 i = 0; i < g_game_count; i++) {
-                g_uid_map[g_games[i].entry.uid] = (u16)i;
+        /* Bound check max_uid to prevent excessive heap allocations on corrupt UIDs */
+        if (max_uid <= 100000) {
+            g_uid_map_size = max_uid + 1;
+            g_uid_map = (u16*)malloc(g_uid_map_size * sizeof(u16));
+            if (g_uid_map) {
+                memset(g_uid_map, 0xFF, g_uid_map_size * sizeof(u16)); /* 0xFFFF means empty */
+                for (u32 i = 0; i < g_game_count; i++) {
+                    u32 uid = g_games[i].entry.uid;
+                    if (uid < g_uid_map_size) {
+                        g_uid_map[uid] = (u16)i;
+                    }
+                }
             }
         }
     }
@@ -170,10 +239,27 @@ int data_load_all(void) {
     fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     if (fd >= 0) {
         SceOff size = sceIoLseek(fd, 0, PSP_SEEK_END);
-        g_session_count = size / sizeof(SessionEntry);
-        g_sessions = (SessionEntry*)malloc(size);
-        sceIoLseek(fd, 0, PSP_SEEK_SET);
-        sceIoRead(fd, g_sessions, size);
+        if (size > 0) {
+            u32 count = (u32)(size / sizeof(SessionEntry));
+            if (count > 0) {
+                size_t alloc_size = count * sizeof(SessionEntry);
+                g_sessions = (SessionEntry*)malloc(alloc_size);
+                if (g_sessions) {
+                    sceIoLseek(fd, 0, PSP_SEEK_SET);
+                    int sess_bytes = sceIoRead(fd, g_sessions, (SceSize)alloc_size);
+                    g_session_count = (sess_bytes > 0) ? (u32)(sess_bytes / sizeof(SessionEntry)) : 0;
+                    if (g_session_count > count) g_session_count = count;
+                } else {
+                    g_session_count = 0;
+                }
+            } else {
+                g_session_count = 0;
+                g_sessions = NULL;
+            }
+        } else {
+            g_session_count = 0;
+            g_sessions = NULL;
+        }
         sceIoClose(fd);
     }
 
@@ -181,21 +267,28 @@ int data_load_all(void) {
 }
 
 void data_rebuild_uid_map(void) {
-    if (!g_uid_map || !g_games) return;
+    if (!g_uid_map || !g_games || g_game_count == 0) return;
     /* Map each UID to its CURRENT index in the array */
     memset(g_uid_map, 0xFF, g_uid_map_size * sizeof(u16));
     for (u32 i = 0; i < g_game_count; i++) {
-        g_uid_map[g_games[i].entry.uid] = (u16)i;
+        u32 uid = g_games[i].entry.uid;
+        if (uid < g_uid_map_size) {
+            g_uid_map[uid] = (u16)i;
+        }
     }
 }
 
 void data_calculate_stats(u32 start_ts, u32 end_ts) {
+    if (!g_games || g_game_count == 0) return;
+
     for (u32 i = 0; i < g_game_count; i++) {
         g_games[i].total_playtime = 0;
         g_games[i].session_count = 0;
         g_games[i].last_played_ts = 0;
         g_games[i].period_playtime = 0;
     }
+
+    if (!g_sessions || g_session_count == 0) return;
 
     for (u32 i = 0; i < g_session_count; i++) {
         u32 uid = g_sessions[i].game_uid;
@@ -367,7 +460,9 @@ int data_delete_session(u32 game_uid, u32 timestamp) {
  * @param out       Output struct; zeroed by this function before filling.
  */
 void data_compute_game_details(u32 game_uid, GameDetailStats *out) {
+    if (!out) return;
     memset(out, 0, sizeof(*out));
+    if (!g_sessions || g_session_count == 0) return;
 
     /* Get current time from the PSP RTC. */
     u32 now = utils_get_timestamp();
@@ -423,6 +518,3 @@ void data_compute_game_details(u32 game_uid, GameDetailStats *out) {
     out->playtime_month = total_month;
     out->playtime_year  = total_year;
 }
-
-
-

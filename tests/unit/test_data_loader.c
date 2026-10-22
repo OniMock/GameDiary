@@ -227,11 +227,101 @@ static void test_data_loader_errors_and_edge_cases(void) {
     data_free();
 }
 
+static void test_data_loader_corrupted_headers_and_recovery(void) {
+    mock_pspsdk_reset();
+    char games_path[256];
+    snprintf(games_path, sizeof(games_path), "%s/db/%s", k_base_dir, GAMES_DAT);
+
+    // Case 1: Corrupted magic in primary and no backup
+    GameRegistryHeader bad_h;
+    memset(&bad_h, 0, sizeof(bad_h));
+    bad_h.magic = 0xDEADBEEF;
+    bad_h.version = DB_VERSION;
+    bad_h.ready_flag = GAMEDIARY_MAGIC;
+    mock_vfs_map_file(games_path, &bad_h, sizeof(bad_h));
+
+    int res = data_load_all();
+    ASSERT_EQ(res, -2);
+    ASSERT_EQ(data_get_game_count(), 0U);
+    ASSERT_NULL(data_get_games());
+
+    // Case 2: Future DB version
+    bad_h.magic = GAMEDIARY_MAGIC;
+    bad_h.version = DB_VERSION + 10;
+    mock_vfs_map_file(games_path, &bad_h, sizeof(bad_h));
+    res = data_load_all();
+    ASSERT_EQ(res, -2);
+
+    // Case 3: Incomplete write (ready_flag != GAMEDIARY_MAGIC)
+    bad_h.version = DB_VERSION;
+    bad_h.ready_flag = 0;
+    mock_vfs_map_file(games_path, &bad_h, sizeof(bad_h));
+    res = data_load_all();
+    ASSERT_EQ(res, -2);
+
+    // Case 4: File smaller than header size
+    u8 tiny_buf[10] = {0};
+    mock_vfs_map_file(games_path, tiny_buf, sizeof(tiny_buf));
+    res = data_load_all();
+    ASSERT_EQ(res, -2);
+
+    // Case 5: Corrupt num_entries exceeding file size
+    bad_h.ready_flag = GAMEDIARY_MAGIC;
+    bad_h.num_entries = 99999;
+    mock_vfs_map_file(games_path, &bad_h, sizeof(bad_h));
+    res = data_load_all();
+    ASSERT_EQ(res, -2);
+    ASSERT_EQ(data_get_game_count(), 0U);
+
+    // Case 6: Primary header corrupted, but trailing backup header is valid -> Recovery succeeds
+    GameRegistryHeader valid_h;
+    memset(&valid_h, 0, sizeof(valid_h));
+    valid_h.magic = GAMEDIARY_MAGIC;
+    valid_h.version = DB_VERSION;
+    valid_h.num_entries = 1;
+    valid_h.next_uid = 2;
+    valid_h.ready_flag = GAMEDIARY_MAGIC;
+    valid_h.checksum = calc_hdr_checksum(&valid_h);
+
+    GameEntry entry;
+    memset(&entry, 0, sizeof(entry));
+    entry.uid = 1;
+    strncpy(entry.game_id, "TEST-00001", sizeof(entry.game_id) - 1);
+    strncpy(entry.game_name, "Recovery Game", sizeof(entry.game_name) - 1);
+    entry.category = CAT_PSP;
+
+    u8 recovery_buf[sizeof(GameRegistryHeader) + sizeof(GameEntry) + sizeof(GameRegistryHeader)];
+    bad_h.magic = 0xBAD00000;
+    memcpy(recovery_buf, &bad_h, sizeof(bad_h));
+    memcpy(recovery_buf + sizeof(bad_h), &entry, sizeof(entry));
+    memcpy(recovery_buf + sizeof(bad_h) + sizeof(entry), &valid_h, sizeof(valid_h));
+
+    mock_vfs_map_file(games_path, recovery_buf, sizeof(recovery_buf));
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_game_count(), 1U);
+    GameStats *recovered_games = data_get_games();
+    ASSERT_NOT_NULL(recovered_games);
+    ASSERT_STR_EQ(recovered_games[0].entry.game_id, "TEST-00001");
+
+    // Case 7: Calling stats and details on empty/null state should never crash
+    data_free();
+    data_calculate_stats(0, 100000);
+    GameDetailStats details;
+    data_compute_game_details(1, &details);
+    ASSERT_EQ(details.playtime_week, 0U);
+    ASSERT_EQ(details.playtime_month, 0U);
+    ASSERT_EQ(details.playtime_year, 0U);
+
+    data_free();
+}
+
 void run_test_data_loader(void) {
     TEST_SUITE_BEGIN("Data Loader & Query Module");
     TEST_RUN(test_data_loader_load_and_stats);
     TEST_RUN(test_data_loader_delete_operations);
     TEST_RUN(test_data_loader_compute_game_details);
     TEST_RUN(test_data_loader_errors_and_edge_cases);
+    TEST_RUN(test_data_loader_corrupted_headers_and_recovery);
     TEST_SUITE_END();
 }
