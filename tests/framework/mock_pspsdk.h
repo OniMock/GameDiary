@@ -37,6 +37,11 @@ void mock_vfs_fail_open(bool enable);
 void mock_vfs_fail_write(bool enable);
 void mock_vfs_fail_rename(bool enable);
 void mock_vfs_fail_path(const char *pattern);
+void mock_vfs_fail_read_nth(int nth);
+void mock_mem_fail_calloc(int enable);
+void mock_mem_fail_malloc(int enable);
+void mock_mem_fail_malloc_nth(int nth);
+void mock_mem_fail_realloc(int enable);
 
 /* RTC Control */
 void mock_rtc_set_unix_time(u32 seconds);

@@ -60,6 +60,13 @@ static bool g_fail_open = false;
 static bool g_fail_write = false;
 static bool g_fail_rename = false;
 static char g_fail_pattern[64] = "";
+static int  g_fail_read_nth = 0;
+static int  g_read_count = 0;
+static int  g_fail_calloc = 0;
+static int  g_fail_malloc = 0;
+static int  g_fail_malloc_nth = 0;
+static int  g_fail_realloc = 0;
+static int  g_malloc_count = 0;
 
 /* Ensure directories exist recursively for host path */
 static void ensure_parent_dirs(const char *path) {
@@ -143,6 +150,13 @@ void mock_pspsdk_reset(void) {
     g_fail_write = false;
     g_fail_rename = false;
     g_fail_pattern[0] = '\0';
+    g_fail_read_nth = 0;
+    g_read_count = 0;
+    g_fail_calloc = 0;
+    g_fail_malloc = 0;
+    g_fail_malloc_nth = 0;
+    g_fail_realloc = 0;
+    g_malloc_count = 0;
 }
 
 void mock_pspsdk_cleanup(void) {
@@ -201,6 +215,59 @@ void mock_vfs_fail_path(const char *pattern) {
     } else {
         g_fail_pattern[0] = '\0';
     }
+}
+
+void mock_vfs_fail_read_nth(int nth) {
+    g_fail_read_nth = nth;
+    g_read_count = 0;
+}
+
+void mock_mem_fail_calloc(int enable) {
+    g_fail_calloc = enable;
+}
+
+void mock_mem_fail_malloc(int enable) {
+    g_fail_malloc = enable;
+}
+
+void mock_mem_fail_malloc_nth(int nth) {
+    g_fail_malloc_nth = nth;
+    g_malloc_count = 0;
+}
+
+void mock_mem_fail_realloc(int enable) {
+    g_fail_realloc = enable;
+}
+
+extern void *__real_malloc(size_t size);
+extern void *__real_calloc(size_t nmemb, size_t size);
+extern void *__real_realloc(void *ptr, size_t size);
+
+void *__wrap_malloc(size_t size) {
+    if (g_fail_malloc) {
+        return NULL;
+    }
+    if (g_fail_malloc_nth > 0) {
+        g_malloc_count++;
+        if (g_malloc_count == g_fail_malloc_nth) {
+            return NULL;
+        }
+    }
+    return __real_malloc(size);
+}
+
+void *__wrap_calloc(size_t nmemb, size_t size) {
+    if (g_fail_calloc) {
+        return NULL;
+    }
+    return __real_calloc(nmemb, size);
+}
+
+void *__wrap_realloc(void *ptr, size_t size) {
+    if (g_fail_realloc) {
+        return NULL;
+    }
+    return __real_realloc(ptr, size);
 }
 
 void mock_rtc_set_unix_time(u32 seconds) { g_unix_time = seconds; }
@@ -320,6 +387,10 @@ int sceIoClose(SceUID fd) {
 }
 
 int sceIoRead(SceUID fd, void *data, SceSize size) {
+    if (g_fail_read_nth > 0) {
+        g_read_count++;
+        if (g_read_count == g_fail_read_nth) return -1;
+    }
     int idx = (int)fd - 10;
     if (idx < 0 || idx >= MAX_OPEN_FILES || !g_files[idx].in_use || !g_files[idx].fp) return -1;
     size_t rd = fread(data, 1, size, g_files[idx].fp);

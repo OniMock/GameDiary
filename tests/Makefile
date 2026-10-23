@@ -6,7 +6,7 @@ CC ?= gcc
 CFLAGS ?= -O0 -g -Wall -Wextra -Wno-unused-parameter -std=c99
 INCLUDES = -Itests/mock_pspsdk -Iinclude -Iinclude/app -Ilib -Itests
 DEFINES = -DGDIARY_PLUGIN -DGDIARY_DEBUG=1 -D_PSP_FW_VERSION=661 -DTESTING=1
-LIBS = -lm
+LIBS = -lm -Wl,--wrap=malloc -Wl,--wrap=calloc -Wl,--wrap=realloc
 
 ifeq ($(COVERAGE), 1)
 CFLAGS += -fprofile-arcs -ftest-coverage

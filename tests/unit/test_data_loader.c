@@ -444,6 +444,67 @@ static void test_data_loader_write_failure_paths(void) {
     data_free();
 }
 
+static void test_data_loader_memory_allocation_failures(void) {
+    mock_pspsdk_reset();
+
+    // Case 1: calloc failure when allocating g_games
+    setup_mock_database();
+    mock_mem_fail_calloc(1);
+    int res = data_load_all();
+    ASSERT_EQ(res, -3);
+    ASSERT_EQ(data_get_game_count(), 0U);
+    ASSERT_NULL(data_get_games());
+    mock_mem_fail_calloc(0);
+    data_free();
+
+    // Case 2: malloc failure for temp_entries during bulk read (triggers sequential read fallback)
+    setup_mock_database();
+    // 1st malloc in data_load_all is temp_entries
+    mock_mem_fail_malloc_nth(1);
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_game_count(), 2U);
+    ASSERT_NOT_NULL(data_get_games());
+    data_free();
+
+    // Case 3: Sequential fallback read when sceIoRead fails on 2nd entry
+    setup_mock_database();
+    // 1st malloc is temp_entries (forces fallback loop)
+    mock_mem_fail_malloc_nth(1);
+    // Read #1 is header, Read #2 is entry 0, Read #3 is entry 1 (fails!)
+    mock_vfs_fail_read_nth(3);
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    // Truncated to 1 loaded entry because 2nd read encountered error
+    ASSERT_EQ(data_get_game_count(), 1U);
+    data_free();
+
+    // Case 4: malloc failure for g_sessions (3rd malloc in data_load_all)
+    setup_mock_database();
+    mock_mem_fail_malloc_nth(3);
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_game_count(), 2U);
+    ASSERT_EQ(data_get_session_count(), 0U);
+    data_free();
+
+    // Case 5: realloc failure during delete operations (should succeed and retain buffer)
+    setup_mock_database();
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+
+    mock_mem_fail_realloc(1);
+    int del_res = data_delete_game_at_index(0);
+    ASSERT_EQ(del_res, 0);
+    ASSERT_EQ(data_get_game_count(), 1U);
+
+    del_res = data_delete_session(2, 150000);
+    ASSERT_EQ(del_res, 0);
+    mock_mem_fail_realloc(0);
+
+    data_free();
+}
+
 void run_test_data_loader(void) {
     TEST_SUITE_BEGIN("Data Loader & Query Module");
     TEST_RUN(test_data_loader_load_and_stats);
@@ -453,5 +514,6 @@ void run_test_data_loader(void) {
     TEST_RUN(test_data_loader_corrupted_headers_and_recovery);
     TEST_RUN(test_data_loader_session_file_variations);
     TEST_RUN(test_data_loader_write_failure_paths);
+    TEST_RUN(test_data_loader_memory_allocation_failures);
     TEST_SUITE_END();
 }
