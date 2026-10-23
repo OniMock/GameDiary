@@ -316,6 +316,134 @@ static void test_data_loader_corrupted_headers_and_recovery(void) {
     data_free();
 }
 
+static void test_data_loader_session_file_variations(void) {
+    mock_pspsdk_reset();
+    char games_path[256], sessions_path[256];
+    snprintf(games_path, sizeof(games_path), "%s/db/%s", k_base_dir, GAMES_DAT);
+    snprintf(sessions_path, sizeof(sessions_path), "%s/db/%s", k_base_dir, SESSIONS_DAT);
+
+    // Build a valid games.dat with 1 game
+    GameRegistryHeader h;
+    memset(&h, 0, sizeof(h));
+    h.magic = GAMEDIARY_MAGIC;
+    h.version = DB_VERSION;
+    h.num_entries = 1;
+    h.next_uid = 2;
+    h.ready_flag = GAMEDIARY_MAGIC;
+    h.checksum = calc_hdr_checksum(&h);
+
+    GameEntry entry;
+    memset(&entry, 0, sizeof(entry));
+    entry.uid = 1;
+    strncpy(entry.game_id, "TEST-00001", sizeof(entry.game_id) - 1);
+    strncpy(entry.game_name, "Single Game", sizeof(entry.game_name) - 1);
+    entry.category = CAT_PSP;
+
+    u8 g_buf[sizeof(GameRegistryHeader) + sizeof(GameEntry) + sizeof(GameRegistryHeader)];
+    memcpy(g_buf, &h, sizeof(h));
+    memcpy(g_buf + sizeof(h), &entry, sizeof(entry));
+    memcpy(g_buf + sizeof(h) + sizeof(entry), &h, sizeof(h));
+    mock_vfs_map_file(games_path, g_buf, sizeof(g_buf));
+
+    // Case 1: sessions.dat exists but has size 0 (empty file)
+    mock_vfs_map_file(sessions_path, "", 0);
+    int res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_game_count(), 1U);
+    ASSERT_EQ(data_get_session_count(), 0U);
+    ASSERT_NULL(data_get_sessions());
+    data_calculate_stats(0, 100000);
+    data_rebuild_uid_map();
+
+    // Case 2: sessions.dat has size > 0 but less than sizeof(SessionEntry) (5 bytes)
+    mock_vfs_map_file(sessions_path, "12345", 5);
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_session_count(), 0U);
+    ASSERT_NULL(data_get_sessions());
+
+    // Case 3: sessions.dat has unaligned size: 1 valid SessionEntry (12 bytes) + 4 extra bytes = 16 bytes
+    u8 unaligned_sess[sizeof(SessionEntry) + 4];
+    memset(unaligned_sess, 0, sizeof(unaligned_sess));
+    SessionEntry *s_ptr = (SessionEntry *)unaligned_sess;
+    s_ptr->game_uid = 1;
+    s_ptr->duration = 300;
+    s_ptr->timestamp = 1000;
+    mock_vfs_map_file(sessions_path, unaligned_sess, sizeof(unaligned_sess));
+
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_session_count(), 1U);
+    ASSERT_NOT_NULL(data_get_sessions());
+    data_calculate_stats(0, 2000);
+    GameStats *g = data_get_games();
+    ASSERT_NOT_NULL(g);
+    ASSERT_EQ(g[0].total_playtime, 300U);
+
+    // Case 4: Delete the last remaining session -> triggers free(g_sessions) and g_sessions = NULL
+    int del_res = data_delete_session(1, 1000);
+    ASSERT_EQ(del_res, 0);
+    ASSERT_EQ(data_get_session_count(), 0U);
+    ASSERT_NULL(data_get_sessions());
+
+    // Case 5: Valid games.dat with num_entries == 0
+    h.num_entries = 0;
+    h.checksum = calc_hdr_checksum(&h);
+    u8 empty_g_buf[sizeof(GameRegistryHeader) * 2];
+    memcpy(empty_g_buf, &h, sizeof(h));
+    memcpy(empty_g_buf + sizeof(h), &h, sizeof(h));
+    mock_vfs_map_file(games_path, empty_g_buf, sizeof(empty_g_buf));
+
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_game_count(), 0U);
+    ASSERT_NULL(data_get_games());
+    data_calculate_stats(0, 100);
+    data_rebuild_uid_map();
+
+    // Case 6: Game entry with max_uid > 100000 (safeguard prevents huge uid_map allocation)
+    h.num_entries = 1;
+    h.checksum = calc_hdr_checksum(&h);
+    entry.uid = 150000;
+    memcpy(g_buf, &h, sizeof(h));
+    memcpy(g_buf + sizeof(h), &entry, sizeof(entry));
+    memcpy(g_buf + sizeof(h) + sizeof(entry), &h, sizeof(h));
+    mock_vfs_map_file(games_path, g_buf, sizeof(g_buf));
+
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data_get_game_count(), 1U);
+    data_calculate_stats(0, 100);
+
+    data_free();
+}
+
+static void test_data_loader_write_failure_paths(void) {
+    mock_pspsdk_reset();
+    setup_mock_database();
+
+    int res = data_load_all();
+    ASSERT_EQ(res, 0);
+
+    // Case 1: Fail opening sessions.dat during delete write
+    mock_vfs_fail_path("sessions.dat");
+    int del_res = data_delete_game_at_index(0);
+    ASSERT_EQ(del_res, -3);
+    mock_vfs_fail_path(NULL);
+
+    // Case 2: Fail opening games.dat during delete write
+    setup_mock_database();
+    res = data_load_all();
+    ASSERT_EQ(res, 0);
+
+    mock_vfs_fail_path("games.dat");
+    del_res = data_delete_game_at_index(0);
+    ASSERT_EQ(del_res, -2);
+    mock_vfs_fail_path(NULL);
+
+    data_free();
+}
+
 void run_test_data_loader(void) {
     TEST_SUITE_BEGIN("Data Loader & Query Module");
     TEST_RUN(test_data_loader_load_and_stats);
@@ -323,5 +451,7 @@ void run_test_data_loader(void) {
     TEST_RUN(test_data_loader_compute_game_details);
     TEST_RUN(test_data_loader_errors_and_edge_cases);
     TEST_RUN(test_data_loader_corrupted_headers_and_recovery);
+    TEST_RUN(test_data_loader_session_file_variations);
+    TEST_RUN(test_data_loader_write_failure_paths);
     TEST_SUITE_END();
 }
