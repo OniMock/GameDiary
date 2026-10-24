@@ -55,7 +55,8 @@ jobs:
       # -------------------------------------------------------
       - name: Build Project
         env:
-          VERSION_URL: "http://${{ secrets.VPS_SSH_HOST }}/version.json"
+          VERSION_URL: ${{ secrets.WORKER_URL != '' && secrets.WORKER_URL || format('http://{0}/version.json', secrets.VPS_SSH_HOST) }}
+          VERSION_FALLBACK_URL: ${{ secrets.VPS_SSH_HOST != '' && format('http://{0}/version.json', secrets.VPS_SSH_HOST) || '' }}
         run: |
           export PSPSDK=$(psp-config --pspsdk-path)
           export PSPDEV=$(psp-config --pspdev-path)
@@ -121,7 +122,8 @@ jobs:
       # -------------------------------------------------------
       - name: Build Debug
         env:
-          VERSION_URL: "http://${{ secrets.VPS_SSH_HOST }}/version.json"
+          VERSION_URL: ${{ secrets.WORKER_URL != '' && secrets.WORKER_URL || format('http://{0}/version.json', secrets.VPS_SSH_HOST) }}
+          VERSION_FALLBACK_URL: ${{ secrets.VPS_SSH_HOST != '' && format('http://{0}/version.json', secrets.VPS_SSH_HOST) || '' }}
         run: |
           export PSPSDK=$(psp-config --pspsdk-path)
           export PSPDEV=$(psp-config --pspdev-path)
@@ -210,10 +212,11 @@ jobs:
           cp version.json deploy_out/
 
       # -------------------------------------------------------
-      # 📤 Upload version.json to Production (GCP VPS via SFTP)
+      # 📤 Upload version.json to Production (VPS Fallback)
       # -------------------------------------------------------
-      - name: Upload version.json to Production
+      - name: Upload version.json to Production (VPS Fallback)
         if: steps.check_tag.outputs.exists == 'false'
+        continue-on-error: true
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_SSH_HOST }}
@@ -343,5 +346,6 @@ jobs:
           files: |
             GameDiary.zip
             GameDiaryDebug.zip
+            version.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

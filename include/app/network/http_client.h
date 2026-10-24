@@ -20,10 +20,15 @@
  * Includes timeout limits and cancellation flags using purely `sceHttp`.
  */
 
-// The IP is injected via Makefile to avoid hardcoding secrets.
-// Use: make VERSION_URL="\"http://your-ip/version.json\""
+// The URLs are injected via Makefile to avoid hardcoding secrets.
+// Use: make VERSION_URL="\"http://worker/version.json\"" VERSION_FALLBACK_URL="\"http://vps/version.json\""
 #ifndef VERSION_ENDPOINT
 #define VERSION_ENDPOINT "http://127.0.0.1/version.json"
+#endif
+
+// Fallback endpoint in case the primary (Worker) endpoint fails
+#ifndef VERSION_ENDPOINT_FALLBACK
+#define VERSION_ENDPOINT_FALLBACK ""
 #endif
 
 // Set true to cancel any ongoing reading/establishing connection

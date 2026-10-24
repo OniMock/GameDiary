@@ -56,11 +56,11 @@ static int curl_progress_cb(void *clientp, double dltotal, double dlnow, double 
     return 0;
 }
 
-static int http_client_do_request(char* out_buf, size_t buf_size) {
-    if (!out_buf || buf_size == 0) return -1;
+static int http_client_do_request(const char* url, char* out_buf, size_t buf_size) {
+    if (!url || url[0] == '\0' || !out_buf || buf_size == 0) return -1;
     out_buf[0] = '\0';
 
-    debug_log("HTTP", "Initializing curl request...");
+    debug_log("HTTP", "Initializing curl request to %s...", url);
     CURL *curl = curl_easy_init();
     if (!curl) {
         debug_log("HTTP", "curl_easy_init failed!");
@@ -73,7 +73,7 @@ static int http_client_do_request(char* out_buf, size_t buf_size) {
     chunk.max_size = buf_size;
 
     if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, VERSION_ENDPOINT);
+        curl_easy_setopt(curl, CURLOPT_URL, url);
 
         // PSP CA certs are usually missing or very old. Disable SSL verification.
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -121,7 +121,7 @@ static int http_client_do_request(char* out_buf, size_t buf_size) {
             ret = 0;
             debug_log("HTTP", "Read %d bytes.", chunk.size);
         } else {
-            debug_log("HTTP", "Non-200 OK status.");
+            debug_log("HTTP", "Non-200 OK status: %ld", response_code);
         }
     }
 
@@ -129,24 +129,51 @@ static int http_client_do_request(char* out_buf, size_t buf_size) {
     return ret;
 }
 
-int http_client_fetch_version(char* out_buf, size_t buf_size) {
-    g_http_cancel = 0;
+/**
+ * @brief Attempts fetching from a specific URL with retry logic.
+ */
+static int http_client_fetch_from_url(const char* url, char* out_buf, size_t buf_size) {
+    if (!url || url[0] == '\0') return -1;
     int ret = -1;
 
     for (int attempt = 0; attempt < HTTP_MAX_RETRIES; attempt++) {
-        debug_log("HTTP", "Fetching... Attempt %d of %d", attempt + 1, HTTP_MAX_RETRIES);
+        debug_log("HTTP", "Fetching [%s] Attempt %d of %d", url, attempt + 1, HTTP_MAX_RETRIES);
 
-        ret = http_client_do_request(out_buf, buf_size);
+        ret = http_client_do_request(url, out_buf, buf_size);
         if (ret >= 0) break; // Success
         if (g_http_cancel) break; // User aborted
 
-        debug_log("HTTP", "Attempt %d failed. Retrying...", attempt + 1);
+        debug_log("HTTP", "Attempt %d failed.", attempt + 1);
         if (attempt < HTTP_MAX_RETRIES - 1) {
-            for (int delay = 0; delay < 5 && !g_http_cancel; delay++) { // break down delay so cancellation is fast
+            for (int delay = 0; delay < 5 && !g_http_cancel; delay++) { // Break down delay for responsive cancellation
                 sceKernelDelayThread(HTTP_RETRY_DELAY / 5);
             }
         }
     }
+
+    return ret;
+}
+
+int http_client_fetch_version(char* out_buf, size_t buf_size) {
+    g_http_cancel = 0;
+    int ret = -1;
+
+    // 1. Attempt primary endpoint (Cloudflare Worker)
+    if (strlen(VERSION_ENDPOINT) > 0) {
+        debug_log("HTTP", "Attempting primary endpoint: %s", VERSION_ENDPOINT);
+        ret = http_client_fetch_from_url(VERSION_ENDPOINT, out_buf, buf_size);
+        if (ret >= 0 || g_http_cancel) {
+            return ret;
+        }
+    }
+
+    // 2. Fallback to secondary endpoint (VPS) if primary fails and not aborted by user
+#if defined(VERSION_ENDPOINT_FALLBACK)
+    if (strlen(VERSION_ENDPOINT_FALLBACK) > 0 && !g_http_cancel) {
+        debug_log("HTTP", "Primary endpoint failed. Attempting fallback: %s", VERSION_ENDPOINT_FALLBACK);
+        ret = http_client_fetch_from_url(VERSION_ENDPOINT_FALLBACK, out_buf, buf_size);
+    }
+#endif
 
     return ret;
 }
