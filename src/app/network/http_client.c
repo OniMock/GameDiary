@@ -82,6 +82,9 @@ static int http_client_do_request(const char* url, char* out_buf, size_t buf_siz
         // Required for PSP to prevent signals from crashing the app during DNS resolve
         curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 
+        // Force IPv4 only (PSP network stack does not support IPv6, prevents hanging on AAAA records)
+        curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+
         // PSP requires a custom User-Agent sometimes to pass basic firewalls
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "GameDiary/0.1.1 (PSP)");
 

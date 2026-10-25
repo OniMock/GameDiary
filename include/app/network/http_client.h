@@ -23,7 +23,7 @@
 // The URLs are injected via Makefile to avoid hardcoding secrets.
 // Use: make VERSION_URL="\"http://worker/version.json\"" VERSION_FALLBACK_URL="\"http://vps/version.json\""
 #ifndef VERSION_ENDPOINT
-#define VERSION_ENDPOINT "http://127.0.0.1/version.json"
+#define VERSION_ENDPOINT "http://psp.gamediary.onimock.com/version.json"
 #endif
 
 // Fallback endpoint in case the primary (Worker) endpoint fails

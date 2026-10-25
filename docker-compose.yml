@@ -13,4 +13,4 @@ services:
     command: sleep infinity
 
     environment:
-      VERSION_URL: ${VERSION_URL}
+      VERSION_URL: http://psp.gamediary.onimock.com/version.json

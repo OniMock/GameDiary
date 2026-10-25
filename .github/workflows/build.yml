@@ -55,8 +55,7 @@ jobs:
       # -------------------------------------------------------
       - name: Build Project
         env:
-          VERSION_URL: ${{ secrets.WORKER_URL != '' && secrets.WORKER_URL || format('http://{0}/version.json', secrets.VPS_SSH_HOST) }}
-          VERSION_FALLBACK_URL: ${{ secrets.VPS_SSH_HOST != '' && format('http://{0}/version.json', secrets.VPS_SSH_HOST) || '' }}
+          VERSION_URL: "http://psp.gamediary.onimock.com/version.json"
         run: |
           export PSPSDK=$(psp-config --pspsdk-path)
           export PSPDEV=$(psp-config --pspdev-path)
@@ -122,8 +121,7 @@ jobs:
       # -------------------------------------------------------
       - name: Build Debug
         env:
-          VERSION_URL: ${{ secrets.WORKER_URL != '' && secrets.WORKER_URL || format('http://{0}/version.json', secrets.VPS_SSH_HOST) }}
-          VERSION_FALLBACK_URL: ${{ secrets.VPS_SSH_HOST != '' && format('http://{0}/version.json', secrets.VPS_SSH_HOST) || '' }}
+          VERSION_URL: "http://psp.gamediary.onimock.com/version.json"
         run: |
           export PSPSDK=$(psp-config --pspsdk-path)
           export PSPDEV=$(psp-config --pspdev-path)
@@ -210,22 +208,6 @@ jobs:
 
           mkdir -p deploy_out
           cp version.json deploy_out/
-
-      # -------------------------------------------------------
-      # 📤 Upload version.json to Production (VPS Fallback)
-      # -------------------------------------------------------
-      - name: Upload version.json to Production (VPS Fallback)
-        if: steps.check_tag.outputs.exists == 'false'
-        continue-on-error: true
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_SSH_HOST }}
-          username: ${{ secrets.VPS_SSH_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          source: "deploy_out/version.json"
-          target: "/var/www/html/"
-          strip_components: 1
       # -------------------------------------------------------
       # 📥 Download artifact
       # -------------------------------------------------------
