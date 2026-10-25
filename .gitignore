@@ -23,7 +23,6 @@ exports.c
 # IDE folders
 
 .vscode/
-.cursor/
 .idea/
 
 # OS files
