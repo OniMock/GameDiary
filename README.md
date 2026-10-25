@@ -20,11 +20,11 @@
 
   <img src="./assets-src/logo.png" width="400" />
 
-# 🎮 GameDiary
+# GameDiary
 
 > Your handheld gaming history, beautifully tracked.
 
-### 🌐 [Official Website](https://gamediary.onimock.com/) | 📺 [Video Introduction & Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
+### [Official Website](https://gamediary.onimock.com/) | [Video Introduction & Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
 
 </div>
 
@@ -55,7 +55,7 @@
 
 ---
 
-## <a id="overview"></a>📖 Overview
+## <a id="overview"></a>Overview
 
 **GameDiary** is a background kernel-mode plugin (PRX) and a premium user-mode application (EBOOT) for the PlayStation Portable (PSP).
 
@@ -69,28 +69,28 @@ It exists to give PSP power-users modern, console-like play tracking capabilitie
 
 ---
 
-## <a id="features"></a>✨ Features
+## <a id="features"></a>Features
 
-### ⚙️ Core
+### Core
 
 - **Seamless Background Tracking**: Minimal footprint kernel plugin starts silently with your games and records your playtime accurately.
 - **Automatic Icon Management**: Automatically extracts `ICON0.PNG`
   from EBOOTs and ISOs for a rich visual diary without manual scraping.
 
-### 🎨 UI / UX
+### UI / UX
 
 - **Premium User Interface**: Fluid carousel navigation, smooth transitions, depth-sorted overlapping icons, and dynamic backgrounds designed to feel like a native PSP OS experience.
 - **Detailed Play Statistics**: View individual playtime for every game, total accumulated playtime across your entire library, session history, and detailed activity graphs.
 - **Clean and Scalable Text Rendering**: Sharp and readable interface text at any size with full support for multiple languages and character sets.
 
-### 🧩 System
+### System
 
 - **Global Internationalization (i18n)**: Fully localized in English, Spanish, Portuguese, Russian, German, French, Italian, Japanese and Chinese with automatic language detection based on PSP system settings.
 - **POPS Compatibility**: Reliable tracking and icon parsing for PlayStation 1 classics running via the official emulator.
 
 ---
 
-## <a id="compatibility-list"></a>📋 Compatibility List
+## <a id="compatibility-list"></a>Compatibility List
 
 Curious if your favorite game is supported? We maintain an actively updated **[Community Compatibility List (Google Sheets)](https://docs.google.com/spreadsheets/d/1rcNE7YMPR731JNituGIee5ARop7di-FBcygmstWmvJk/edit?usp=sharing)**.
 
@@ -98,7 +98,7 @@ This spreadsheet contains all UMDs, PS1 classics, and Homebrews tested by us and
 
 ---
 
-## <a id="official-website-web-tools"></a>🌐 Official Website & Web Tools
+## <a id="official-website-web-tools"></a>Official Website & Web Tools
 
 Extend your GameDiary experience with our **[Official Web App](https://gamediary.onimock.com/)**, designed to manage and refine your collection beyond the handheld.
 
@@ -111,7 +111,7 @@ By using the **Backup / Export** feature in the PSP application, you can generat
 > [!TIP]
 > Go to **Settings > Backup > Export** in the PSP app to generate the file needed for the web tools.
 
-## <a id="screenshots--ui"></a>🖼️ Screenshots / UI
+## <a id="screenshots--ui"></a>Screenshots / UI
 
 <p align="center">
   <img src="./.github/sources/output.gif" width="360" />
@@ -124,7 +124,7 @@ By using the **Backup / Export** feature in the PSP application, you can generat
 
 ---
 
-## <a id="how-it-works"></a>⚙️ How It Works
+## <a id="how-it-works"></a>How It Works
 
 GameDiary operates in two layers:
 
@@ -133,15 +133,15 @@ GameDiary operates in two layers:
 2. User Application (EBOOT)
    - Reads and visualizes collected data
 
-## <a id="installation"></a>📦 Installation
+## <a id="installation"></a>Installation
 
-### 📋 Requirements
+### Requirements
 
 - A PlayStation Portable (PSP 1000/2000/3000 or Go).
 - Custom Firmware (CFW) installed (such as PRO, ME, or ARK-4).
 - A Memory Stick (or MicroSD to MS adapter).
 
-### 🗂️ Folder Preparation
+### Folder Preparation
 
 Ensure you have the latest release downloaded from the [Releases](https://github.com/OniMock/GameDiary/releases) page. The release contains two main components: the App and the Plugin.
 
@@ -199,13 +199,13 @@ Ensure you have the latest release downloaded from the [Releases](https://github
 
 ---
 
-## <a id="usage"></a>🚀 Usage
+## <a id="usage"></a>Usage
 
-### ▶️ Launching the App
+### Launching the App
 
 Simply navigate to your PSP's **Game** menu on the XMB and launch **GameDiary** like any other homebrew.
 
-### 🎮 Controls
+### Controls
 
 | Button                     | Action                                                  |
 | :------------------------- | :------------------------------------------------------ |
@@ -217,14 +217,14 @@ Simply navigate to your PSP's **Game** menu on the XMB and launch **GameDiary** 
 | **SELECT**                 | Open Settings Menu (Language, Support, About)           |
 | **L-Trigger**              | Open context-sensitive Help Popup                       |
 
-### 🔄 Example Workflows
+### Example Workflows
 
 1. **Playing a game**: Boot up a UMD or ISO. The plugin silently detects the game ID, extracts the icon if missing, and begins tracking your playtime.
 2. **Reviewing stats**: Run the GameDiary Application from the XMB. Scroll through the carousel to find your game, hit **X** (or **O**) to view your weekly and all-time playtime statistics.
 
 ---
 
-## <a id="project-structure"></a>🏗️ Project Structure
+## <a id="project-structure"></a>Project Structure
 
 A clean, modular architecture separating kernel plugin operations from user-mode presentation.
 
@@ -257,7 +257,7 @@ GameDiary/
 
 ---
 
-## <a id="configuration"></a>🛠️ Configuration
+## <a id="configuration"></a>Configuration
 
 GameDiary data is stored inside the `ms0:/PSP/COMMON/GameDiary/` directory to keep your Memory Stick tidy.
 
@@ -268,7 +268,7 @@ GameDiary data is stored inside the `ms0:/PSP/COMMON/GameDiary/` directory to ke
 - `plugin.dat`: Plugin runtime options, shared between the PRX and the App. Stores whether the **in-game hotkey** (`L+R+SELECT`) is enabled, whether **automatic icon capture** is active, and which content types the plugin records (**PSP games**, **PS1**, **Homebrew**, **PSP/APP**, **Unknown**). Missing or invalid file is treated as hotkey off, icons on, and all capture types on. Older files without the capture fields keep every type enabled.
 - `tracker.dat`: Game blocklist used by the plugin. When the hotkey is active and the user toggles tracking off for the current game, that game ID is written here so the plugin skips it on future boots. Automatically managed — no manual editing required.
 
-### ⏱️ Hotkey Availability (L+R+SELECT)
+### Hotkey Availability (L+R+SELECT)
 
 The hotkey is only available after the plugin finishes its startup settle phase, which varies by game type:
 
@@ -286,11 +286,11 @@ During the initial boot wait time, pressing `L+R+SELECT` will do **absolutely no
 
 ---
 
-## <a id="development"></a>👨‍💻 Development
+## <a id="development"></a>Development
 
 GameDiary is built using the standard [pspdev implementation of the PSPSDK](https://github.com/pspdev/pspdev).
 
-### 🧪 Building Locally
+### Building Locally
 
 1. Ensure `pspdev` is installed and the environment variables (`PSPSDK`, `PATH`) are configured.
 2. Clone the repository:
@@ -305,7 +305,7 @@ GameDiary is built using the standard [pspdev implementation of the PSPSDK](http
 4. The output will be in the `obj` folder.
 5. EBOOT.PBP and GameDiary.prx will be in the root folder.
 
-### 🐳 Docker
+### Docker
 
 Alternatively, use the official Docker image to compile without setting up local tools:
 
@@ -313,11 +313,11 @@ Alternatively, use the official Docker image to compile without setting up local
 docker run --rm -it -v "${PWD}:/workspace" pspdev/pspdev Make clean all
 ```
 
-### 🖥️ Running on Emulator
+### Running on Emulator
 
 The user-mode application can be tested using [PPSSPP](https://www.ppsspp.org/). Testing the kernel-plugin typically requires a real PSP, though specific module debugging can sometimes be simulated with advanced emulator setups.
 
-### 🧪 Automated Testing & Code Coverage
+### Automated Testing & Code Coverage
 
 GameDiary features a comprehensive automated test suite capable of running on any standard PC (Linux, macOS, Windows) or CI environment without requiring physical PSP hardware.
 
@@ -347,7 +347,7 @@ docker run --rm -v "${PWD}:/workspace" -w /workspace alpine:latest sh -c \
 
 ---
 
-## <a id="plugin-details"></a>🔌 Plugin Details
+## <a id="plugin-details"></a>Plugin Details
 
 The tracking system relies on kernel thread manipulation and syscall hooks to calculate precise uptime accurately.
 
@@ -357,7 +357,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 
 ---
 
-## <a id="roadmap"></a>🗺️ Roadmap
+## <a id="roadmap"></a>Roadmap
 
 - [x] Background play tracking and database mapping.
 - [x] MSDF font rendering with full Latin, Cyrillic, and CJK fallback chains.
@@ -376,7 +376,7 @@ The tracking system relies on kernel thread manipulation and syscall hooks to ca
 
 ---
 
-## <a id="contributing"></a>🤝 Contributing
+## <a id="contributing"></a>Contributing
 
 We welcome contributions! Please adhere to the following guidelines:
 
@@ -388,7 +388,7 @@ We welcome contributions! Please adhere to the following guidelines:
 
 ---
 
-## <a id="support"></a>☕ Support
+## <a id="support"></a>Support
 
 If you like this project and want to support its continuous development, consider buying me a coffee or sending a crypto donation!
 
@@ -405,20 +405,20 @@ If you like this project and want to support its continuous development, conside
   </tr>
 </table>
 
-## <a id="license"></a>📝 License
+## <a id="license"></a>License
 
 This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## <a id="credits"></a>🌟 Credits
+## <a id="credits"></a>Credits
 
 - [pspdev](https://github.com/pspdev/pspdev) SDK and community for maintaining modern PSP toolchains.
 - Developers of PRO / ARK-4 CFW for mapping the boundaries of modern PSP kernel development.
 - Members of the Reddit [PSP](https://www.reddit.com/r/PSP/) community for testing, feedback, and support throughout development.
 - [Gamebrew](https://www.gamebrew.org/wiki/GameDiary_PSP) and [PSPunk](https://www.pspunk.com/psp-homebrew/) for hosting and showcasing the project within the PSP homebrew scene.
 
-## <a id="author"></a>👤 Author
+## <a id="author"></a>Author
 
 Developed by [OniMock](https://github.com/OniMock).
 
