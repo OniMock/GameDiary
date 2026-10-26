@@ -8,7 +8,7 @@
 [![Platform: PSP](https://img.shields.io/badge/Platform-PSP-informational.svg)](https://en.wikipedia.org/wiki/PlayStation_Portable)
 
 ![Language: C](https://img.shields.io/badge/Language-C-orange.svg)
-[![Official Website](https://img.shields.io/badge/Official_Website-GameDiary-111111?style=flat&logo=firefoxbrowser&logoColor=white)](https://gamediary.onimock.com/)
+[![Official Website](https://img.shields.io/badge/Official_Website-GameDiary_PSP-111111?style=flat&logo=firefoxbrowser&logoColor=white)](https://gamediary.onimock.com/)
 [![GameBrew Wiki](https://img.shields.io/badge/GameBrew-Wiki-E9711C?style=flat&logo=wikipedia&logoColor=white)](https://www.gamebrew.org/wiki/GameDiary_PSP)
 [![PSPunk](https://img.shields.io/badge/PSPunk-Homebrew-E30016?style=flat&logo=playstation&logoColor=white)](https://www.pspunk.com/psp-homebrew/)
 [![Compatibility List](https://img.shields.io/badge/Compatibility_List-Tested_Games-34A853?style=flat&logo=google&logoColor=white)](https://docs.google.com/spreadsheets/d/1rcNE7YMPR731JNituGIee5ARop7di-FBcygmstWmvJk/edit?usp=sharing)
@@ -24,7 +24,7 @@
 
 > Your handheld gaming history, beautifully tracked.
 
-### [Official Website](https://gamediary.onimock.com/) | [Video Introduction & Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
+### [GameDiary PSP Official Website](https://gamediary.onimock.com/) | [Download](https://gamediary.onimock.com/download) | [Web Tools](https://gamediary.onimock.com/tools) | [Video Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
 
 </div>
 
@@ -100,12 +100,12 @@ This spreadsheet contains all UMDs, PS1 classics, and Homebrews tested by us and
 
 ## <a id="official-website-web-tools"></a>Official Website & Web Tools
 
-Extend your GameDiary experience with our **[Official Web App](https://gamediary.onimock.com/)**, designed to manage and refine your collection beyond the handheld.
+Extend your GameDiary experience with the **[GameDiary PSP Official Web App](https://gamediary.onimock.com/)**, designed to manage and refine your collection beyond the handheld.
 
 By using the **Backup / Export** feature in the PSP application, you can generate a `backup.json` file (located in `ms0:/PSP/COMMON/GameDiary/backup.json`) that can be used with our specialized web tools:
 
-- **Visual Database Editor**: A premium web-based editor to manually add, remove, or fix game sessions on an interactive timeline.
-- **Database Merge Tool**: Safely combine multiple `backup.json` files from different Memory Sticks or PSP consoles into a single, unified master database without losing history.
+- **[Visual Database Editor](https://gamediary.onimock.com/tools/game_sessions)**: A premium web-based editor to manually add, remove, or fix game sessions on an interactive timeline.
+- **[Database Merge Tool](https://gamediary.onimock.com/tools/db_merge)**: Safely combine multiple `backup.json` files from different Memory Sticks or PSP consoles into a single, unified master database without losing history.
 - **Modern Management**: Access and refine your gaming stats from any PC or smartphone with a sleek, responsive interface.
 
 > [!TIP]
