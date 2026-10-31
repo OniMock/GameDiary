@@ -24,7 +24,7 @@
 
 > Your handheld gaming history, beautifully tracked.
 
-### [GameDiary PSP Official Website](https://gamediary.onimock.com/) | [Download](https://gamediary.onimock.com/download) | [Web Tools](https://gamediary.onimock.com/tools) | [Video Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
+### [GameDiary PSP Official Website](https://gamediary.onimock.com/) | [Download](https://gamediary.onimock.com/download) | [Stats Dashboard](https://gamediary.onimock.com/stats) | [Web Tools](https://gamediary.onimock.com/tools) | [Video Tutorial](https://www.youtube.com/watch?v=S2e6iIoxfpM)
 
 </div>
 
@@ -37,7 +37,7 @@
 1. [Overview](#overview)
 2. [Features](#features)
 3. [Compatibility List](#compatibility-list)
-4. [Official Website & Web Tools](#official-website-web-tools)
+4. [Official Website, Stats & Web Tools](#official-website-web-tools)
 5. [Screenshots / UI](#screenshots--ui)
 6. [How It Works](#how-it-works)
 7. [Installation](#installation)
@@ -98,18 +98,45 @@ This spreadsheet contains all UMDs, PS1 classics, and Homebrews tested by us and
 
 ---
 
-## <a id="official-website-web-tools"></a>Official Website & Web Tools
+## <a id="official-website-web-tools"></a>Official Website, Stats & Web Tools
 
-Extend your GameDiary experience with the **[GameDiary PSP Official Web App](https://gamediary.onimock.com/)**, designed to manage and refine your collection beyond the handheld.
+Extend your GameDiary experience with the **[GameDiary PSP Official Web App](https://gamediary.onimock.com/)**, designed to explore, visualize, and manage your collection beyond the handheld console.
 
-By using the **Backup / Export** feature in the PSP application, you can generate a `backup.json` file (located in `ms0:/PSP/COMMON/GameDiary/backup.json`) that can be used with our specialized web tools:
+By using the **Backup / Export** feature in the PSP application, you generate a `backup.json` file (located in `ms0:/PSP/COMMON/GameDiary/backup.json`) that unlocks the full desktop and mobile web companion:
 
-- **[Visual Database Editor](https://gamediary.onimock.com/tools/game_sessions)**: A premium web-based editor to manually add, remove, or fix game sessions on an interactive timeline.
-- **[Database Merge Tool](https://gamediary.onimock.com/tools/db_merge)**: Safely combine multiple `backup.json` files from different Memory Sticks or PSP consoles into a single, unified master database without losing history.
-- **Modern Management**: Access and refine your gaming stats from any PC or smartphone with a sleek, responsive interface.
+### 📊 [Interactive Stats & Analytics Dashboard](https://gamediary.onimock.com/stats)
+- **Comprehensive KPI Overview**: Real-time breakdown of total playtime, games tracked, total session count, average session length, peak playtime hours, and most active gaming days.
+- **Platform & Time Breakdown**: Compare PSP vs. PS1 playtime distribution and track your monthly playtime evolution over time.
+- **Complete Top Rankings**:
+  - Full catalog listing with **canonical global rank numbering** (`#1`, `#2`, `#15`...) preserved across searches and alternate sorting.
+  - Multi-criteria sorting options:
+    - **Most Played**: Highest accumulated playtime.
+    - **Least Played**: Lowest accumulated playtime.
+    - **Most Sessions**: Highest number of recorded gameplay sessions.
+    - **Least Sessions**: Lowest number of recorded gameplay sessions.
+    - **Last Played**: Most recently played titles.
+  - Granular filtering by platform (**All**, **PSP**, **PS1**) and period (**All Time**, **Past Year**, **Past 30 Days**).
+  - Instant accent-insensitive search by game title or Game ID.
+  - High-performance virtualized scrolling supporting libraries with thousands of games smoothly.
+- **Game Detail Modal**: Deep-dive into any title's history with session logs, first/last played dates, average duration, and longest continuous session.
+
+### 🎨 [Share Card Studio](https://gamediary.onimock.com/stats)
+Export and share high-resolution aesthetic graphic cards of your gaming journey:
+- **5 Dynamic Templates**: *Top 5 Hall of Fame*, *Most Played Game*, *Library Overview*, *Gamer Retrospective*, and *Individual Game Card*.
+- **3 Aspect Ratios**: Vertical (9:16 for Stories/TikTok/Reels), Square (1:1 for Feed/Discord), and Horizontal (16:9 for Twitter/Banners).
+- **Interactive Game Selector**: Searchable virtualized combobox to instantly pick and render any game from your library.
+- **100% Client-Side**: Rendered locally on HTML5 Canvas with instant PNG export.
+
+### 🛠️ [System Tools Suite](https://gamediary.onimock.com/tools)
+- **[Visual Database Editor](https://gamediary.onimock.com/tools/game_sessions)**: A premium web-based editor to inspect, manually add, adjust, or remove individual game sessions on an interactive visual timeline.
+- **[Database Merge Tool](https://gamediary.onimock.com/tools/db_merge)**: Safely combine multiple `backup.json` files from different Memory Sticks, PSP models, or backup archives into a single unified database without duplicate sessions or lost history.
+- **[Data Management & Backup Suite](https://gamediary.onimock.com/tools/data_management)**: 100% offline-first local storage (IndexedDB), backup replacement/merging, clean `backup.json` exports, and complete ZIP package downloads bundled with your game cover icons (`icons/`).
+
+### 🌐 Global Internationalization
+The entire web platform is natively localized in 9 languages with automatic detection: **English, Portuguese (pt-BR), Spanish, German, French, Italian, Simplified Chinese, Japanese, and Russian**.
 
 > [!TIP]
-> Go to **Settings > Backup > Export** in the PSP app to generate the file needed for the web tools.
+> Go to **Settings > Backup > Export** in the PSP app to generate the `backup.json` needed for the web tools and stats dashboard.
 
 ## <a id="screenshots--ui"></a>Screenshots / UI
 
